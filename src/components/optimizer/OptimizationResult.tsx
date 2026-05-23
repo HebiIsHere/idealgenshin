@@ -50,7 +50,7 @@ function formatBreakdownDisplay(key: string, value: number | DamagePath | undefi
 }
 
 /** Mapping from DamageResult multiplier field key to Chinese display name. */
-const ZONE_LABELS: Record<keyof Omit<DamageResult, 'totalDamage' | 'scalingMultiplier'>, string> = {
+const ZONE_LABELS: Partial<Record<keyof Omit<DamageResult, 'totalDamage' | 'scalingMultiplier'>, string>> = {
   baseDamage: '基础伤害区',
   bonusMultiplier: '增伤区',
   critMultiplier: '暴击区',

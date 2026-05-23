@@ -211,6 +211,7 @@ function computeZoneAnalysis(
         defReductions: [],
         defIgnore: 0,
         elevationBonus: 0,
+        independentBonus: 0,
         extraBonuses,
       };
       const midDamage = DamageFormula.calculate(midCtx).totalDamage;

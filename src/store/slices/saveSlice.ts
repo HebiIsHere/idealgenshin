@@ -191,6 +191,7 @@ export const useSaveStore = create<SaveState & SaveActions>((set, get) => ({
         characterLevel: characterStore.characterLevel,
         weaponConfig,
         constellationConfig: characterStore.constellationConfig,
+        talentConfig: characterStore.talentConfig,
         artifacts,
         selectedScenarioId: characterStore.selectedScenarioId ?? '',
         fromEnka: false,

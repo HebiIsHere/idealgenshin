@@ -21,8 +21,8 @@ import { getScenariosByCharacterId } from '../../data/scenarios';
 import { formatDamage, formatNumber } from '../../utils/format';
 import { mergeExtraBonuses } from '../../utils/mergeExtraBonuses';
 import { DamagePath } from '../../types';
-import type { CharacterBuild, ArtifactInstance, DamageContext, DamageResult, ZoneBonusInput } from '../../types';
-import { ArtifactSlotType, ElementType, ReactionType } from '../../types';
+import type { CharacterBuild, ArtifactInstance, DamageContext, DamageResult } from '../../types';
+import { ArtifactSlotType, ElementType } from '../../types';
 import { getReactionOptions, isNodKraiCharacter } from '../../data/reactions';
 
 /** 伤害路径中文标签。 */
@@ -36,7 +36,7 @@ const DAMAGE_PATH_LABELS: Record<DamagePath, string> = {
 };
 
 /** 乘区标签。 */
-const ZONE_LABELS: Record<keyof Omit<DamageResult, 'totalDamage' | 'scalingMultiplier'>, string> = {
+const ZONE_LABELS: Partial<Record<keyof Omit<DamageResult, 'totalDamage' | 'scalingMultiplier'>, string>> = {
   baseDamage: '基础伤害区',
   bonusMultiplier: '增伤区',
   critMultiplier: '暴击区',

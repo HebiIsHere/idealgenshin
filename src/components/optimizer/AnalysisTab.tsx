@@ -319,7 +319,7 @@ function AnalysisTab(): React.ReactElement {
                       <Typography variant="caption" color="text.secondary">{slotLabel}</Typography>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                         <Typography variant="body2" sx={{ color: changed ? 'text.secondary' : 'text.primary', textDecoration: changed ? 'line-through' : 'none' }}>
-                          {STAT_DISPLAY_NAMES[currentType ?? ''] ?? currentType ?? '—'}
+                          {currentType ? (STAT_DISPLAY_NAMES[currentType] ?? currentType) : '—'}
                         </Typography>
                         {changed && (
                           <>

@@ -3,7 +3,6 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import ZoneBonusInput from '../common/ZoneBonusInput';
 import { useCharacterStore } from '../../store/slices/characterSlice';
-import type { ZoneBonusInput as ZoneBonusInputType } from '../../types';
 
 /**
  * ConstellationInput — 命座乘区加成输入组件。

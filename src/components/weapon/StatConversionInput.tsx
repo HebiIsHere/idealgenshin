@@ -30,6 +30,7 @@ const TO_LABELS: Record<StatConversion['to'], string> = {
   dmgBonus: '伤害加成 (DMG%)',
   critRate: '暴击率 (CR%)',
   critDmg: '暴击伤害 (CD%)',
+  baseDamageFlat: '基础伤害 (固定值)',
 };
 
 /** 源属性所有可选值。 */
@@ -44,6 +45,7 @@ function getRatioPlaceholder(to: StatConversion['to']): string {
     case 'totalAtk': case 'totalHp': case 'totalDef': return '例: 0.52';
     case 'dmgBonus': return '例: 0.14';
     case 'critRate': case 'critDmg': return '例: 0.12';
+    case 'baseDamageFlat': return '例: 1.0';
   }
 }
 
@@ -130,7 +132,7 @@ function StatConversionInput(): React.ReactElement {
     commitConv(index, { ...statConversions[index], ratio: v });
   }, [localRatios, statConversions, commitConv]);
 
-  const handleRatioKeyDown = useCallback((e: React.KeyboardEvent, index: number) => {
+  const handleRatioKeyDown = useCallback((e: React.KeyboardEvent, _index: number) => {
     if (e.key === 'Enter') {
       (e.target as HTMLInputElement).blur();
     }

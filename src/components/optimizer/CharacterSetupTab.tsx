@@ -22,7 +22,6 @@ import ArtifactSetSelect from '../artifact/ArtifactSetSelect';
 import { useCharacterStore } from '../../store/slices/characterSlice';
 import { useArtifactStore } from '../../store/slices/artifactSlice';
 import { StatCalculator } from '../../engine/stats';
-import { searchCharacters } from '../../data/characters';
 import avatarMap from '../../data/avatar_to_character.json';
 import { DEFAULT_WEAPON, getWeaponById } from '../../data/weapons';
 import type { CharacterBuild, ArtifactInstance } from '../../types';

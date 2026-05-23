@@ -1,7 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -15,7 +14,7 @@ import TextField from '@mui/material/TextField';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Autocomplete from '@mui/material/Autocomplete';
-import Grid from '@mui/material/Grid';
+import Grid from '@mui/material/Grid2';
 import Divider from '@mui/material/Divider';
 
 import supportBuffs from '../../data/support_buffs.json';
@@ -25,7 +24,7 @@ import type { ZoneBonusInput } from '../../types';
 
 /** Support character descriptor. */
 interface SupportEntry {
-  id: string;
+  id?: string;
   name: string;
   nameEn: string;
   rarity: number;
@@ -35,7 +34,7 @@ interface SupportEntry {
 
 /** Artifact set descriptor. */
 interface ArtifactEntry {
-  id: string;
+  id?: string;
   name: string;
   nameEn: string;
   rarity: number;
@@ -44,7 +43,7 @@ interface ArtifactEntry {
 
 /** Resonance entry. */
 interface ResonanceEntry {
-  id: string;
+  id?: string;
   name: string;
   desc: string;
   buffs?: Partial<ZoneBonusInput>;
@@ -172,8 +171,8 @@ function TeamBuffPanel({ config, onChange }: TeamBuffPanelProps): React.ReactEle
               size="small"
               options={supports}
               getOptionLabel={(o) => `${'★'.repeat(o.rarity)} ${o.name}`}
-              value={supports.filter((s) => config.supportIds.includes(s.id))}
-              onChange={(_, vals) => update({ supportIds: vals.map((v) => v.id) })}
+              value={supports.filter((s) => s.id && config.supportIds.includes(s.id))}
+              onChange={(_, vals) => update({ supportIds: vals.map((v) => v.id!).filter(Boolean) })}
               renderTags={(selected, getTagProps) =>
                 selected.map((s, idx) => {
                   const { key, ...rest } = getTagProps({ index: idx });
@@ -198,8 +197,8 @@ function TeamBuffPanel({ config, onChange }: TeamBuffPanelProps): React.ReactEle
               size="small"
               options={artifacts}
               getOptionLabel={(o) => `[${o.rarity}★] ${o.name}`}
-              value={artifacts.filter((a) => config.artifactIds.includes(a.id))}
-              onChange={(_, vals) => update({ artifactIds: vals.map((v) => v.id) })}
+              value={artifacts.filter((a) => a.id && config.artifactIds.includes(a.id))}
+              onChange={(_, vals) => update({ artifactIds: vals.map((v) => v.id!).filter(Boolean) })}
               renderTags={(selected, getTagProps) =>
                 selected.map((a, idx) => {
                   const { key, ...rest } = getTagProps({ index: idx });
