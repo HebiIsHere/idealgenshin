@@ -1,4 +1,4 @@
-# Test Report — 原神圣遗物词条优化器
+# Test Report — 理想原生
 
 ## Summary
 - **Total Tests**: 55 | **Passed**: 55 | **Failed**: 0

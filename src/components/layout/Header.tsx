@@ -35,7 +35,10 @@ function Header(): React.ReactElement {
               flexGrow: 1,
             }}
           >
-            原神圣遗物词条优化器 V2
+            理想原生
+          </Typography>
+          <Typography variant="caption" sx={{ color: 'text.secondary', mr: 1.5 }}>
+            作者：袔苾 v1.0
           </Typography>
 
           <IconButton
