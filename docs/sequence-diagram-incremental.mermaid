@@ -1,0 +1,71 @@
+sequenceDiagram
+    actor Caller as 调用方(优化器/UI)
+    participant Formula as DamageFormula
+    participant Router as resolvePath()
+    participant Direct as calculateDirect
+    participant Amplify as calculateAmplifying
+    participant Transform as calculateTransformative
+    participant Catalyze as calculateCatalyze
+    participant Moon as calculateMoonsign
+    participant Base as BaseDamageZone
+    participant Bonus as BonusZone
+    participant Crit as CritZone
+    participant Resist as ResistanceZone
+    participant Defense as DefenseZone
+    participant AmpliZone as AmplifyingZone
+    participant CataZone as CatalyzeZone
+    participant MoonZone as MoonsignZone
+    participant ElevZone as ElevationZone
+
+    Caller->>Formula: calculate(ctx)
+    Formula->>Router: resolvePath(ctx.reactionType)
+    
+    alt 无反应 NONE
+        Router-->>Formula: DamagePath.DIRECT
+        Formula->>Direct: calculateDirect(ctx)
+        Direct->>Base: calculate(ctx) → baseDamage
+        Direct->>Bonus: calculate(ctx) → bonusMultiplier
+        Direct->>Crit: calculate(ctx) → critMultiplier
+        Direct->>Resist: calculate(ctx) → resistanceMultiplier
+        Direct->>Defense: calculate(ctx) → defenseMultiplier
+        Direct-->>Formula: baseDamage × bonus × crit × resist × defense
+    else 增幅反应 VAPORIZE/MELT
+        Router-->>Formula: DamagePath.AMPLIFYING
+        Formula->>Amplify: calculateAmplifying(ctx)
+        Amplify->>Base: calculate(ctx) → baseDamage
+        Amplify->>Bonus: calculate(ctx) → bonusMultiplier
+        Amplify->>Crit: calculate(ctx) → critMultiplier
+        Amplify->>Resist: calculate(ctx) → resistanceMultiplier
+        Amplify->>Defense: calculate(ctx) → defenseMultiplier
+        Amplify->>AmpliZone: calculate(ctx) → reactionMultiplier
+        Amplify-->>Formula: baseDamage × bonus × crit × resist × defense × reaction
+    else 剧变反应 OVERLOADED/...
+        Router-->>Formula: DamagePath.TRANSFORMATIVE
+        Formula->>Transform: calculateTransformative(ctx)
+        Transform->>Transform: LevelBaseDamage = rate × levelMultiplier
+        Transform->>Transform: EM Bonus = 16×EM/(EM+2000)
+        Transform->>Resist: calculate(ctx) → resistanceMultiplier
+        Transform-->>Formula: levelBaseDmg × (1+EM) × resist
+    else 激化反应 AGGRAVATION/SPREAD
+        Router-->>Formula: DamagePath.CATALYZE
+        Formula->>Catalyze: calculateCatalyze(ctx)
+        Catalyze->>Base: calculate(ctx) → baseDamage
+        Catalyze->>CataZone: calculate(ctx) → aggravationBonus
+        Note over Catalyze: effectiveBase = baseDamage + aggravationBonus
+        Catalyze->>Bonus: calculate(ctx) → bonusMultiplier
+        Catalyze->>Crit: calculate(ctx) → critMultiplier
+        Catalyze->>Resist: calculate(ctx) → resistanceMultiplier
+        Catalyze->>Defense: calculate(ctx) → defenseMultiplier
+        Catalyze-->>Formula: effectiveBase × bonus × crit × resist × defense
+    else 月曜反应 MOON_BLOOM/...
+        Router-->>Formula: DamagePath.MOONSIGN
+        Formula->>Moon: calculateMoonsign(ctx)
+        Moon->>MoonZone: calculate(ctx) → moonBaseDamage
+        Moon->>Crit: calculate(ctx) → critMultiplier
+        Moon->>Resist: calculate(ctx) → resistanceMultiplier
+        Moon->>ElevZone: calculate(ctx) → elevationMultiplier
+        Note over Moon: 无增伤区、无防御区
+        Moon-->>Formula: moonBaseDmg × crit × resist × elevation
+    end
+
+    Formula-->>Caller: DamageResult

@@ -1,0 +1,12 @@
+{
+  "id": "mappa_mare",
+  "name": "Mappa Mare",
+  "nameZh": "万国诸海图谱",
+  "rarity": 4,
+  "weaponType": "CATALYST",
+  "baseAtk": 565,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 110.256,
+  "passiveName": "注能之卷",
+  "passiveDesc": "触发元素反应后的10秒内，获得8%元素伤害加成，该效果最多可以叠加2层。"
+}

@@ -1,0 +1,48 @@
+{
+  "id": "kamisato_ayato",
+  "name": "Kamisato Ayato",
+  "nameZh": "神里绫人",
+  "element": "HYDRO",
+  "weaponType": "SWORD",
+  "baseStats": {
+    "hp": 13715,
+    "atk": 299,
+    "def": 769,
+    "critRate": 0.05,
+    "critDmg": 0.5,
+    "em": 0,
+    "er": 1
+  },
+  "ascensionStat": {
+    "type": "CRIT_DMG",
+    "values": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.096,
+      0.096,
+      0.192,
+      0.192,
+      0.192,
+      0.192,
+      0.288,
+      0.288,
+      0.384
+    ]
+  },
+  "relevantSubstats": [
+    "CRIT_RATE",
+    "CRIT_DMG",
+    "ATK_PERCENT",
+    "ENERGY_RECHARGE",
+    "ELEMENTAL_MASTERY"
+  ],
+  "defaultStatScaling": {
+    "atkRatio": 1,
+    "hpRatio": 0,
+    "defRatio": 0,
+    "emRatio": 0
+  }
+}

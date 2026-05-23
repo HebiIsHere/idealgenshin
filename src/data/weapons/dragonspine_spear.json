@@ -1,0 +1,12 @@
+{
+  "id": "dragonspine_spear",
+  "name": "Dragonspine Spear",
+  "nameZh": "龙脊长枪",
+  "rarity": 4,
+  "weaponType": "POLEARM",
+  "baseAtk": 454,
+  "substatType": "PHYSICAL_DMG_BONUS",
+  "substatValue": 0.69,
+  "passiveName": "霜葬",
+  "passiveDesc": "普通攻击与重击命中敌人时，有60%概率在敌人上方生成恒冰晶核并坠落，造成80%攻击力的范围伤害。若敌人处于冰元素影响下，则造成200%攻击力的伤害。该效果每10秒至多触发一次。"
+}

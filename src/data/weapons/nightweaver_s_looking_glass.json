@@ -1,0 +1,12 @@
+{
+  "id": "nightweaver_s_looking_glass",
+  "name": "Nightweaver's Looking Glass",
+  "nameZh": "纺夜天镜",
+  "rarity": 5,
+  "weaponType": "CATALYST",
+  "baseAtk": 542,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 264.614,
+  "passiveName": "千年的祷咏歌",
+  "passiveDesc": "元素战技造成水元素或草元素伤害时，装备者获得「终北圣言」效果：元素精通提升60点，持续4.5秒；队伍中附近的角色触发月绽放反应时，装备者获得「朔月诗篇」效果：元素精通提升60点，持续10秒；「终北圣言」效果与「朔月诗篇」效果同时存在时，队伍中附近的所有角色触发的绽放反应造成的伤害提升120%，超绽放、烈绽放反应造成的伤害提升80%，月绽放反应伤害提升40%，该效果无法叠加。装备者处于队伍后台时，依然能触发上述效果。"
+}

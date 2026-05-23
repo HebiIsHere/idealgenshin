@@ -1,0 +1,12 @@
+{
+  "id": "primordial_jade_winged_spear",
+  "name": "Primordial Jade Winged-Spear",
+  "nameZh": "和璞鸢",
+  "rarity": 5,
+  "weaponType": "POLEARM",
+  "baseAtk": 674,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.221,
+  "passiveName": "Eagle Spear of Justice",
+  "passiveDesc": "命中敌人时自身攻击力提高3.2%，持续6秒，最高叠加7层。满层后攻击力额外提升12%。"
+}

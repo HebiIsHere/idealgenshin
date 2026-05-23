@@ -1,0 +1,12 @@
+{
+  "id": "primordial_jade_cutter",
+  "name": "Primordial Jade Cutter",
+  "nameZh": "磐岩结绿",
+  "rarity": 5,
+  "weaponType": "SWORD",
+  "baseAtk": 542,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.441,
+  "passiveName": "护国的无垢之心",
+  "passiveDesc": "生命值提升20%。此外，基于装备该武器的角色生命值上限的1.2%，获得攻击力加成。"
+}

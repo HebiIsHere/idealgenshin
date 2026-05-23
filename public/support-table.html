@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原神辅助角色加成速查表</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: #0f0f1a;
+    color: #e0e0e0;
+    padding: 24px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 6px;
+    color: #d4a843;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 20px;
+  }
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 18px;
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+  .legend span { display: flex; align-items: center; gap: 4px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot-s { background: #4cc2f1; } /* universal */
+  .dot-e { background: #ff914d; } /* elemental */
+  .dot-d { background: #a855f7; } /* sub-dps */
+  .dot-h { background: #22c55e; } /* healer/shielder */
+  .dot-n { background: #94a3b8; } /* niche */
+  .dot-f { background: #facc15; } /* feather */
+
+  .container { max-width: 1100px; margin: 0 auto; overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: #16162a;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,.4);
+  }
+  thead { background: linear-gradient(135deg, #1e1e3a, #282850); }
+  th {
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #d4a843;
+    white-space: nowrap;
+    border-bottom: 2px solid rgba(212,168,67,.3);
+  }
+  td {
+    padding: 11px 10px;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    vertical-align: middle;
+    line-height: 1.5;
+  }
+  tbody tr:hover { background: rgba(212,168,67,.06); }
+
+  .char-cell { display: flex; align-items: center; gap: 8px; }
+  .char-rarity { font-size: 10px; color: #d4a843; }
+  .char-name { font-weight: 600; }
+  .char-name.zh { font-size: 15px; }
+  .char-name.en { font-size: 10px; color: #666; margin-left: 4px; }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tag-s { background: rgba(76,194,241,.18); color: #4cc2f1; }       /* universal */
+  .tag-e { background: rgba(255,145,77,.18); color: #ff914d; }       /* elemental */
+  .tag-d { background: rgba(168,85,247,.18); color: #a855f7; }       /* sub-dps */
+  .tag-h { background: rgba(34,197,94,.18); color: #22c55e; }        /* healer/shield */
+  .tag-n { background: rgba(148,163,184,.18); color: #94a3b8; }      /* niche */
+  .tag-f { background: rgba(250,204,21,.18); color: #facc15; }       /* feather */
+
+  .buff-val {
+    font-weight: 700;
+    font-size: 13px;
+    color: #ffd76a;
+  }
+  .buff-val small { font-weight: 400; color: #888; font-size: 10px; }
+
+  .cond { font-size: 11px; color: #999; }
+
+  .section-header td {
+    background: #1a1a35;
+    color: #d4a843;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 10px;
+    border-bottom: 1px solid rgba(212,168,67,.25);
+    letter-spacing: 1px;
+  }
+
+  /* star display */
+  .stars { color: #d4a843; font-size: 11px; letter-spacing: 1px; }
+  .stars-4 { color: #a855f7; }
+</style>
+</head>
+<body>
+
+<h1>⚖️ 原神辅助角色典型加成速查表</h1>
+<p class="subtitle">数据基于社区强度共识归纳 · 假设关键命座/天赋满级 · 2025.5 版本适用</p>
+
+<div class="legend">
+  <span><span class="dot dot-s"></span> 通用辅</span>
+  <span><span class="dot dot-e"></span> 元素/流派专辅</span>
+  <span><span class="dot dot-d"></span> 副C带增益</span>
+  <span><span class="dot dot-h"></span> 生存辅（治疗/护盾）</span>
+  <span><span class="dot dot-n"></span> 特定场景</span>
+  <span><span class="dot dot-f"></span> 羽毛辅</span>
+</div>
+
+<div class="container">
+<table>
+<thead>
+<tr>
+  <th>角色</th>
+  <th>定位</th>
+  <th>主要加成类型</th>
+  <th>典型数值</th>
+  <th>条件 / 备注</th>
+</tr>
+</thead>
+<tbody>
+
+<!-- ========== 通用辅助 ========== -->
+<tr class="section-header"><td colspan="5">🔷 通用顶级辅助</td></tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">班尼特</span><span class="char-name en">Bennett</span></div></td>
+  <td><span class="tag tag-s">通用辅</span></td>
+  <td>攻击力加成（面板）</td>
+  <td class="buff-val">+700~1200 ATK</td>
+  <td class="cond">C1 解锁; lv13 大招 + 674白值武器 ≈ 1100; 治疗 >70% HP</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">枫原万叶</span><span class="char-name en">Kazuha</span></div></td>
+  <td><span class="tag tag-s">通用辅</span></td>
+  <td>增伤 + 减抗</td>
+  <td class="buff-val">~40% 元素增伤<br>+ 40% 减抗</td>
+  <td class="cond">1000 精通扩散; 4风套减抗; C2 额外 +200 精通</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">希诺宁</span><span class="char-name en">Xilonen</span></div></td>
+  <td><span class="tag tag-s">通用辅</span></td>
+  <td>减抗 + 增伤</td>
+  <td class="buff-val">36% 减抗<br>+ 40% 增伤</td>
+  <td class="cond">lv10 战技; 4烬城勇者套; 还可提供治疗</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">芙宁娜</span><span class="char-name en">Furina</span></div></td>
+  <td><span class="tag tag-s">通用辅</span></td>
+  <td>全队增伤</td>
+  <td class="buff-val">+75% 增伤</td>
+  <td class="cond">满层气氛值 (C0); 需队伍有治疗配合</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">钟离</span><span class="char-name en">Zhongli</span></div></td>
+  <td><span class="tag tag-s">通用辅</span></td>
+  <td>全属性减抗 + 护盾</td>
+  <td class="buff-val">20% 减抗</td>
+  <td class="cond">玉璋护盾范围内; 持续时间长</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">纳西妲</span><span class="char-name en">Nahida</span></div></td>
+  <td><span class="tag tag-s">通用辅</span></td>
+  <td>元素精通共享</td>
+  <td class="buff-val">+250 精通</td>
+  <td class="cond">大招领域内队伍中最高精通的 25% 共享</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">莫娜</span><span class="char-name en">Mona</span></div></td>
+  <td><span class="tag tag-s">通用辅</span></td>
+  <td>增伤（星异）</td>
+  <td class="buff-val">+60% 增伤</td>
+  <td class="cond">lv10 大招泡影破裂后 5s; 可冻结延长</td>
+</tr>
+
+<!-- ========== 增伤/减抗副C ========== -->
+<tr class="section-header"><td colspan="5">🔷 增伤/减抗型副C与辅助</td></tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">夜兰</span><span class="char-name en">Yelan</span></div></td>
+  <td><span class="tag tag-d">副C带增益</span></td>
+  <td>前台增伤（渐进）</td>
+  <td class="buff-val">+0→50% 增伤</td>
+  <td class="cond">大招期间每秒 +3.5% 前台角色增伤 (A4)</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">砂糖</span><span class="char-name en">Sucrose</span></div></td>
+  <td><span class="tag tag-s">通用辅</span></td>
+  <td>精通共享 + 增伤 + 减抗</td>
+  <td class="buff-val">~200 精通<br>+ 20% 增伤<br>+ 40% 减抗</td>
+  <td class="cond">C6 增伤; 4风套减抗; 扩散 +50 精通 (A4 被动)</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">琳妮特</span><span class="char-name en">Lynette</span></div></td>
+  <td><span class="tag tag-s">通用辅</span></td>
+  <td>攻击力 + 减抗</td>
+  <td class="buff-val">+0~20% ATK<br>+ 40% 减抗</td>
+  <td class="cond">队伍元素种类越多 ATK 越高; 4风套</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">珐露珊</span><span class="char-name en">Faruzan</span></div></td>
+  <td><span class="tag tag-e">元素专辅</span></td>
+  <td>风伤增幅 + 减抗 + 暴伤</td>
+  <td class="buff-val">~32% 风伤<br>+ 30% 减风抗<br>+ 40% 风暴伤</td>
+  <td class="cond">C6 暴伤; lv13 大招减抗; A4 增伤</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">五郎</span><span class="char-name en">Gorou</span></div></td>
+  <td><span class="tag tag-e">元素专辅</span></td>
+  <td>防御 + 岩伤 + 岩暴伤</td>
+  <td class="buff-val">+~400 DEF<br>+ 15% 岩伤<br>+ 40% 岩暴伤</td>
+  <td class="cond">C6 暴伤; 三岩队效果最大化</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">九条裟罗</span><span class="char-name en">Sara</span></div></td>
+  <td><span class="tag tag-e">元素专辅</span></td>
+  <td>攻击力 + 雷暴伤</td>
+  <td class="buff-val">+~700 ATK<br>+ 60% 雷暴伤</td>
+  <td class="cond">C6 暴伤; 攻击加成 6s 短覆盖</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">申鹤</span><span class="char-name en">Shenhe</span></div></td>
+  <td><span class="tag tag-f">羽毛辅</span></td>
+  <td>冰翎（基础伤害区羽毛）</td>
+  <td class="buff-val">冰翎 ~3000×5~7次<br>（基础伤害区羽毛）<br>+ 15% 冰伤<br>+ 15% 减冰抗</td>
+  <td class="cond">E 给冰翎羽毛 5/7 次; 每次冰伤消耗 1 层附加基础伤(基于申鹤攻击力); 大招减抗</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">夏沃蕾</span><span class="char-name en">Chevreuse</span></div></td>
+  <td><span class="tag tag-e">元素专辅</span></td>
+  <td>减抗 + 攻击力</td>
+  <td class="buff-val">+40% ATK<br>+ 40% 减抗</td>
+  <td class="cond">仅火雷队伍; 4W HP 满加成; 需超载触发</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">云堇</span><span class="char-name en">Yun Jin</span></div></td>
+  <td><span class="tag tag-f">羽毛辅</span></td>
+  <td>普攻基础伤害提升</td>
+  <td class="buff-val">+~2000 基础伤</td>
+  <td class="cond">基于自身 DEF (2500=约2000附加); 30 次触发</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">闲云</span><span class="char-name en">Xianyun</span></div></td>
+  <td><span class="tag tag-f">羽毛辅</span></td>
+  <td>下落攻击基础伤害提升（羽毛）</td>
+  <td class="buff-val">+~9000 基础伤<br>×8 次</td>
+  <td class="cond">大招给 8 层羽毛; 每次下落消耗 1 层附加基础伤(基于闲云 ATK); 附带全队治疗</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">玛薇卡</span><span class="char-name en">Mavuika</span></div></td>
+  <td><span class="tag tag-d">副C带增益</span></td>
+  <td>增伤 + 火后台</td>
+  <td class="buff-val">+40% 增伤<br>+ 20~40% 增伤</td>
+  <td class="cond">4烬城 +40%; 大招后 A4 前台增伤 20s 衰减; E 可后台挂火</td>
+</tr>
+
+<!-- ========== 治疗/护盾辅助 ========== -->
+<tr class="section-header"><td colspan="5">🔷 治疗 / 护盾辅助（附增益效果）</td></tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">迪奥娜</span><span class="char-name en">Diona</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>护盾 + 治疗 + 精通</td>
+  <td class="buff-val">盾 + 治疗<br>+ 200 精通</td>
+  <td class="cond">C6 大招范围内 +200 精通 (HP>50%)</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">莱依拉</span><span class="char-name en">Layla</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>护盾 + 普攻重击增伤</td>
+  <td class="buff-val">盾<br>+ 15% NA/CA 增伤</td>
+  <td class="cond">C4 增益; 盾量与钟离并列四星最强</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">托马</span><span class="char-name en">Thoma</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>护盾 + NA/CA/PA 增伤</td>
+  <td class="buff-val">盾<br>+ 15% NA/CA/PA 增伤</td>
+  <td class="cond">C6 增益; 可叠盾（烈绽放常用）</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">白术</span><span class="char-name en">Baizhu</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>治疗 + 草反应增伤</td>
+  <td class="buff-val">全队治疗<br>+ 100% 绽放/超绽放<br>+ 40% 激化</td>
+  <td class="cond">A4 被动; 基于自身 HP 封顶 5W</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">久岐忍</span><span class="char-name en">Kuki Shinobu</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>治疗 + 雷附着</td>
+  <td class="buff-val">治疗<br>+ 雷后台</td>
+  <td class="cond">超绽放队核心触发位; 精通收益高</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">蓝砚</span><span class="char-name en">Lan Yan</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>护盾 + 减抗</td>
+  <td class="buff-val">盾<br>+ 40% 减抗</td>
+  <td class="cond">4风套减抗; C2 大招刷新护盾; 护盾基于攻击力</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">梦见月瑞希</span><span class="char-name en">Mizuki</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>扩散增幅 + 治疗 + 精通</td>
+  <td class="buff-val">扩散伤害 ×~10<br>+ 全队治疗</td>
+  <td class="cond">固有天赋大幅提高扩散基础伤害; 大招持续治疗</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">伊安珊</span><span class="char-name en">Iansan</span></div></td>
+  <td><span class="tag tag-e">通用辅</span></td>
+  <td>攻击力加成</td>
+  <td class="buff-val">+~700 ATK</td>
+  <td class="cond">夜魂消耗期间按自身攻击力给全队加攻; 需维持位移</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">伊法</span><span class="char-name en">Ifa</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>治疗 + 减抗</td>
+  <td class="buff-val">治疗<br>+ 40% 减抗</td>
+  <td class="cond">4风套减抗; 风系治疗位可选</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">希格雯</span><span class="char-name en">Sigewinne</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>治疗 + 后台战技增伤</td>
+  <td class="buff-val">全队治疗<br>+~2800 基础伤</td>
+  <td class="cond">A4 基于 HP 提升后台战技伤害 (5 次); 6.5W HP 满</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">多莉</span><span class="char-name en">Dori</span></div></td>
+  <td><span class="tag tag-n">场景辅</span></td>
+  <td>治疗 + 充能</td>
+  <td class="buff-val">治疗<br>+ 回能</td>
+  <td class="cond">大招连线回能 + 附雷; 特定充能需求队</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">瑶瑶</span><span class="char-name en">Yaoyao</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>治疗 + 草附着</td>
+  <td class="buff-val">治疗<br>+ 草后台</td>
+  <td class="cond">萝卜投掷持续挂草; 妮露绽放队常用</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">夏洛蒂</span><span class="char-name en">Charlotte</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>全队瞬疗 + 冰附着</td>
+  <td class="buff-val">瞬疗<br>+ 冰后台</td>
+  <td class="cond">芙宁娜队配合优秀; 可带4千岩/金箔</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">绮良良</span><span class="char-name en">Kirara</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>护盾 + 草附着</td>
+  <td class="buff-val">盾<br>+ 草后台</td>
+  <td class="cond">短 E 强力护盾; 可带4磐岩</td>
+</tr>
+
+<!-- ========== 通用增益型副C ========== -->
+<tr class="section-header"><td colspan="5">🔷 带增益效果的副C</td></tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">行秋</span><span class="char-name en">Xingqiu</span></div></td>
+  <td><span class="tag tag-d">副C带增益</span></td>
+  <td>减水抗 + 减伤 + 微治疗</td>
+  <td class="buff-val">15% 减水抗<br>+ 减伤 + 抗打断</td>
+  <td class="cond">C2 减水抗; 雨帘剑提供减伤和微治疗</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">香菱</span><span class="char-name en">Xiangling</span></div></td>
+  <td><span class="tag tag-d">副C带增益</span></td>
+  <td>减火抗 + 火伤 + ATK</td>
+  <td class="buff-val">15% 减火抗<br>+ 15% 火伤<br>+ 10% ATK</td>
+  <td class="cond">C1 减抗; C6 火伤; 锅巴辣椒 +10% ATK</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">雷电将军</span><span class="char-name en">Raiden</span></div></td>
+  <td><span class="tag tag-d">副C带增益</span></td>
+  <td>大招增伤 + 全队充能</td>
+  <td class="buff-val">~27% 大招增伤<br>+ 全队充能</td>
+  <td class="cond">E 技能按元素能量比例增伤 (300%充能≈27%)</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">阿贝多</span><span class="char-name en">Albedo</span></div></td>
+  <td><span class="tag tag-d">副C带增益</span></td>
+  <td>全队精通</td>
+  <td class="buff-val">+125 精通</td>
+  <td class="cond">大招后 10s 全队 +125 EM</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">茜特菈莉</span><span class="char-name en">Citlali</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>盾 + 减水火抗 + 增伤</td>
+  <td class="buff-val">20% 减水火抗<br>+ 40% 增伤</td>
+  <td class="cond">4烬城勇者套; C2 额外 +250 EM 共享</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">欧洛伦</span><span class="char-name en">Ororon</span></div></td>
+  <td><span class="tag tag-d">副C带增益</span></td>
+  <td>增伤 + 雷后台</td>
+  <td class="buff-val">+40% 增伤</td>
+  <td class="cond">4烬城勇者套; 感电/夜魂触发</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">艾梅莉埃</span><span class="char-name en">Emilie</span></div></td>
+  <td><span class="tag tag-d">副C带增益</span></td>
+  <td>草后台 + 燃烧特化</td>
+  <td class="buff-val">持续草伤<br>+ 对燃烧目标增伤</td>
+  <td class="cond">纯后台草副C; 燃烧队核心; 伤害随燃烧频率提升</td>
+</tr>
+
+<!-- ========== 特定场景辅助 ========== -->
+<tr class="section-header"><td colspan="5">🔷 特定场景 / 命座辅助</td></tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">琴</span><span class="char-name en">Jean</span></div></td>
+  <td><span class="tag tag-n">场景辅</span></td>
+  <td>减风抗 + 治疗 + 攻速</td>
+  <td class="buff-val">40% 减风抗<br>+ 15% 攻速</td>
+  <td class="cond">C4 减风抗; C2 攻速; 可带 4风套进一步减抗</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">罗莎莉亚</span><span class="char-name en">Rosaria</span></div></td>
+  <td><span class="tag tag-n">场景辅</span></td>
+  <td>暴击率共享 + 减物抗</td>
+  <td class="buff-val">+15% 暴击率<br>+ 20% 减物抗</td>
+  <td class="cond">A4 暴击率共享（自身暴击×15% 上限 15%）; C6 减物抗</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">米卡</span><span class="char-name en">Mika</span></div></td>
+  <td><span class="tag tag-e">流派专辅</span></td>
+  <td>攻速 + 物伤暴伤 + 治疗</td>
+  <td class="buff-val">+25% 攻速<br>+ 60% 物暴伤</td>
+  <td class="cond">C6 物暴伤; 仅物理队有效</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">卡齐娜</span><span class="char-name en">Kachina</span></div></td>
+  <td><span class="tag tag-n">场景辅</span></td>
+  <td>增伤</td>
+  <td class="buff-val">+40% 增伤</td>
+  <td class="cond">4烬城勇者套; 结晶队低保</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">柯莱</span><span class="char-name en">Collei</span></div></td>
+  <td><span class="tag tag-n">场景辅</span></td>
+  <td>草附着 + 精通</td>
+  <td class="buff-val">+60 精通</td>
+  <td class="cond">C4 全队 +60 EM; 持续挂草</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">菲谢尔</span><span class="char-name en">Fischl</span></div></td>
+  <td><span class="tag tag-d">副C带增益</span></td>
+  <td>雷后台 + 充能</td>
+  <td class="buff-val">雷后台<br>+ 产球</td>
+  <td class="cond">C6 奥兹协同攻击; 激化队核心挂雷</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">早柚</span><span class="char-name en">Sayu</span></div></td>
+  <td><span class="tag tag-n">场景辅</span></td>
+  <td>治疗 + 减抗</td>
+  <td class="buff-val">治疗<br>+ 40% 减抗</td>
+  <td class="cond">4风套触发; 大世界探索便利</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">温迪</span><span class="char-name en">Venti</span></div></td>
+  <td><span class="tag tag-n">场景辅</span></td>
+  <td>减抗 + 回能 + 聚怪</td>
+  <td class="buff-val">40% 减抗<br>+ 15 回能</td>
+  <td class="cond">4风套; 大招结束回能 15 给对应元素队友</td>
+</tr>
+
+<!-- ========== 6.0+ 新增 ========== -->
+<tr class="section-header"><td colspan="5">🔷 5.8-6.5 挪德卡莱/至冬 新增辅助</td></tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">菈乌玛</span><span class="char-name en">Lauma</span></div></td>
+  <td><span class="tag tag-e">羽毛辅</span></td>
+  <td>绽放羽毛 + 减双抗 + 绽放暴击</td>
+  <td class="buff-val">18~36 层苍色圣咏<br>（绽放基础伤增幅）<br>+ 15%暴率 100%暴伤</td>
+  <td class="cond">大招给 18 层羽毛 + 月歌额外 18; 队友触发绽放/超/烈绽放消耗 1 层增幅; 技能减草水抗; P1 月相激活绽放可暴击; P3 月相+1</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">哥伦比娅</span><span class="char-name en">Columbina</span></div></td>
+  <td><span class="tag tag-s">通用辅</span></td>
+  <td>月反应增伤 + 独立乘区</td>
+  <td class="buff-val">月反应 +40% 增伤<br>+ 7% 独立乘区</td>
+  <td class="cond">独立乘区覆盖月绽放/月感电/月结晶; 重力涟漪挂水; 月域触发额外雷击/绽放</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">爱可菲</span><span class="char-name en">Escoffier</span></div></td>
+  <td><span class="tag tag-e">元素专辅</span></td>
+  <td>治疗 + 冰水减抗</td>
+  <td class="buff-val">全队治疗<br>+ 5~55% 冰水减抗</td>
+  <td class="cond">冰水队友数决定减抗幅度 (1人5%→4人55%); 冰箱跟随挂冰</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">法尔伽</span><span class="char-name en">Varka</span></div></td>
+  <td><span class="tag tag-s">通用辅</span></td>
+  <td>队伍元素增益</td>
+  <td class="buff-val">元素转化增益</td>
+  <td class="cond">根据队伍火水雷冰角色提供不同增益 (类似琳妮特上位)</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">莉奈娅</span><span class="char-name en">Linnea</span></div></td>
+  <td><span class="tag tag-e">元素专辅</span></td>
+  <td>岩减抗 + 精通 + 治疗</td>
+  <td class="buff-val">-15% 岩抗<br>+ EM 共享<br>+ 治疗</td>
+  <td class="cond">召唤 Lumi 在场期间减岩抗; EM 基于自身防御 5%; 大招全队治疗</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars">★★★★★</span><span class="char-name zh">伊涅芙</span><span class="char-name en">Ineffa</span></div></td>
+  <td><span class="tag tag-s">通用辅</span></td>
+  <td>护盾 + 精通</td>
+  <td class="buff-val">盾<br>+ EM 共享</td>
+  <td class="cond">盾基于攻击力 (250% 雷吸收); 大招全队 +6% 自身攻击的 EM</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">达利亚</span><span class="char-name en">Dahlia</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>护盾 + 攻速</td>
+  <td class="buff-val">水盾<br>+ 0~20% 攻速</td>
+  <td class="cond">盾基于 HP (250% 水吸收); 攻速每 1000 HP +0.5% 上限 20%</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">叶洛亚</span><span class="char-name en">Illuga</span></div></td>
+  <td><span class="tag tag-e">羽毛辅</span></td>
+  <td>岩羽毛 + 岩双暴 + 精通</td>
+  <td class="buff-val">21~36 层夜莺之歌<br>（岩基础伤增幅）<br>+5%岩暴率+10%岩暴伤<br>+50 精通</td>
+  <td class="cond">大招给 21 层羽毛 + 岩造物额外 15; 队友岩伤消耗 1 层增幅(基于自身精通); 水岩队友进一步放大; P1 全队岩双暴; P3 月相+1</td>
+</tr>
+
+<tr>
+  <td><div class="char-cell"><span class="stars-4">★★★★</span><span class="char-name zh">雅科达</span><span class="char-name en">Jahoda</span></div></td>
+  <td><span class="tag tag-h">生存辅</span></td>
+  <td>治疗 + 精通</td>
+  <td class="buff-val">治疗<br>+ 100 精通</td>
+  <td class="cond">治疗机器人触发; 角色 HP>70% +100 EM 持续 6s</td>
+</tr>
+
+</tbody>
+</table>
+
+<p style="text-align:center;font-size:11px;color:#666;margin-top:18px">
+  ※ "典型数值" 均基于天赋 lv9-10、关键命座、常见配装下的近似值；百分比均为面板显示值<br>
+  ※ 4风套 = 翠绿之影（扩散减抗40%）；4烬城 = 烬城勇者绘卷（夜魂相关反应增伤40%）
+</p>
+
+</body>
+</html>

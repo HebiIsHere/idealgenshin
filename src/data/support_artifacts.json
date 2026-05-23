@@ -1,0 +1,67 @@
+{
+  "noblesse_oblige": {
+    "name": "昔日宗室之仪",
+    "nameEn": "Noblesse Oblige",
+    "rarity": 5,
+    "buffs": {
+      "atkPercent": 0.20
+    }
+  },
+  "tenacity_of_the_millelith": {
+    "name": "千岩牢固",
+    "nameEn": "Tenacity of the Millelith",
+    "rarity": 5,
+    "buffs": {
+      "atkPercent": 0.20
+    }
+  },
+  "viridescent_venerer": {
+    "name": "翠绿之影",
+    "nameEn": "Viridescent Venerer",
+    "rarity": 5,
+    "buffs": {
+      "resistReduction": 0.40
+    }
+  },
+  "scroll_of_cinder_city": {
+    "name": "烬城勇者之卷",
+    "nameEn": "Scroll of the Hero of Cinder City",
+    "rarity": 5,
+    "buffs": {
+      "dmgBonus": 0.40
+    }
+  },
+  "deepwood_memories": {
+    "name": "深林的记忆",
+    "nameEn": "Deepwood Memories",
+    "rarity": 5,
+    "buffs": {
+      "resistReduction": 0.30
+    }
+  },
+  "instructor": {
+    "name": "教官",
+    "nameEn": "Instructor",
+    "rarity": 4,
+    "buffs": {
+      "elementalMastery": 120
+    }
+  },
+  "archaic_petra": {
+    "name": "悠古的磐岩",
+    "nameEn": "Archaic Petra",
+    "rarity": 5,
+    "buffs": {
+      "dmgBonus": 0.35
+    }
+  },
+  "silken_moons_serenade": {
+    "name": "纺月的夜歌",
+    "nameEn": "Silken Moon's Serenade",
+    "rarity": 5,
+    "buffs": {
+      "elementalMastery": 120,
+      "moonReactionBonus": 0.10
+    }
+  }
+}

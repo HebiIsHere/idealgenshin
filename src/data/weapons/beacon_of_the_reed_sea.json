@@ -1,0 +1,12 @@
+{
+  "id": "beacon_of_the_reed_sea",
+  "name": "Beacon of the Reed Sea",
+  "nameZh": "苇海信标",
+  "rarity": 5,
+  "weaponType": "CLAYMORE",
+  "baseAtk": 608,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.331,
+  "passiveName": "沙海守望",
+  "passiveDesc": "元素战技命中敌人后，攻击力提升20%，持续8秒；受到伤害后，攻击力提升20%，持续8秒。上述2种效果角色处于队伍后台时也能触发。此外，不处于护盾庇护下时，生命值上限提高32%。"
+}

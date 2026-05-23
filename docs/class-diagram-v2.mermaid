@@ -1,0 +1,202 @@
+classDiagram
+    direction TB
+
+    %% ===== V2 新增接口 =====
+
+    class ZoneBonusInput {
+        <<interface>>
+        +number atkPercent
+        +number atkFlat
+        +number hpPercent
+        +number hpFlat
+        +number defPercent
+        +number defFlat
+        +number dmgBonus
+        +number critRate
+        +number critDmg
+        +number elementalMastery
+        +number energyRecharge
+        +number resistReduction
+        +number baseDamageFlat
+    }
+
+    class WeaponConfig {
+        <<interface>>
+        +WeaponData weaponData
+        +number weaponLevel
+        +ZoneBonusInput passiveBonus
+    }
+
+    class ConstellationConfig {
+        <<interface>>
+        +number level
+        +ZoneBonusInput bonus
+    }
+
+    class TypicalScenario {
+        <<interface>>
+        +string id
+        +string name
+        +number skillMultiplier
+        +DamagePath damagePath
+        +ReactionType reactionType
+        +number amplifyingMultiplier
+        +number enemyLevel
+        +number enemyResistance
+        +number enemyElementResistance
+        +number[] defReductions
+        +string description
+    }
+
+    class CharacterScenarios {
+        <<interface>>
+        +string characterId
+        +TypicalScenario[] scenarios
+    }
+
+    class DamageComparison {
+        <<interface>>
+        +string scenarioName
+        +number currentDamage
+        +number optimizedDamage
+        +number improvementPercent
+        +DamageResult currentBreakdown
+        +DamageResult optimizedBreakdown
+    }
+
+    class ZoneAnalysisEntry {
+        <<interface>>
+        +string zoneName
+        +number currentRolls
+        +number optimizedRolls
+        +number rollChange
+        +number damageContribution
+    }
+
+    class ZoneAnalysis {
+        <<interface>>
+        +ZoneAnalysisEntry[] entries
+        +number totalCurrentRolls
+        +number totalOptimizedRolls
+        +number totalImprovement
+    }
+
+    class CharacterSave {
+        <<interface>>
+        +string saveId
+        +string name
+        +string createdAt
+        +string updatedAt
+        +string characterId
+        +number characterLevel
+        +WeaponConfig weaponConfig
+        +ConstellationConfig constellationConfig
+        +ArtifactInstance[] artifacts
+        +string selectedScenarioId
+        +boolean fromEnka
+        +string uid
+    }
+
+    class ExportData {
+        <<interface>>
+        +string version
+        +string exportedAt
+        +string app
+        +CharacterSave[] saves
+    }
+
+    %% ===== V1 已有接口（修改标注） =====
+
+    class WeaponData {
+        +string id
+        +string name
+        +string nameZh
+        +number rarity
+        +WeaponType weaponType
+        +number baseAtk
+        +SubstatType substatType
+        +number substatValue
+        +string passiveDesc
+    }
+
+    class CharacterBuild {
+        +CharacterData character
+        +WeaponConfig weaponConfig
+        +ArtifactInstance[] artifacts
+        +number characterLevel
+        +number skillMultiplier
+        +ReactionType reactionType
+        +TeamBuff[] teamBuffs
+        +StatScaling statScaling
+        +ConstellationConfig constellationConfig
+    }
+
+    class DamageContext {
+        +ComputedStats stats
+        +number skillMultiplier
+        +StatScaling statScaling
+        +ReactionType reactionType
+        +number enemyLevel
+        +number enemyResistance
+        +number amplifyingMultiplier
+        +number characterLevel
+        +number[] defReductions
+        +number defIgnore
+        +number elevationBonus
+        +ZoneBonusInput extraBonuses
+    }
+
+    %% ===== 关系 =====
+
+    WeaponConfig --> WeaponData : contains
+    WeaponConfig --> ZoneBonusInput : passiveBonus
+    ConstellationConfig --> ZoneBonusInput : bonus
+    CharacterBuild --> WeaponConfig : weaponConfig
+    CharacterBuild --> ConstellationConfig : constellationConfig
+    CharacterSave --> WeaponConfig : weaponConfig
+    CharacterSave --> ConstellationConfig : constellationConfig
+    DamageContext --> ZoneBonusInput : extraBonuses
+    DamageComparison --> DamageResult : currentBreakdown
+    DamageComparison --> DamageResult : optimizedBreakdown
+    ZoneAnalysis --> ZoneAnalysisEntry : entries
+    CharacterScenarios --> TypicalScenario : scenarios
+    ExportData --> CharacterSave : saves
+
+    %% ===== 引擎层 =====
+
+    class StatCalculator {
+        +compute~build: CharacterBuild~ ComputedStats$
+        +applyZoneBonus~stats: ComputedStats, bonus: ZoneBonusInput~ ComputedStats$
+    }
+
+    class DamageFormula {
+        +calculate~ctx: DamageContext~ DamageResult$
+        +resolvePath~type: ReactionType~ DamagePath$
+    }
+
+    class RedistributeOptimizer {
+        +optimize~req: RedistributeRequest~ RedistributeResult
+    }
+
+    class IdealTemplateOptimizer {
+        +generate~req: IdealRequest~ IdealResult
+    }
+
+    StatCalculator --> CharacterBuild : reads
+    StatCalculator --> ZoneBonusInput : applies
+    DamageFormula --> DamageContext : reads
+
+    %% ===== 存档服务 =====
+
+    class SaveService {
+        +listSaves~~ CharacterSave[]
+        +getSave~saveId: string~ CharacterSave
+        +saveCharacter~data: CharacterSave~ void
+        +deleteSave~saveId: string~ void
+        +exportToJSON~saves: CharacterSave[], includeUid: boolean~ string
+        +importFromJSON~jsonStr: string~ ImportResult
+        +validateImport~data: unknown~ ValidationResult
+    }
+
+    SaveService --> CharacterSave : manages
+    SaveService --> ExportData : exports

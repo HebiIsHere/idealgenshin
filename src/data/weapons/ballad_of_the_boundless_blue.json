@@ -1,0 +1,12 @@
+{
+  "id": "ballad_of_the_boundless_blue",
+  "name": "Ballad of the Boundless Blue",
+  "nameZh": "无垠蔚蓝之歌",
+  "rarity": 4,
+  "weaponType": "CATALYST",
+  "baseAtk": 565,
+  "substatType": "ENERGY_RECHARGE",
+  "substatValue": 0.306,
+  "passiveName": "蔚蓝深空",
+  "passiveDesc": "普通攻击或重击命中敌人后的6秒内，普通攻击造成的伤害提升8%，重击造成的伤害提升6%。该效果至多叠加3次，每0.3秒至多触发一次。"
+}

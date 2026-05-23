@@ -1,0 +1,12 @@
+{
+  "id": "skyrider_sword",
+  "name": "Skyrider Sword",
+  "nameZh": "飞天御剑",
+  "rarity": 3,
+  "weaponType": "SWORD",
+  "baseAtk": 354,
+  "substatType": "ENERGY_RECHARGE",
+  "substatValue": 0.521,
+  "passiveName": "决心",
+  "passiveDesc": "施放元素爆发后，提高12%攻击力和移动速度，持续15秒。"
+}

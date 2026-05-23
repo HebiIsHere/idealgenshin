@@ -1,0 +1,13 @@
+{
+  "id": "wanderer_s_troupe",
+  "name": "Wanderer S Troupe",
+  "nameZh": "流浪大地的乐团",
+  "twoPcEffect": "元素精通提高80点。",
+  "fourPcEffect": "装备该圣遗物套装的角色为法器、弓箭角色时，角色重击造成的伤害提高35%。",
+  "twoPcBonus": {
+    "elementalMastery": 80.0
+  },
+  "fourPcBonus": {
+    "dmgBonus": 0.35
+  }
+}

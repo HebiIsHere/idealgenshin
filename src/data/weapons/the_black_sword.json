@@ -1,0 +1,12 @@
+{
+  "id": "the_black_sword",
+  "name": "The Black Sword",
+  "nameZh": "黑剑",
+  "rarity": 4,
+  "weaponType": "SWORD",
+  "baseAtk": 510,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.276,
+  "passiveName": "「正义」",
+  "passiveDesc": "普通攻击与重击的造成的伤害提升20%；此外，普通攻击与重击暴击时，回复等同于攻击力60%的生命值。该效果每5秒至多发动一次。"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "emerald_orb",
+  "name": "Emerald Orb",
+  "nameZh": "翡玉法球",
+  "rarity": 3,
+  "weaponType": "CATALYST",
+  "baseAtk": 448,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 93.718,
+  "passiveName": "激流",
+  "passiveDesc": "触发蒸发、感电、冰冻、绽放、月感电、月绽放或水元素扩散后的12秒内，攻击力提高20%。"
+}

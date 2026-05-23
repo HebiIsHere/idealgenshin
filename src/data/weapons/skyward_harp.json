@@ -1,0 +1,12 @@
+{
+  "id": "skyward_harp",
+  "name": "Skyward Harp",
+  "nameZh": "天空之翼",
+  "rarity": 5,
+  "weaponType": "BOW",
+  "baseAtk": 674,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.221,
+  "passiveName": "回响长天的诗歌",
+  "passiveDesc": "暴击伤害提高20%；攻击命中时有60%概率造成125%攻击力的小范围物理伤害，该效果每4秒只能触发一次。"
+}

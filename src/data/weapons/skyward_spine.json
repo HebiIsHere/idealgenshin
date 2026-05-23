@@ -1,0 +1,12 @@
+{
+  "id": "skyward_spine",
+  "name": "Skyward Spine",
+  "nameZh": "天空之脊",
+  "rarity": 5,
+  "weaponType": "POLEARM",
+  "baseAtk": 674,
+  "substatType": "ENERGY_RECHARGE",
+  "substatValue": 0.368,
+  "passiveName": "斫断黑翼的利齿",
+  "passiveDesc": "暴击率提升8%，普通攻击速度提升12%。此外，普通攻击与重击命中敌人时，有50%概率触发真空刃，在小范围内造成额外40%攻击力的伤害。该效果每2秒至多触发一次。"
+}

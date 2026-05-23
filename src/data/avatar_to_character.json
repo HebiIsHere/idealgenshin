@@ -1,0 +1,466 @@
+{
+  "10000002": {
+    "projectId": "kamisato_ayaka",
+    "zhName": "神里绫华"
+  },
+  "10000003": {
+    "projectId": "jean",
+    "zhName": "琴"
+  },
+  "10000005": {
+    "projectId": "aether",
+    "zhName": "空"
+  },
+  "10000006": {
+    "projectId": "lisa",
+    "zhName": "丽莎"
+  },
+  "10000007": {
+    "projectId": "lumine",
+    "zhName": "荧"
+  },
+  "10000014": {
+    "projectId": "barbara",
+    "zhName": "芭芭拉"
+  },
+  "10000015": {
+    "projectId": "kaeya",
+    "zhName": "凯亚"
+  },
+  "10000016": {
+    "projectId": "diluc",
+    "zhName": "迪卢克"
+  },
+  "10000020": {
+    "projectId": "razor",
+    "zhName": "雷泽"
+  },
+  "10000021": {
+    "projectId": "amber",
+    "zhName": "安柏"
+  },
+  "10000022": {
+    "projectId": "venti",
+    "zhName": "温迪"
+  },
+  "10000023": {
+    "projectId": "xiangling",
+    "zhName": "香菱"
+  },
+  "10000024": {
+    "projectId": "beidou",
+    "zhName": "北斗"
+  },
+  "10000025": {
+    "projectId": "xingqiu",
+    "zhName": "行秋"
+  },
+  "10000026": {
+    "projectId": "xiao",
+    "zhName": "魈"
+  },
+  "10000027": {
+    "projectId": "ningguang",
+    "zhName": "凝光"
+  },
+  "10000029": {
+    "projectId": "klee",
+    "zhName": "可莉"
+  },
+  "10000030": {
+    "projectId": "zhongli",
+    "zhName": "钟离"
+  },
+  "10000031": {
+    "projectId": "fischl",
+    "zhName": "菲谢尔"
+  },
+  "10000032": {
+    "projectId": "bennett",
+    "zhName": "班尼特"
+  },
+  "10000033": {
+    "projectId": "tartaglia",
+    "zhName": "达达利亚"
+  },
+  "10000034": {
+    "projectId": "noelle",
+    "zhName": "诺艾尔"
+  },
+  "10000035": {
+    "projectId": "qiqi",
+    "zhName": "七七"
+  },
+  "10000036": {
+    "projectId": "chongyun",
+    "zhName": "重云"
+  },
+  "10000037": {
+    "projectId": "ganyu",
+    "zhName": "甘雨"
+  },
+  "10000038": {
+    "projectId": "albedo",
+    "zhName": "阿贝多"
+  },
+  "10000039": {
+    "projectId": "diona",
+    "zhName": "迪奥娜"
+  },
+  "10000041": {
+    "projectId": "mona",
+    "zhName": "莫娜"
+  },
+  "10000042": {
+    "projectId": "keqing",
+    "zhName": "刻晴"
+  },
+  "10000043": {
+    "projectId": "sucrose",
+    "zhName": "砂糖"
+  },
+  "10000044": {
+    "projectId": "xinyan",
+    "zhName": "辛焱"
+  },
+  "10000045": {
+    "projectId": "rosaria",
+    "zhName": "罗莎莉亚"
+  },
+  "10000046": {
+    "projectId": "hu_tao",
+    "zhName": "胡桃"
+  },
+  "10000047": {
+    "projectId": "kaedehara_kazuha",
+    "zhName": "枫原万叶"
+  },
+  "10000048": {
+    "projectId": "yanfei",
+    "zhName": "烟绯"
+  },
+  "10000049": {
+    "projectId": "yoimiya",
+    "zhName": "宵宫"
+  },
+  "10000050": {
+    "projectId": "thoma",
+    "zhName": "托马"
+  },
+  "10000051": {
+    "projectId": "eula",
+    "zhName": "优菈"
+  },
+  "10000052": {
+    "projectId": "raiden_shogun",
+    "zhName": "雷电将军"
+  },
+  "10000053": {
+    "projectId": "sayu",
+    "zhName": "早柚"
+  },
+  "10000054": {
+    "projectId": "sangonomiya_kokomi",
+    "zhName": "珊瑚宫心海"
+  },
+  "10000055": {
+    "projectId": "gorou",
+    "zhName": "五郎"
+  },
+  "10000056": {
+    "projectId": "kujou_sara",
+    "zhName": "九条裟罗"
+  },
+  "10000057": {
+    "projectId": "arataki_itto",
+    "zhName": "荒泷一斗"
+  },
+  "10000058": {
+    "projectId": "yae_miko",
+    "zhName": "八重神子"
+  },
+  "10000059": {
+    "projectId": "shikanoin_heizou",
+    "zhName": "鹿野院平藏"
+  },
+  "10000060": {
+    "projectId": "yelan",
+    "zhName": "夜兰"
+  },
+  "10000061": {
+    "projectId": "kirara",
+    "zhName": "绮良良"
+  },
+  "10000062": {
+    "projectId": "aloy",
+    "zhName": "埃洛伊"
+  },
+  "10000063": {
+    "projectId": "shenhe",
+    "zhName": "申鹤"
+  },
+  "10000064": {
+    "projectId": "yun_jin",
+    "zhName": "云堇"
+  },
+  "10000065": {
+    "projectId": "kuki_shinobu",
+    "zhName": "久岐忍"
+  },
+  "10000066": {
+    "projectId": "kamisato_ayato",
+    "zhName": "神里绫人"
+  },
+  "10000067": {
+    "projectId": "collei",
+    "zhName": "柯莱"
+  },
+  "10000068": {
+    "projectId": "dori",
+    "zhName": "多莉"
+  },
+  "10000069": {
+    "projectId": "tighnari",
+    "zhName": "提纳里"
+  },
+  "10000070": {
+    "projectId": "nilou",
+    "zhName": "妮露"
+  },
+  "10000071": {
+    "projectId": "cyno",
+    "zhName": "赛诺"
+  },
+  "10000072": {
+    "projectId": "candace",
+    "zhName": "坎蒂丝"
+  },
+  "10000073": {
+    "projectId": "nahida",
+    "zhName": "纳西妲"
+  },
+  "10000074": {
+    "projectId": "layla",
+    "zhName": "莱依拉"
+  },
+  "10000075": {
+    "projectId": "wanderer",
+    "zhName": "流浪者"
+  },
+  "10000076": {
+    "projectId": "faruzan",
+    "zhName": "珐露珊"
+  },
+  "10000077": {
+    "projectId": "yaoyao",
+    "zhName": "瑶瑶"
+  },
+  "10000078": {
+    "projectId": "alhaitham",
+    "zhName": "艾尔海森"
+  },
+  "10000079": {
+    "projectId": "dehya",
+    "zhName": "迪希雅"
+  },
+  "10000080": {
+    "projectId": "mika",
+    "zhName": "米卡"
+  },
+  "10000081": {
+    "projectId": "kaveh",
+    "zhName": "卡维"
+  },
+  "10000082": {
+    "projectId": "baizhu",
+    "zhName": "白术"
+  },
+  "10000083": {
+    "projectId": "lynette",
+    "zhName": "琳妮特"
+  },
+  "10000084": {
+    "projectId": "lyney",
+    "zhName": "林尼"
+  },
+  "10000085": {
+    "projectId": "freminet",
+    "zhName": "菲米尼"
+  },
+  "10000086": {
+    "projectId": "wriothesley",
+    "zhName": "莱欧斯利"
+  },
+  "10000087": {
+    "projectId": "neuvillette",
+    "zhName": "那维莱特"
+  },
+  "10000088": {
+    "projectId": "charlotte",
+    "zhName": "夏洛蒂"
+  },
+  "10000089": {
+    "projectId": "furina",
+    "zhName": "芙宁娜"
+  },
+  "10000090": {
+    "projectId": "chevreuse",
+    "zhName": "夏沃蕾"
+  },
+  "10000091": {
+    "projectId": "navia",
+    "zhName": "娜维娅"
+  },
+  "10000092": {
+    "projectId": "gaming",
+    "zhName": "嘉明"
+  },
+  "10000093": {
+    "projectId": "xianyun",
+    "zhName": "闲云"
+  },
+  "10000094": {
+    "projectId": "chiori",
+    "zhName": "千织"
+  },
+  "10000095": {
+    "projectId": "sigewinne",
+    "zhName": "希格雯"
+  },
+  "10000096": {
+    "projectId": "arlecchino",
+    "zhName": "阿蕾奇诺"
+  },
+  "10000097": {
+    "projectId": "sethos",
+    "zhName": "赛索斯"
+  },
+  "10000098": {
+    "projectId": "clorinde",
+    "zhName": "克洛琳德"
+  },
+  "10000099": {
+    "projectId": "emilie",
+    "zhName": "艾梅莉埃"
+  },
+  "10000100": {
+    "projectId": "kachina",
+    "zhName": "卡齐娜"
+  },
+  "10000101": {
+    "projectId": "kinich",
+    "zhName": "基尼奇"
+  },
+  "10000102": {
+    "projectId": "mualani",
+    "zhName": "玛拉妮"
+  },
+  "10000103": {
+    "projectId": "xilonen",
+    "zhName": "希诺宁"
+  },
+  "10000104": {
+    "projectId": "chasca",
+    "zhName": "恰斯卡"
+  },
+  "10000105": {
+    "projectId": "ororon",
+    "zhName": "欧洛伦"
+  },
+  "10000106": {
+    "projectId": "mavuika",
+    "zhName": "玛薇卡"
+  },
+  "10000107": {
+    "projectId": "citlali",
+    "zhName": "茜特菈莉"
+  },
+  "10000108": {
+    "projectId": "lan_yan",
+    "zhName": "蓝砚"
+  },
+  "10000109": {
+    "projectId": "yumemizuki_mizuki",
+    "zhName": "梦见月瑞希"
+  },
+  "10000110": {
+    "projectId": "iansan",
+    "zhName": "伊安珊"
+  },
+  "10000111": {
+    "projectId": "varesa",
+    "zhName": "瓦雷莎"
+  },
+  "10000112": {
+    "projectId": "escoffier",
+    "zhName": "爱可菲"
+  },
+  "10000113": {
+    "projectId": "ifa",
+    "zhName": "伊法"
+  },
+  "10000114": {
+    "projectId": "skirk",
+    "zhName": "丝柯克"
+  },
+  "10000115": {
+    "projectId": "dahlia",
+    "zhName": "塔利雅"
+  },
+  "10000116": {
+    "projectId": "ineffa",
+    "zhName": "伊涅芙"
+  },
+  "10000117": {
+    "projectId": "manekin",
+    "zhName": "奇偶·男性"
+  },
+  "10000118": {
+    "projectId": "manekina",
+    "zhName": "奇偶·女性"
+  },
+  "10000119": {
+    "projectId": "lauma",
+    "zhName": "菈乌玛"
+  },
+  "10000120": {
+    "projectId": "flins",
+    "zhName": "菲林斯"
+  },
+  "10000121": {
+    "projectId": "aino",
+    "zhName": "爱诺"
+  },
+  "10000122": {
+    "projectId": "nefer",
+    "zhName": "奈芙尔"
+  },
+  "10000123": {
+    "projectId": "durin",
+    "zhName": "杜林"
+  },
+  "10000124": {
+    "projectId": "jahoda",
+    "zhName": "雅珂达"
+  },
+  "10000125": {
+    "projectId": "columbina",
+    "zhName": "哥伦比娅"
+  },
+  "10000126": {
+    "projectId": "zibai",
+    "zhName": "兹白"
+  },
+  "10000127": {
+    "projectId": "illuga",
+    "zhName": "叶洛亚"
+  },
+  "10000128": {
+    "projectId": "varka",
+    "zhName": "法尔伽"
+  },
+  "10000130": {
+    "projectId": "linnea",
+    "zhName": "莉奈娅"
+  }
+}

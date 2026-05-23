@@ -1,0 +1,13 @@
+{
+  "id": "noblesse_oblige",
+  "name": "Noblesse Oblige",
+  "nameZh": "昔日宗室之仪",
+  "twoPcEffect": "元素爆发造成的伤害提升20%。",
+  "fourPcEffect": "施放元素爆发后，队伍中所有角色攻击力提升20%，持续12秒。该效果不可叠加。",
+  "twoPcBonus": {
+    "dmgBonus": 0.2
+  },
+  "fourPcBonus": {
+    "atkPercent": 0.2
+  }
+}

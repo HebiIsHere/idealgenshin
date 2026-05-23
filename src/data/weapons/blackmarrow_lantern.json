@@ -1,0 +1,12 @@
+{
+  "id": "blackmarrow_lantern",
+  "name": "Blackmarrow Lantern",
+  "nameZh": "乌髓孑灯",
+  "rarity": 4,
+  "weaponType": "CATALYST",
+  "baseAtk": 454,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 220.512,
+  "passiveName": "结契的凭证",
+  "passiveDesc": "绽放反应造成的伤害提升48%，月绽放反应伤害提升12%。月兆·满辉：月绽放反应伤害额外提升12%。"
+}

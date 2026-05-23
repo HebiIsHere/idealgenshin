@@ -1,0 +1,12 @@
+{
+  "id": "moonpiercer",
+  "name": "Moonpiercer",
+  "nameZh": "贯月矢",
+  "rarity": 4,
+  "weaponType": "POLEARM",
+  "baseAtk": 565,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 110.256,
+  "passiveName": "幽林月影",
+  "passiveDesc": "触发燃烧、原激化、超激化、蔓激化、绽放、月绽放、超绽放或烈绽放后，将在角色周围产生至多存在10秒的「苏生之叶」。拾取苏生之叶的角色攻击力提升16%，持续12秒。每20秒至多通过这种方式产生一枚苏生之叶。角色处于队伍后台时也能触发。"
+}

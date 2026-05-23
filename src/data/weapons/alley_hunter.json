@@ -1,0 +1,12 @@
+{
+  "id": "alley_hunter",
+  "name": "Alley Hunter",
+  "nameZh": "暗巷猎手",
+  "rarity": 4,
+  "weaponType": "BOW",
+  "baseAtk": 565,
+  "substatType": "ATK_PERCENT",
+  "substatValue": 0.276,
+  "passiveName": "街巷伏击",
+  "passiveDesc": "装备该武器的角色处于队伍后台时，每1秒角色造成的伤害提升2%，最多通过这种方式获得20%的伤害提升；在场上超过4秒后，上述伤害提升效果每1秒会流失4%，直到降低至0%。"
+}

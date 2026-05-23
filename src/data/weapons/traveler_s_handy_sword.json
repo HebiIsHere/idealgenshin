@@ -1,0 +1,12 @@
+{
+  "id": "traveler_s_handy_sword",
+  "name": "Traveler's Handy Sword",
+  "nameZh": "旅行剑",
+  "rarity": 3,
+  "weaponType": "SWORD",
+  "baseAtk": 448,
+  "substatType": "DEF_PERCENT",
+  "substatValue": 0.293,
+  "passiveName": "旅程",
+  "passiveDesc": "获得元素晶球或元素微粒时，恢复1%生命值。"
+}

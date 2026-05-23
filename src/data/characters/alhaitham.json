@@ -1,0 +1,48 @@
+{
+  "id": "alhaitham",
+  "name": "Alhaitham",
+  "nameZh": "艾尔海森",
+  "element": "DENDRO",
+  "weaponType": "SWORD",
+  "baseStats": {
+    "hp": 13348,
+    "atk": 313,
+    "def": 782,
+    "critRate": 0.05,
+    "critDmg": 0.5,
+    "em": 0,
+    "er": 1
+  },
+  "ascensionStat": {
+    "type": "DENDRO_DMG_BONUS",
+    "values": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.072,
+      0.072,
+      0.144,
+      0.144,
+      0.144,
+      0.144,
+      0.216,
+      0.216,
+      0.288
+    ]
+  },
+  "relevantSubstats": [
+    "ELEMENTAL_MASTERY",
+    "CRIT_RATE",
+    "CRIT_DMG",
+    "ATK_PERCENT",
+    "ENERGY_RECHARGE"
+  ],
+  "defaultStatScaling": {
+    "atkRatio": 0.5,
+    "hpRatio": 0,
+    "defRatio": 0,
+    "emRatio": 0.5
+  }
+}

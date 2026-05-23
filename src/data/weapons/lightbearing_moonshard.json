@@ -1,0 +1,12 @@
+{
+  "id": "lightbearing_moonshard",
+  "name": "Lightbearing Moonshard",
+  "nameZh": "朏魄含光",
+  "rarity": 5,
+  "weaponType": "SWORD",
+  "baseAtk": 542,
+  "substatType": "CRIT_DMG",
+  "substatValue": 0.882,
+  "passiveName": "琅玕衍义",
+  "passiveDesc": "防御力提高20%。装备者施放元素战技后的5秒内，月结晶反应伤害提升64%。"
+}

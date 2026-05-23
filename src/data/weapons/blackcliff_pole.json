@@ -1,0 +1,12 @@
+{
+  "id": "blackcliff_pole",
+  "name": "Blackcliff Pole",
+  "nameZh": "黑岩刺枪",
+  "rarity": 4,
+  "weaponType": "POLEARM",
+  "baseAtk": 510,
+  "substatType": "CRIT_DMG",
+  "substatValue": 0.551,
+  "passiveName": "乘胜追击",
+  "passiveDesc": "击败敌人后，攻击力提升12%，持续30秒。该效果至多叠加3层，每层持续时间独立。"
+}

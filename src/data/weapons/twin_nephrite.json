@@ -1,0 +1,12 @@
+{
+  "id": "twin_nephrite",
+  "name": "Twin Nephrite",
+  "nameZh": "甲级宝珏",
+  "rarity": 3,
+  "weaponType": "CATALYST",
+  "baseAtk": 448,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.156,
+  "passiveName": "奔袭战术",
+  "passiveDesc": "击败敌人后的15秒内，移动速度和攻击力提升12%。"
+}

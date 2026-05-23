@@ -1,0 +1,12 @@
+{
+  "id": "wolffang",
+  "name": "Wolf-Fang",
+  "nameZh": "狼牙",
+  "rarity": 4,
+  "weaponType": "SWORD",
+  "baseAtk": 510,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.276,
+  "passiveName": "苍狼北风",
+  "passiveDesc": "元素战技与元素爆发造成的伤害提升16%。元素战技命中敌人时，元素战技的暴击率提升2%；元素爆发命中敌人时，元素爆发的暴击率提升2%。上述两种效果各自持续10秒，至多叠加4次，每0.1秒至多触发一次。"
+}

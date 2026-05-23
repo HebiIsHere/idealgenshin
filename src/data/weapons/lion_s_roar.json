@@ -1,0 +1,12 @@
+{
+  "id": "lion_s_roar",
+  "name": "Lion's Roar",
+  "nameZh": "匣里龙吟",
+  "rarity": 4,
+  "weaponType": "SWORD",
+  "baseAtk": 510,
+  "substatType": "ATK_PERCENT",
+  "substatValue": 0.413,
+  "passiveName": "踏火息雷",
+  "passiveDesc": "对处于火元素或雷元素影响下的敌人，造成的伤害提高20%。"
+}

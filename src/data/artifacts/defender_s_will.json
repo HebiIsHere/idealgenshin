@@ -1,0 +1,10 @@
+{
+  "id": "defender_s_will",
+  "name": "Defender S Will",
+  "nameZh": "守护之心",
+  "twoPcEffect": "防御力提高30%。",
+  "fourPcEffect": "队伍里每有不同一种元素类型的自己的角色，自身获得30%相应的元素抗性。",
+  "twoPcBonus": {
+    "defPercent": 0.3
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "finale_of_the_deep",
+  "name": "Finale of the Deep",
+  "nameZh": "海渊终曲",
+  "rarity": 4,
+  "weaponType": "SWORD",
+  "baseAtk": 565,
+  "substatType": "ATK_PERCENT",
+  "substatValue": 0.276,
+  "passiveName": "最终的崇高",
+  "passiveDesc": "施放元素战技时，攻击力提升12%，持续15秒，并赋予生命值上限25%的生命之契，该效果每10秒至多触发一次。生命之契清除时，基于清除值的2.4%提升至多150点攻击力，持续15秒。"
+}

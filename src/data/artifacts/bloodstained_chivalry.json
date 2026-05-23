@@ -1,0 +1,13 @@
+{
+  "id": "bloodstained_chivalry",
+  "name": "Bloodstained Chivalry",
+  "nameZh": "染血的骑士道",
+  "twoPcEffect": "造成的物理伤害提高25%。",
+  "fourPcEffect": "击败敌人后的10秒内，施放重击时不消耗体力，且重击造成的伤害提升50%。",
+  "twoPcBonus": {
+    "dmgBonus": 0.25
+  },
+  "fourPcBonus": {
+    "dmgBonus": 0.5
+  }
+}

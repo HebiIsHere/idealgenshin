@@ -1,0 +1,48 @@
+{
+  "id": "lynette",
+  "name": "Lynette",
+  "nameZh": "琳妮特",
+  "element": "ANEMO",
+  "weaponType": "SWORD",
+  "baseStats": {
+    "hp": 12397,
+    "atk": 232,
+    "def": 712,
+    "critRate": 0.05,
+    "critDmg": 0.5,
+    "em": 0,
+    "er": 1
+  },
+  "ascensionStat": {
+    "type": "ANEMO_DMG_BONUS",
+    "values": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.06,
+      0.06,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.18,
+      0.18,
+      0.24
+    ]
+  },
+  "relevantSubstats": [
+    "CRIT_RATE",
+    "CRIT_DMG",
+    "ATK_PERCENT",
+    "ENERGY_RECHARGE",
+    "ELEMENTAL_MASTERY"
+  ],
+  "defaultStatScaling": {
+    "atkRatio": 1,
+    "hpRatio": 0,
+    "defRatio": 0,
+    "emRatio": 0
+  }
+}

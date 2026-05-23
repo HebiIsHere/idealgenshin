@@ -1,0 +1,12 @@
+{
+  "id": "bloodtainted_greatsword",
+  "name": "Bloodtainted Greatsword",
+  "nameZh": "沐浴龙血的剑",
+  "rarity": 3,
+  "weaponType": "CLAYMORE",
+  "baseAtk": 354,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 187.435,
+  "passiveName": "踏火息雷",
+  "passiveDesc": "对处于火元素或雷元素影响下的敌人，造成的伤害提高12%。"
+}

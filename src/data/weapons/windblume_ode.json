@@ -1,0 +1,12 @@
+{
+  "id": "windblume_ode",
+  "name": "Windblume Ode",
+  "nameZh": "风花之颂",
+  "rarity": 4,
+  "weaponType": "BOW",
+  "baseAtk": 510,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 165.384,
+  "passiveName": "风花之愿",
+  "passiveDesc": "施放元素战技时，获得风之花的悠古愿望加持，攻击力提升16%，持续6秒。"
+}

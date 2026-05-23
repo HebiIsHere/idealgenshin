@@ -1,0 +1,12 @@
+{
+  "id": "skyward_blade",
+  "name": "Skyward Blade",
+  "nameZh": "天空之刃",
+  "rarity": 5,
+  "weaponType": "SWORD",
+  "baseAtk": 608,
+  "substatType": "ENERGY_RECHARGE",
+  "substatValue": 0.551,
+  "passiveName": "穿刺高天的利齿",
+  "passiveDesc": "暴击率提升4%；施放元素爆发时，获得破空之势：移动速度提升10%，攻击速度提升10%，普通攻击与重击命中时，额外造成20%攻击力的伤害，持续12秒。"
+}

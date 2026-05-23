@@ -1,0 +1,48 @@
+{
+  "id": "arataki_itto",
+  "name": "Arataki Itto",
+  "nameZh": "荒泷一斗",
+  "element": "GEO",
+  "weaponType": "CLAYMORE",
+  "baseStats": {
+    "hp": 12858,
+    "atk": 227,
+    "def": 959,
+    "critRate": 0.05,
+    "critDmg": 0.5,
+    "em": 0,
+    "er": 1
+  },
+  "ascensionStat": {
+    "type": "CRIT_RATE",
+    "values": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.048,
+      0.048,
+      0.096,
+      0.096,
+      0.096,
+      0.096,
+      0.144,
+      0.144,
+      0.192
+    ]
+  },
+  "relevantSubstats": [
+    "DEF_PERCENT",
+    "CRIT_RATE",
+    "CRIT_DMG",
+    "ENERGY_RECHARGE",
+    "ATK_PERCENT"
+  ],
+  "defaultStatScaling": {
+    "atkRatio": 0,
+    "hpRatio": 0,
+    "defRatio": 1,
+    "emRatio": 0
+  }
+}

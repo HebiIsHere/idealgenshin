@@ -1,0 +1,12 @@
+{
+  "id": "recurve_bow",
+  "name": "Recurve Bow",
+  "nameZh": "反曲弓",
+  "rarity": 3,
+  "weaponType": "BOW",
+  "baseAtk": 354,
+  "substatType": "HP_PERCENT",
+  "substatValue": 0.469,
+  "passiveName": "收割",
+  "passiveDesc": "击败敌人时，恢复8%生命值。"
+}

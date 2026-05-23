@@ -1,0 +1,12 @@
+{
+  "id": "uraku_misugiri",
+  "name": "Uraku Misugiri",
+  "nameZh": "有乐御簾切",
+  "rarity": 5,
+  "weaponType": "SWORD",
+  "baseAtk": 542,
+  "substatType": "CRIT_DMG",
+  "substatValue": 0.882,
+  "passiveName": "锦之花与龛中剑",
+  "passiveDesc": "普通攻击造成的伤害提升16%，元素战技造成的伤害提升24%；队伍中附近的角色在场上造成岩元素伤害后，上述效果进一步提升100%，持续15秒。此外，装备者的防御力提升20%。"
+}

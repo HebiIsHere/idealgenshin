@@ -1,0 +1,98 @@
+{
+  "bennett": {
+    "name": "班尼特",
+    "nameEn": "Bennett",
+    "rarity": 5,
+    "element": "pyro",
+    "buffs": {
+      "atkFlat": 1200
+    }
+  },
+  "kaedehara_kazuha": {
+    "name": "枫原万叶",
+    "nameEn": "Kaedehara Kazuha",
+    "rarity": 5,
+    "element": "anemo",
+    "buffs": {
+      "dmgBonus": 0.40,
+      "resistReduction": 0.40
+    }
+  },
+  "xilonen": {
+    "name": "希诺宁",
+    "nameEn": "Xilonen",
+    "rarity": 5,
+    "element": "geo",
+    "buffs": {
+      "dmgBonus": 0.40,
+      "resistReduction": 0.36
+    }
+  },
+  "furina": {
+    "name": "芙宁娜",
+    "nameEn": "Furina",
+    "rarity": 5,
+    "element": "hydro",
+    "buffs": {
+      "dmgBonus": 0.75
+    }
+  },
+  "zhongli": {
+    "name": "钟离",
+    "nameEn": "Zhongli",
+    "rarity": 5,
+    "element": "geo",
+    "buffs": {
+      "resistReduction": 0.20
+    }
+  },
+  "nahida": {
+    "name": "纳西妲",
+    "nameEn": "Nahida",
+    "rarity": 5,
+    "element": "dendro",
+    "buffs": {
+      "elementalMastery": 250
+    }
+  },
+  "mona": {
+    "name": "莫娜",
+    "nameEn": "Mona",
+    "rarity": 5,
+    "element": "hydro",
+    "buffs": {
+      "dmgBonus": 0.60
+    }
+  },
+  "sucrose": {
+    "name": "砂糖",
+    "nameEn": "Sucrose",
+    "rarity": 4,
+    "element": "anemo",
+    "buffs": {
+      "elementalMastery": 200,
+      "dmgBonus": 0.20,
+      "resistReduction": 0.40
+    }
+  },
+  "iansan": {
+    "name": "伊安珊",
+    "nameEn": "Iansan",
+    "rarity": 4,
+    "element": "electro",
+    "buffs": {
+      "atkFlat": 700,
+      "dmgBonus": 0.40
+    }
+  },
+  "columbina": {
+    "name": "哥伦比娅",
+    "nameEn": "Columbina",
+    "rarity": 5,
+    "element": "hydro",
+    "buffs": {
+      "moonReactionBonus": 0.40,
+      "independentBonus": 0.07
+    }
+  }
+}

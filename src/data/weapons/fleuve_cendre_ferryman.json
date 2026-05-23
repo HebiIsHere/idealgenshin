@@ -1,0 +1,12 @@
+{
+  "id": "fleuve_cendre_ferryman",
+  "name": "Fleuve Cendre Ferryman",
+  "nameZh": "灰河渡手",
+  "rarity": 4,
+  "weaponType": "SWORD",
+  "baseAtk": 510,
+  "substatType": "ENERGY_RECHARGE",
+  "substatValue": 0.459,
+  "passiveName": "铁骨",
+  "passiveDesc": "元素战技暴击率提升8%；此外，施放元素战技后的5秒内，元素充能效率提升16%。"
+}

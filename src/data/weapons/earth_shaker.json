@@ -1,0 +1,12 @@
+{
+  "id": "earth_shaker",
+  "name": "Earth Shaker",
+  "nameZh": "撼地者",
+  "rarity": 4,
+  "weaponType": "CLAYMORE",
+  "baseAtk": 565,
+  "substatType": "ATK_PERCENT",
+  "substatValue": 0.276,
+  "passiveName": "苍翠之路的誓言",
+  "passiveDesc": "队伍中的角色触发火元素相关反应后，装备者元素战技造成的伤害提升16%，持续8秒。该效果队伍中的角色处于队伍后台时也能触发。"
+}

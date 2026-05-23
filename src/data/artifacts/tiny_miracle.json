@@ -1,0 +1,7 @@
+{
+  "id": "tiny_miracle",
+  "name": "Tiny Miracle",
+  "nameZh": "奇迹",
+  "twoPcEffect": "所有元素抗性提高20%。",
+  "fourPcEffect": "受到某个元素类型的伤害后，相应的抗性提升30%，持续10秒。该效果每10秒只能触发一次。"
+}

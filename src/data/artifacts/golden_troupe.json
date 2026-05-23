@@ -1,0 +1,13 @@
+{
+  "id": "golden_troupe",
+  "name": "Golden Troupe",
+  "nameZh": "黄金剧团",
+  "twoPcEffect": "元素战技造成的伤害提升20%。",
+  "fourPcEffect": "元素战技造成的伤害提升25%；此外，处于队伍后台时，元素战技造成的伤害还将进一步提升25%，该效果将在登场后2秒移除。",
+  "twoPcBonus": {
+    "dmgBonus": 0.2
+  },
+  "fourPcBonus": {
+    "dmgBonus": 0.5
+  }
+}

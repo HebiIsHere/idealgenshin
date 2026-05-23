@@ -1,0 +1,13 @@
+{
+  "id": "instructor",
+  "name": "Instructor",
+  "nameZh": "教官",
+  "twoPcEffect": "元素精通提高80点。",
+  "fourPcEffect": "触发元素反应后，队伍中所有角色的元素精通提高120点，持续8秒。",
+  "twoPcBonus": {
+    "elementalMastery": 80.0
+  },
+  "fourPcBonus": {
+    "elementalMastery": 120.0
+  }
+}

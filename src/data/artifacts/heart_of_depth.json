@@ -1,0 +1,13 @@
+{
+  "id": "heart_of_depth",
+  "name": "Heart Of Depth",
+  "nameZh": "沉沦之心",
+  "twoPcEffect": "获得15%水元素伤害加成。",
+  "fourPcEffect": "施放元素战技后的15秒内，普通攻击与重击造成的伤害提高30%。",
+  "twoPcBonus": {
+    "dmgBonus": 0.15
+  },
+  "fourPcBonus": {
+    "dmgBonus": 0.3
+  }
+}

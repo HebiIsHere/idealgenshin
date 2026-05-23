@@ -1,0 +1,48 @@
+{
+  "id": "nilou",
+  "name": "Nilou",
+  "nameZh": "妮露",
+  "element": "HYDRO",
+  "weaponType": "SWORD",
+  "baseStats": {
+    "hp": 15185,
+    "atk": 230,
+    "def": 729,
+    "critRate": 0.05,
+    "critDmg": 0.5,
+    "em": 0,
+    "er": 1
+  },
+  "ascensionStat": {
+    "type": "HP_PERCENT",
+    "values": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.072,
+      0.072,
+      0.144,
+      0.144,
+      0.144,
+      0.144,
+      0.216,
+      0.216,
+      0.288
+    ]
+  },
+  "relevantSubstats": [
+    "HP_PERCENT",
+    "ELEMENTAL_MASTERY",
+    "ENERGY_RECHARGE",
+    "CRIT_RATE",
+    "CRIT_DMG"
+  ],
+  "defaultStatScaling": {
+    "atkRatio": 0,
+    "hpRatio": 1,
+    "defRatio": 0,
+    "emRatio": 0
+  }
+}

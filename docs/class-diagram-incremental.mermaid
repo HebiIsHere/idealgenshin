@@ -1,0 +1,169 @@
+classDiagram
+    direction TB
+
+    %% ===== 新增/修改的枚举 =====
+    class ReactionType {
+        <<enumeration>>
+        NONE
+        VAPORIZE MELT
+        OVERLOADED SUPERCONDUCT ELECTRO_CHARGED
+        SWIRL HYPERBLOOM BLOOM BURGEON
+        AGGRAVATION SPREAD
+        MOON_BLOOM MOON_ELECTRO MOON_CRYSTAL
+        REACTION_MOON_ELECTRO REACTION_MOON_CRYSTAL
+    }
+
+    class DamagePath {
+        <<enumeration>>
+        DIRECT
+        AMPLIFYING
+        TRANSFORMATIVE
+        CATALYZE
+        MOONSIGN
+    }
+
+    class StatScaling {
+        <<interface>>
+        +number atkRatio
+        +number hpRatio
+        +number defRatio
+        +number emRatio
+    }
+
+    %% ===== 修改的接口 =====
+    class DamageContext {
+        +ComputedStats stats
+        +number skillMultiplier
+        +StatScaling statScaling
+        +ReactionType reactionType
+        +number enemyLevel
+        +number enemyResistance
+        +number amplifyingMultiplier
+        +number characterLevel
+        +number[] defReductions
+        +number defIgnore
+        +number elevationBonus
+    }
+
+    class DamageResult {
+        +number totalDamage
+        +number baseDamage
+        +number scalingMultiplier
+        +number bonusMultiplier
+        +number critMultiplier
+        +number resistanceMultiplier
+        +number defenseMultiplier
+        +number reactionMultiplier
+        +DamagePath damagePath
+        +number aggravationBonus
+        +number elevationMultiplier
+    }
+
+    class CharacterData {
+        +string id
+        +string name
+        +string nameZh
+        +ElementType element
+        +WeaponType weaponType
+        +BaseStats baseStats
+        +AscensionStat ascensionStat
+        +SubstatType[] relevantSubstats
+        +StatScaling defaultStatScaling
+    }
+
+    class CharacterBuild {
+        +CharacterData character
+        +WeaponData weapon
+        +ArtifactInstance[] artifacts
+        +number characterLevel
+        +number weaponLevel
+        +number skillMultiplier
+        +ReactionType reactionType
+        +TeamBuff[] teamBuffs
+        +StatScaling statScaling
+    }
+
+    %% ===== 乘区接口 =====
+    class DamageZone {
+        <<abstract>>
+        +calculate~ctx: DamageContext~ number*
+        +getName() string*
+    }
+
+    %% ===== 新增乘区 =====
+    class CatalyzeZone {
+        +calculate~ctx: DamageContext~ number
+        +getName() string
+    }
+
+    class MoonsignZone {
+        +calculate~ctx: DamageContext~ number
+        +getName() string
+    }
+
+    class ElevationZone {
+        +calculate~ctx: DamageContext~ number
+        +getName() string
+    }
+
+    %% ===== 修改后乘区 =====
+    class BaseDamageZone {
+        +calculate~ctx: DamageContext~ number
+    }
+
+    class DefenseZone {
+        +calculate~ctx: DamageContext~ number
+    }
+
+    class TransformativeZone {
+        +calculate~ctx: DamageContext~ number
+    }
+
+    class AmplifyingZone {
+        +calculate~ctx: DamageContext~ number
+    }
+
+    %% ===== 不变的乘区 =====
+    class BonusZone {
+        +calculate~ctx: DamageContext~ number
+    }
+
+    class CritZone {
+        +calculate~ctx: DamageContext~ number
+    }
+
+    class ResistanceZone {
+        +calculate~ctx: DamageContext~ number
+    }
+
+    DamageZone <|-- CatalyzeZone
+    DamageZone <|-- MoonsignZone
+    DamageZone <|-- ElevationZone
+    DamageZone <|-- BaseDamageZone
+    DamageZone <|-- DefenseZone
+    DamageZone <|-- TransformativeZone
+    DamageZone <|-- AmplifyingZone
+    DamageZone <|-- BonusZone
+    DamageZone <|-- CritZone
+    DamageZone <|-- ResistanceZone
+
+    %% ===== 路由器 =====
+    class DamageFormula {
+        +calculate~ctx: DamageContext~ DamageResult$
+        -calculateDirect~ctx~ DamageResult$
+        -calculateAmplifying~ctx~ DamageResult$
+        -calculateTransformative~ctx~ DamageResult$
+        -calculateCatalyze~ctx~ DamageResult$
+        -calculateMoonsign~ctx~ DamageResult$
+        -resolvePath~type: ReactionType~ DamagePath$
+    }
+
+    DamageFormula --> DamageZone : uses
+    DamageFormula --> DamagePath : routes
+
+    %% ===== 关系 =====
+    DamageContext --> StatScaling
+    DamageContext --> ComputedStats
+    DamageResult --> DamagePath
+    CharacterData --> StatScaling
+    CharacterBuild --> StatScaling

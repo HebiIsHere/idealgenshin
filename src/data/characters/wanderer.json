@@ -1,0 +1,48 @@
+{
+  "id": "wanderer",
+  "name": "Wanderer",
+  "nameZh": "流浪者",
+  "element": "ANEMO",
+  "weaponType": "CATALYST",
+  "baseStats": {
+    "hp": 10164,
+    "atk": 328,
+    "def": 607,
+    "critRate": 0.05,
+    "critDmg": 0.5,
+    "em": 0,
+    "er": 1
+  },
+  "ascensionStat": {
+    "type": "CRIT_RATE",
+    "values": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.048,
+      0.048,
+      0.096,
+      0.096,
+      0.096,
+      0.096,
+      0.144,
+      0.144,
+      0.192
+    ]
+  },
+  "relevantSubstats": [
+    "CRIT_RATE",
+    "CRIT_DMG",
+    "ATK_PERCENT",
+    "ENERGY_RECHARGE",
+    "ELEMENTAL_MASTERY"
+  ],
+  "defaultStatScaling": {
+    "atkRatio": 1,
+    "hpRatio": 0,
+    "defRatio": 0,
+    "emRatio": 0
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "master_key",
+  "name": "Master Key",
+  "nameZh": "万能钥匙",
+  "rarity": 4,
+  "weaponType": "CLAYMORE",
+  "baseAtk": 454,
+  "substatType": "ENERGY_RECHARGE",
+  "substatValue": 0.613,
+  "passiveName": "迎刃而解",
+  "passiveDesc": "触发元素反应后的12秒内，元素精通提升60点。月兆·满辉：该效果中的元素精通额外提升60点。装备者处于队伍后台时，依然能触发上述效果。"
+}

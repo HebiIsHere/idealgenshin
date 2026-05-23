@@ -1,0 +1,13 @@
+{
+  "id": "martial_artist",
+  "name": "Martial Artist",
+  "nameZh": "武人",
+  "twoPcEffect": "普通攻击与重击造成的伤害提高15%。",
+  "fourPcEffect": "施放元素战技后的8秒内，普通攻击和重击造成的伤害提升25%。",
+  "twoPcBonus": {
+    "dmgBonus": 0.15
+  },
+  "fourPcBonus": {
+    "dmgBonus": 0.25
+  }
+}

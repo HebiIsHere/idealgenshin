@@ -1,0 +1,12 @@
+{
+  "id": "ballad_of_the_fjords",
+  "name": "Ballad of the Fjords",
+  "nameZh": "峡湾长歌",
+  "rarity": 4,
+  "weaponType": "POLEARM",
+  "baseAtk": 510,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.276,
+  "passiveName": "冰原的诸多故事",
+  "passiveDesc": "队伍中存在至少三种不同元素类型的角色时，元素精通提升120点。"
+}

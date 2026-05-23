@@ -1,0 +1,12 @@
+{
+  "id": "sunny_morning_sleepin",
+  "name": "Sunny Morning Sleep-In",
+  "nameZh": "寝正月初晴",
+  "rarity": 5,
+  "weaponType": "CATALYST",
+  "baseAtk": 542,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 264.614,
+  "passiveName": "一汤二鹰三鸣神",
+  "passiveDesc": "触发扩散反应后的6秒内，元素精通提升120点；元素战技命中敌人后的9秒内，元素精通提升96点；元素爆发命中敌人后的30秒内，元素精通提升32点。"
+}

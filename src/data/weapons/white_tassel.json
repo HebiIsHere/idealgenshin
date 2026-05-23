@@ -1,0 +1,12 @@
+{
+  "id": "white_tassel",
+  "name": "White Tassel",
+  "nameZh": "白缨枪",
+  "rarity": 3,
+  "weaponType": "POLEARM",
+  "baseAtk": 401,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.234,
+  "passiveName": "锐利",
+  "passiveDesc": "普通攻击造成的伤害提升24%。"
+}

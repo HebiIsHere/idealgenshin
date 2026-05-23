@@ -1,0 +1,12 @@
+{
+  "id": "fading_twilight",
+  "name": "Fading Twilight",
+  "nameZh": "落霞",
+  "rarity": 4,
+  "weaponType": "BOW",
+  "baseAtk": 565,
+  "substatType": "ENERGY_RECHARGE",
+  "substatValue": 0.306,
+  "passiveName": "渊中霞彩",
+  "passiveDesc": "具有夕暮、流霞、朝晖三种状态，分别能使造成的伤害提升6%/10%/14%。攻击命中敌人后，将转换为下一种状态，每7秒至多转换一次状态。装备该武器的角色处于队伍后台时该效果依旧能触发转换。"
+}

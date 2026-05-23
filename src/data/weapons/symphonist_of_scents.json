@@ -1,0 +1,12 @@
+{
+  "id": "symphonist_of_scents",
+  "name": "Symphonist of Scents",
+  "nameZh": "香韵奏者",
+  "rarity": 5,
+  "weaponType": "POLEARM",
+  "baseAtk": 608,
+  "substatType": "CRIT_DMG",
+  "substatValue": 0.662,
+  "passiveName": "百味交响",
+  "passiveDesc": "攻击力提升12%；当装备此武器的角色处于队伍后台时，攻击力额外提升12%。进行治疗后，装备者与受到治疗的角色会获得「甘美回奏」的效果，攻击力提升32%，持续3秒。装备者处于队伍后台时，依然能触发上述效果。"
+}

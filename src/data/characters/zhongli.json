@@ -1,0 +1,48 @@
+{
+  "id": "zhongli",
+  "name": "Zhongli",
+  "nameZh": "钟离",
+  "element": "GEO",
+  "weaponType": "POLEARM",
+  "baseStats": {
+    "hp": 14695,
+    "atk": 251,
+    "def": 738,
+    "critRate": 0.05,
+    "critDmg": 0.5,
+    "em": 0,
+    "er": 1
+  },
+  "ascensionStat": {
+    "type": "GEO_DMG_BONUS",
+    "values": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.072,
+      0.072,
+      0.144,
+      0.144,
+      0.144,
+      0.144,
+      0.216,
+      0.216,
+      0.288
+    ]
+  },
+  "relevantSubstats": [
+    "CRIT_RATE",
+    "CRIT_DMG",
+    "ATK_PERCENT",
+    "ENERGY_RECHARGE",
+    "ELEMENTAL_MASTERY"
+  ],
+  "defaultStatScaling": {
+    "atkRatio": 0,
+    "hpRatio": 1,
+    "defRatio": 0,
+    "emRatio": 0
+  }
+}

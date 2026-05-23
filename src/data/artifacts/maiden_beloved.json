@@ -1,0 +1,7 @@
+{
+  "id": "maiden_beloved",
+  "name": "Maiden Beloved",
+  "nameZh": "被怜爱的少女",
+  "twoPcEffect": "角色造成的治疗效果提升15%。",
+  "fourPcEffect": "施放元素战技或元素爆发后的10秒内，队伍中所有角色受治疗效果加成提高20%。"
+}

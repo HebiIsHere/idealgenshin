@@ -1,0 +1,12 @@
+{
+  "id": "cinnabar_spindle",
+  "name": "Cinnabar Spindle",
+  "nameZh": "辰砂之纺锤",
+  "rarity": 4,
+  "weaponType": "SWORD",
+  "baseAtk": 454,
+  "substatType": "DEF_PERCENT",
+  "substatValue": 0.69,
+  "passiveName": "无垢之心",
+  "passiveDesc": "元素战技造成的伤害值提高，提高数值相当于防御力的40%。该效果每1.5秒最多触发一次，并将在元素战技造成伤害后的0.1秒后清除效果。"
+}

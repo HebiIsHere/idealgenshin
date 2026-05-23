@@ -1,0 +1,13 @@
+{
+  "id": "long_night_s_oath",
+  "name": "Long Night S Oath",
+  "nameZh": "长夜之誓",
+  "twoPcEffect": "下落攻击造成的伤害提升25%。",
+  "fourPcEffect": "装备者的下落攻击/重击/元素战技命中敌人后，获得1/2/2层「永照的流辉」，由下落攻击、重击或元素战技产生的该效果分别每1秒至多触发一次。永照的流辉：下落攻击造成的伤害提升15%，持续6秒，至多叠加5层，每层持续时间独立计算。",
+  "twoPcBonus": {
+    "dmgBonus": 0.25
+  },
+  "fourPcBonus": {
+    "dmgBonus": 0.75
+  }
+}

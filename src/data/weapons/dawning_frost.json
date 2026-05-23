@@ -1,0 +1,12 @@
+{
+  "id": "dawning_frost",
+  "name": "Dawning Frost",
+  "nameZh": "霜辰",
+  "rarity": 4,
+  "weaponType": "CATALYST",
+  "baseAtk": 510,
+  "substatType": "CRIT_DMG",
+  "substatValue": 0.551,
+  "passiveName": "深宵的胎梦",
+  "passiveDesc": "重击命中敌人后的10秒内，元素精通提升72点；元素战技命中敌人后的10秒内，元素精通提升48点。"
+}

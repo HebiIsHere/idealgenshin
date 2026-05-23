@@ -1,0 +1,48 @@
+{
+  "id": "sigewinne",
+  "name": "Sigewinne",
+  "nameZh": "希格雯",
+  "element": "HYDRO",
+  "weaponType": "BOW",
+  "baseStats": {
+    "hp": 13348,
+    "atk": 193,
+    "def": 500,
+    "critRate": 0.05,
+    "critDmg": 0.5,
+    "em": 0,
+    "er": 1
+  },
+  "ascensionStat": {
+    "type": "HP_PERCENT",
+    "values": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.072,
+      0.072,
+      0.144,
+      0.144,
+      0.144,
+      0.144,
+      0.216,
+      0.216,
+      0.288
+    ]
+  },
+  "relevantSubstats": [
+    "CRIT_RATE",
+    "CRIT_DMG",
+    "ATK_PERCENT",
+    "ENERGY_RECHARGE",
+    "ELEMENTAL_MASTERY"
+  ],
+  "defaultStatScaling": {
+    "atkRatio": 0,
+    "hpRatio": 1,
+    "defRatio": 0,
+    "emRatio": 0
+  }
+}

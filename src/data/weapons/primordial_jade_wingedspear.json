@@ -1,0 +1,12 @@
+{
+  "id": "primordial_jade_wingedspear",
+  "name": "Primordial Jade Winged-Spear",
+  "nameZh": "和璞鸢",
+  "rarity": 5,
+  "weaponType": "POLEARM",
+  "baseAtk": 674,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.221,
+  "passiveName": "昭理的鸢之枪",
+  "passiveDesc": "命中敌人时自身攻击力提高3.2%，持续6秒，最高可以叠加7层。该效果每0.3秒最多触发一次。满层状态时伤害提升12%。"
+}

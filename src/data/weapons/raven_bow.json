@@ -1,0 +1,12 @@
+{
+  "id": "raven_bow",
+  "name": "Raven Bow",
+  "nameZh": "鸦羽弓",
+  "rarity": 3,
+  "weaponType": "BOW",
+  "baseAtk": 448,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 93.718,
+  "passiveName": "踏火止水",
+  "passiveDesc": "对处于水元素或火元素影响下的敌人，造成的伤害提高12%。"
+}

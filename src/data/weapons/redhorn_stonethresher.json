@@ -1,0 +1,12 @@
+{
+  "id": "redhorn_stonethresher",
+  "name": "Redhorn Stonethresher",
+  "nameZh": "赤角石溃杵",
+  "rarity": 5,
+  "weaponType": "CLAYMORE",
+  "baseAtk": 542,
+  "substatType": "CRIT_DMG",
+  "substatValue": 0.882,
+  "passiveName": "御伽大王御伽话",
+  "passiveDesc": "防御力提高28%；普通攻击与重击造成的伤害值提高，提高数值相当于防御力的40%。"
+}

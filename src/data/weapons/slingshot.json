@@ -1,0 +1,12 @@
+{
+  "id": "slingshot",
+  "name": "Slingshot",
+  "nameZh": "弹弓",
+  "rarity": 3,
+  "weaponType": "BOW",
+  "baseAtk": 354,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.312,
+  "passiveName": "弹弓",
+  "passiveDesc": "普通攻击与重击的箭矢若在发射后的0.3秒内击中敌人，则造成的伤害增加36%；否则，造成的伤害下降10%。"
+}

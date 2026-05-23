@@ -1,0 +1,12 @@
+{
+  "id": "fruit_of_fulfillment",
+  "name": "Fruit of Fulfillment",
+  "nameZh": "盈满之实",
+  "rarity": 4,
+  "weaponType": "CATALYST",
+  "baseAtk": 510,
+  "substatType": "ENERGY_RECHARGE",
+  "substatValue": 0.459,
+  "passiveName": "圆满之相",
+  "passiveDesc": "触发元素反应后，获得「盈缺」效果：元素精通提升24点，攻击力降低5%。每0.3秒至多获得一层盈缺效果，至多叠加5层。未触发元素反应时将每6秒失去一层。角色处于队伍后台时也能触发效果。"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "sacrificer_s_staff",
+  "name": "Sacrificer's Staff",
+  "nameZh": "圣祭者的辉杖",
+  "rarity": 4,
+  "weaponType": "POLEARM",
+  "baseAtk": 620,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.092,
+  "passiveName": "未染的觖望",
+  "passiveDesc": "元素战技命中敌人后的6秒内，攻击力提升8%，元素充能效率提升6%。该效果至多叠加3层，装备者处于队伍后台时依然能触发。"
+}

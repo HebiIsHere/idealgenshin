@@ -1,0 +1,12 @@
+{
+  "id": "the_stringless",
+  "name": "The Stringless",
+  "nameZh": "绝弦",
+  "rarity": 4,
+  "weaponType": "BOW",
+  "baseAtk": 510,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 165.384,
+  "passiveName": "无矢之歌",
+  "passiveDesc": "元素战技与元素爆发的伤害提高24%。"
+}

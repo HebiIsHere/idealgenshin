@@ -1,0 +1,12 @@
+{
+  "id": "mountainbracing_bolt",
+  "name": "Mountain-Bracing Bolt",
+  "nameZh": "镇山之钉",
+  "rarity": 4,
+  "weaponType": "POLEARM",
+  "baseAtk": 565,
+  "substatType": "ENERGY_RECHARGE",
+  "substatValue": 0.306,
+  "passiveName": "越峰之望",
+  "passiveDesc": "攀爬消耗的体力降低15%，元素战技造成的伤害提升12%；此外，队伍中附近的其他角色施放元素战技后，装备者的元素战技造成的伤害还会提升12%，持续8秒。"
+}

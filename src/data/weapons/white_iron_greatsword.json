@@ -1,0 +1,12 @@
+{
+  "id": "white_iron_greatsword",
+  "name": "White Iron Greatsword",
+  "nameZh": "白铁大剑",
+  "rarity": 3,
+  "weaponType": "CLAYMORE",
+  "baseAtk": 401,
+  "substatType": "DEF_PERCENT",
+  "substatValue": 0.439,
+  "passiveName": "收割",
+  "passiveDesc": "击败敌人时，恢复8%生命值。"
+}

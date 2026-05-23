@@ -1,0 +1,13 @@
+{
+  "id": "archaic_petra",
+  "name": "Archaic Petra",
+  "nameZh": "悠古的磐岩",
+  "twoPcEffect": "获得15%岩元素伤害加成。",
+  "fourPcEffect": "获得结晶反应形成的晶片或触发月结晶反应时，队伍中所有角色获得35%对应元素伤害加成，持续10秒。同时只能通过该效果获得一种元素伤害加成。",
+  "twoPcBonus": {
+    "dmgBonus": 0.15
+  },
+  "fourPcBonus": {
+    "dmgBonus": 0.35
+  }
+}

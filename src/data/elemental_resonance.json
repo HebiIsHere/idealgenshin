@@ -1,0 +1,39 @@
+{
+  "double_pyro": {
+    "name": "双火",
+    "desc": "攻击力提高25%",
+    "buffs": { "atkPercent": 0.25 }
+  },
+  "double_hydro": {
+    "name": "双水",
+    "desc": "生命值上限提高25%",
+    "buffs": { "hpPercent": 0.25 }
+  },
+  "double_cryo": {
+    "name": "双冰",
+    "desc": "攻击冰元素影响或冻结的敌人时，暴击率提高15%",
+    "buffs": { "critRate": 0.15 }
+  },
+  "double_electro": {
+    "name": "双雷",
+    "desc": "触发超导/超载/感电/原激化/超激化/超绽放时，产生一个雷元素微粒（CD 5s）"
+  },
+  "double_anemo": {
+    "name": "双风",
+    "desc": "体力消耗降低15%，移动速度提高10%，技能冷却缩短5%"
+  },
+  "double_geo": {
+    "name": "双岩",
+    "desc": "护盾强效提高15%，处于护盾下时伤害提高15%，攻击降低敌人岩抗20%",
+    "buffs": { "dmgBonus": 0.15, "resistReduction": 0.20 }
+  },
+  "double_dendro": {
+    "name": "双草",
+    "desc": "元素精通提高50；触发燃烧/原激化/绽放后全队精通提高30",
+    "buffs": { "elementalMastery": 80 }
+  },
+  "four_diff": {
+    "name": "四色队",
+    "desc": "全元素抗性提高15%"
+  }
+}

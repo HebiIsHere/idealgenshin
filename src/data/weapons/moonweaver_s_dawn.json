@@ -1,0 +1,12 @@
+{
+  "id": "moonweaver_s_dawn",
+  "name": "Moonweaver's Dawn",
+  "nameZh": "织月者的曙色",
+  "rarity": 4,
+  "weaponType": "SWORD",
+  "baseAtk": 565,
+  "substatType": "ATK_PERCENT",
+  "substatValue": 0.276,
+  "passiveName": "秘银的血告",
+  "passiveDesc": "元素爆发造成的伤害提高20%；装备者的元素能量上限不超过60/40点时，元素爆发造成的伤害额外提高16%/28%。"
+}

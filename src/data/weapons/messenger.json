@@ -1,0 +1,12 @@
+{
+  "id": "messenger",
+  "name": "Messenger",
+  "nameZh": "信使",
+  "rarity": 3,
+  "weaponType": "BOW",
+  "baseAtk": 448,
+  "substatType": "CRIT_DMG",
+  "substatValue": 0.312,
+  "passiveName": "飞矢传书",
+  "passiveDesc": "重击若命中要害，则额外造成100%攻击力的伤害，该伤害必定暴击。此效果每10秒只能触发一次。"
+}

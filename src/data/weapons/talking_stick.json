@@ -1,0 +1,12 @@
+{
+  "id": "talking_stick",
+  "name": "Talking Stick",
+  "nameZh": "聊聊棒",
+  "rarity": 4,
+  "weaponType": "CLAYMORE",
+  "baseAtk": 565,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.184,
+  "passiveName": "「伶牙俐齿」",
+  "passiveDesc": "承受火元素附着后的15秒内，攻击力提升16%，每12秒至多触发一次；承受水元素、冰元素、雷元素或草元素附着后的15秒内，所有元素伤害加成提升12%，每12秒至多触发一次。"
+}

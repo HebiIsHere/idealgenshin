@@ -1,0 +1,12 @@
+{
+  "id": "fruitful_hook",
+  "name": "Fruitful Hook",
+  "nameZh": "硕果钩",
+  "rarity": 4,
+  "weaponType": "CLAYMORE",
+  "baseAtk": 565,
+  "substatType": "ATK_PERCENT",
+  "substatValue": 0.276,
+  "passiveName": "坠枝之重",
+  "passiveDesc": "下落攻击的暴击率提升16%；下落攻击命中敌人后，普通攻击、重击、下落攻击造成的伤害提升16%，持续10秒。"
+}

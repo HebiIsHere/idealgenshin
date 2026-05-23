@@ -1,0 +1,12 @@
+{
+  "id": "cashflow_supervision",
+  "name": "Cashflow Supervision",
+  "nameZh": "金流监督",
+  "rarity": 5,
+  "weaponType": "CATALYST",
+  "baseAtk": 674,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.221,
+  "passiveName": "黄金的血潮",
+  "passiveDesc": "攻击力提升16%。当前生命值提升或降低时，普通攻击造成的伤害提升16%，重击造成的伤害提升14%。该效果持续4秒，至多叠加3层，每0.3秒至多触发一次；处于叠加3层的状态下时，攻击速度提升8%。"
+}

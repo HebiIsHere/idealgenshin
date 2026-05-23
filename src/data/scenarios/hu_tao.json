@@ -1,0 +1,27 @@
+{
+  "characterId": "hu_tao",
+  "scenarios": [
+    {
+      "id": "hu_tao_vape_ca",
+      "name": "蒸发重击",
+      "skillMultiplier": 6.93,
+      "damagePath": "AMPLIFYING",
+      "reactionType": "VAPORIZE",
+      "amplifyingMultiplier": 1.5,
+      "enemyLevel": 100,
+      "enemyResistance": 0.10,
+      "description": "胡桃E状态下重击触发蒸发，最常用输出手法的期望伤害"
+    },
+    {
+      "id": "hu_tao_skill_direct",
+      "name": "元素战技直伤",
+      "skillMultiplier": 2.86,
+      "damagePath": "DIRECT",
+      "reactionType": "NONE",
+      "amplifyingMultiplier": 0,
+      "enemyLevel": 100,
+      "enemyResistance": 0.10,
+      "description": "胡桃E技能无反应时的直伤，用于评估基础伤害"
+    }
+  ]
+}

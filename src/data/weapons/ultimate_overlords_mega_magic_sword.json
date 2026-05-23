@@ -1,0 +1,12 @@
+{
+  "id": "ultimate_overlords_mega_magic_sword",
+  "name": "\"Ultimate Overlord's Mega Magic Sword\"",
+  "nameZh": "\"Ultimate Overlord's Mega Magic Sword\"",
+  "rarity": 4,
+  "weaponType": "CLAYMORE",
+  "baseAtk": 565,
+  "substatType": "ATK_PERCENT",
+  "substatValue": 0.306,
+  "passiveName": "",
+  "passiveDesc": ""
+}

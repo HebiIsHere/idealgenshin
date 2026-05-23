@@ -1,0 +1,12 @@
+{
+  "id": "lumidouce_elegy",
+  "name": "Lumidouce Elegy",
+  "nameZh": "柔灯挽歌",
+  "rarity": 5,
+  "weaponType": "POLEARM",
+  "baseAtk": 608,
+  "substatType": "CRIT_RATE",
+  "substatValue": 0.331,
+  "passiveName": "白晓的序曲",
+  "passiveDesc": "攻击力提升15%；装备者对敌人触发燃烧反应或对处于燃烧状态下的敌人造成草元素伤害后，造成的伤害提高18%。该效果持续8秒，至多叠加2层；叠加至2层或2层的持续时间刷新时，恢复12点元素能量，每12秒至多通过这种方式恢复一次元素能量。上述2种效果角色处于队伍后台时也能触发。"
+}

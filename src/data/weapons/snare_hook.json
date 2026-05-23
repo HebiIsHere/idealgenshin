@@ -1,0 +1,12 @@
+{
+  "id": "snare_hook",
+  "name": "Snare Hook",
+  "nameZh": "罗网勾针",
+  "rarity": 4,
+  "weaponType": "BOW",
+  "baseAtk": 454,
+  "substatType": "ENERGY_RECHARGE",
+  "substatValue": 0.613,
+  "passiveName": "矫捷无影",
+  "passiveDesc": "触发元素反应后的12秒内，元素精通提升60点。月兆·满辉：该效果中的元素精通额外提升60点。装备者处于队伍后台时，依然能触发上述效果。"
+}

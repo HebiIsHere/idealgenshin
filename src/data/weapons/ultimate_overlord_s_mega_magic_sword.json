@@ -1,0 +1,12 @@
+{
+  "id": "ultimate_overlord_s_mega_magic_sword",
+  "name": "\"Ultimate Overlord's Mega Magic Sword\"",
+  "nameZh": "「究极霸王超级魔剑」",
+  "rarity": 4,
+  "weaponType": "CLAYMORE",
+  "baseAtk": 565,
+  "substatType": "ENERGY_RECHARGE",
+  "substatValue": 0.306,
+  "passiveName": "加油！",
+  "passiveDesc": "攻击力提升12%。不仅如此！海沫村中曾蒙你帮助的美露莘们的声援心意充满了力量，依照她们的数目，攻击力至多进一步提升12%。"
+}

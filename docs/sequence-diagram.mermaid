@@ -1,0 +1,55 @@
+sequenceDiagram
+    actor User
+    participant Page as RedistributePage
+    participant Store as Zustand Store
+    participant Worker as OptimizerWorker
+    participant Redist as RedistributeOptimizer
+    participant Search as SearchSpaceExplorer
+    participant Formula as DamageFormula
+    participant StatCalc as StatCalculator
+    participant Zones as DamageZones
+
+    User->>Page: 选择角色 + 录入圣遗物 + 点击"优化"
+    Page->>Store: dispatch(runRedistribution(build))
+    Store->>Store: 设置 isCalculating = true
+
+    Store->>Worker: Comlink 代理调用 redistribute(req)
+    Note over Worker: 在 Web Worker 线程中执行
+
+    Worker->>StatCalc: compute(build) → 当前 ComputedStats
+    StatCalc-->>Worker: currentStats
+
+    Worker->>Formula: calculate(currentStats, ctx) → 当前伤害
+    Formula->>Zones: 依次计算 8 个乘区
+    Zones-->>Formula: 各乘区乘数
+    Formula-->>Worker: originalDamage
+
+    Worker->>Redist: optimize(req)
+    Redist->>Redist: 提取有效副词条类型列表
+    Redist->>Redist: 计算词条总数 N = Σrolls
+
+    loop 枚举每种词条分配方案
+        Redist->>Search: getNextDistribution()
+        Search-->>Redist: allocation
+
+        Redist->>Redist: 根据 allocation 构建虚拟 Build
+        Redist->>StatCalc: compute(virtualBuild)
+        StatCalc-->>Redist: virtualStats
+
+        Redist->>Formula: calculate(virtualStats, ctx)
+        Formula->>Zones: 依次计算 8 个乘区
+        Formula-->>Redist: damage
+
+        Redist->>Redist: 剪枝判断：若上界 < 当前最优则跳过
+        Redist->>Redist: 更新最优解
+    end
+
+    Redist-->>Worker: bestAllocation + optimizedDamage
+    Worker-->>Store: RedistributeResult
+
+    Store->>Store: 更新 optimizationResult
+    Store->>Store: 设置 isCalculating = false
+
+    Store-->>Page: 状态变更触发重渲染
+    Page->>User: 展示优化结果（伤害提升 +15.3%）
+    Page->>User: 展示词条分配对比表 + 雷达图

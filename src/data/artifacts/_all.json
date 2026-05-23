@@ -1,0 +1,689 @@
+[
+  {
+    "id": "maiden_beloved",
+    "name": "Maiden Beloved",
+    "nameZh": "被怜爱的少女",
+    "twoPcEffect": "角色造成的治疗效果提升15%。",
+    "fourPcEffect": "施放元素战技或元素爆发后的10秒内，队伍中所有角色受治疗效果加成提高20%。"
+  },
+  {
+    "id": "blizzard_strayer",
+    "name": "Blizzard Strayer",
+    "nameZh": "冰风迷途的勇士",
+    "twoPcEffect": "获得15%冰元素伤害加成。",
+    "fourPcEffect": "攻击处于冰元素影响下的敌人时，暴击率提高20%；若敌人处于冻结状态下，则暴击率额外提高20%。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "critRate": 0.4
+    }
+  },
+  {
+    "id": "pale_flame",
+    "name": "Pale Flame",
+    "nameZh": "苍白之火",
+    "twoPcEffect": "造成的物理伤害提高25%。",
+    "fourPcEffect": "元素战技命中敌人后，攻击力提升9%。该效果持续7秒，至多叠加2层，每0.3秒至多触发一次。叠满2层时，2件套的效果提升100%。",
+    "twoPcBonus": {
+      "dmgBonus": 0.25
+    },
+    "fourPcBonus": {
+      "atkPercent": 0.18
+    }
+  },
+  {
+    "id": "heart_of_depth",
+    "name": "Heart Of Depth",
+    "nameZh": "沉沦之心",
+    "twoPcEffect": "获得15%水元素伤害加成。",
+    "fourPcEffect": "施放元素战技后的15秒内，普通攻击与重击造成的伤害提高30%。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.3
+    }
+  },
+  {
+    "id": "vermillion_hereafter",
+    "name": "Vermillion Hereafter",
+    "nameZh": "辰砂往生录",
+    "twoPcEffect": "攻击力提高18%。",
+    "fourPcEffect": "施放元素爆发后，将产生持续16秒的「潜光」效果：攻击力提升8%；并在角色的生命值降低时，攻击力进一步提升10%，至多通过这种方式提升4次，每0.8秒至多触发一次。「潜光」效果将在角色退场时消失；持续期间再次施放元素爆发，将移除原有的「潜光」。",
+    "twoPcBonus": {
+      "atkPercent": 0.18
+    },
+    "fourPcBonus": {
+      "atkPercent": 0.48
+    }
+  },
+  {
+    "id": "aubade_of_morningstar_and_moon",
+    "name": "Aubade Of Morningstar And Moon",
+    "nameZh": "晨星与月的晓歌",
+    "twoPcEffect": "元素精通提高80点。",
+    "fourPcEffect": "装备者处于队伍后台时，造成的月曜反应伤害提升20%；队伍的月兆等级至少为满辉时，造成的月曜反应伤害进一步提升40%。上述效果将在装备者位于场上3秒后移除。",
+    "twoPcBonus": {
+      "elementalMastery": 80.0
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.4
+    }
+  },
+  {
+    "id": "crimson_witch_of_flames",
+    "name": "Crimson Witch Of Flames",
+    "nameZh": "炽烈的炎之魔女",
+    "twoPcEffect": "获得15%火元素伤害加成。",
+    "fourPcEffect": "超载、燃烧、烈绽放反应造成的伤害提升40%，蒸发、融化反应的加成系数提高15%。施放元素战技后的10秒内，2件套的效果提高50%，该效果最多叠加3次。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.225,
+      "transformReactionBonus": 0.4,
+      "ampReactionBonus": 0.15
+    }
+  },
+  {
+    "id": "viridescent_venerer",
+    "name": "Viridescent Venerer",
+    "nameZh": "翠绿之影",
+    "twoPcEffect": "获得15%风元素伤害加成。",
+    "fourPcEffect": "扩散反应造成的伤害提升60%。根据扩散的元素类型，降低受到影响的敌人40%的对应元素抗性，持续10秒。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "transformReactionBonus": 0.6,
+      "resistReduction": 0.4
+    }
+  },
+  {
+    "id": "lavawalker",
+    "name": "Lavawalker",
+    "nameZh": "渡过烈火的贤人",
+    "twoPcEffect": "火元素抗性提高40%。",
+    "fourPcEffect": "对处于火元素影响下的敌人造成的伤害提升35%。",
+    "fourPcBonus": {
+      "dmgBonus": 0.35
+    }
+  },
+  {
+    "id": "silken_moon_s_serenade",
+    "name": "Silken Moon S Serenade",
+    "nameZh": "纺月的夜歌",
+    "twoPcEffect": "元素充能效率提高20%。",
+    "fourPcEffect": "造成元素伤害时，获得持续8秒的「月辉明光·崇信」效果：队伍的月兆为初辉/满辉时，队伍中的所有角色的元素精通提高60点/120点。装备者处于后台时也能触发上述效果。队伍中的角色每拥有一种不同的「月辉明光」效果，队伍中的所有角色触发的月曜反应造成的伤害提升10%。由「月辉明光」产生的效果无法叠加。",
+    "twoPcBonus": {
+      "energyRecharge": 0.2
+    },
+    "fourPcBonus": {
+      "elementalMastery": 120.0,
+      "moonReactionBonus": 0.2
+    }
+  },
+  {
+    "id": "a_day_carved_from_rising_winds",
+    "name": "A Day Carved From Rising Winds",
+    "nameZh": "风起之日",
+    "twoPcEffect": "攻击力提高18%。",
+    "fourPcEffect": "普通攻击、重击、元素战技或元素爆发命中敌人后，将获得持续6秒的「风与牧歌的眷怜」：攻击力提高25%。若装备者已经完成了「魔女的课业」，则「风与牧歌的眷怜」将会升级为「风与牧歌的决意」，额外使通过考验的装备者的暴击率提升20%。装备者处于队伍后台时，也能触发上述效果。",
+    "twoPcBonus": {
+      "atkPercent": 0.18
+    },
+    "fourPcBonus": {
+      "atkPercent": 0.25,
+      "critRate": 0.2
+    }
+  },
+  {
+    "id": "ocean_hued_clam",
+    "name": "Ocean Hued Clam",
+    "nameZh": "海染砗磲",
+    "twoPcEffect": "治疗加成提高15%。",
+    "fourPcEffect": "装备此圣遗物套装的角色对队伍中的角色进行治疗时，将产生持续3秒的海染泡沫，记录治疗的生命值回复量（包括溢出值）。持续时间结束时，海染泡沫将会爆炸，对周围的敌人造成90%累计回复量的伤害（该伤害结算方式同感电、超导等元素反应，但不受元素精通、等级或反应伤害加成效果影响）。每3.5秒至多产生一个海染泡沫；海染泡沫至多记录30000点回复量，含溢出部分的治疗量；自己的队伍中同时至多存在一个海染泡沫。装备此圣遗物套装的角色处于队伍后台时，依然能触发该效果。"
+  },
+  {
+    "id": "obsidian_codex",
+    "name": "Obsidian Codex",
+    "nameZh": "黑曜秘典",
+    "twoPcEffect": "装备者处于夜魂加持状态，并且在场上时，造成的伤害提高15%。",
+    "fourPcEffect": "装备者在场上消耗1点夜魂值后，暴击率提高40%，持续6秒。该效果每1秒至多触发一次。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "critRate": 0.4
+    }
+  },
+  {
+    "id": "vourukasha_s_glow",
+    "name": "Vourukasha S Glow",
+    "nameZh": "花海甘露之光",
+    "twoPcEffect": "生命值提升20%。",
+    "fourPcEffect": "元素战技与元素爆发造成的伤害提升10%；装备者受到伤害后的5秒内，上述伤害提升效果提高80%，该提高效果至多叠加5层，每层持续时间独立计算，处于队伍后台时依然能触发该效果。",
+    "twoPcBonus": {
+      "hpPercent": 0.2
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.5
+    }
+  },
+  {
+    "id": "husk_of_opulent_dreams",
+    "name": "Husk Of Opulent Dreams",
+    "nameZh": "华馆梦醒形骸记",
+    "twoPcEffect": "防御力提高30%。",
+    "fourPcEffect": "装备此圣遗物套装的角色在以下情况下，将获得「问答」效果：在场上用岩元素攻击命中敌人后获得一层，每0.3秒至多触发一次；在队伍后台中，每3秒获得一层。问答至多叠加4层，每层能提供6%防御力与6%岩元素伤害加成。每6秒，若未获得问答效果，将损失一层。",
+    "twoPcBonus": {
+      "defPercent": 0.3
+    },
+    "fourPcBonus": {
+      "defPercent": 0.24,
+      "dmgBonus": 0.24
+    }
+  },
+  {
+    "id": "golden_troupe",
+    "name": "Golden Troupe",
+    "nameZh": "黄金剧团",
+    "twoPcEffect": "元素战技造成的伤害提升20%。",
+    "fourPcEffect": "元素战技造成的伤害提升25%；此外，处于队伍后台时，元素战技造成的伤害还将进一步提升25%，该效果将在登场后2秒移除。",
+    "twoPcBonus": {
+      "dmgBonus": 0.2
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.5
+    }
+  },
+  {
+    "id": "nighttime_whispers_in_the_echoing_woods",
+    "name": "Nighttime Whispers In The Echoing Woods",
+    "nameZh": "回声之林夜话",
+    "twoPcEffect": "攻击力提高18%。",
+    "fourPcEffect": "施放元素战技后的10秒内，岩元素伤害加成提升20%；若处于结晶反应产生的护盾庇护下，或附近存在月结晶反应产生的月笼，上述效果提高150%，进一步提高的效果将在不满足上述条件的1秒后移除。",
+    "twoPcBonus": {
+      "atkPercent": 0.18
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.5
+    }
+  },
+  {
+    "id": "gladiator_s_finale",
+    "name": "Gladiator S Finale",
+    "nameZh": "角斗士的终幕礼",
+    "twoPcEffect": "攻击力提高18%。",
+    "fourPcEffect": "装备该圣遗物套装的角色为单手剑、双手剑、长柄武器角色时，角色普通攻击造成的伤害提高35%。",
+    "twoPcBonus": {
+      "atkPercent": 0.18
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.35
+    }
+  },
+  {
+    "id": "scroll_of_the_hero_of_cinder_city",
+    "name": "Scroll Of The Hero Of Cinder City",
+    "nameZh": "烬城勇者绘卷",
+    "twoPcEffect": "队伍中附近的角色触发「夜魂迸发」时，装备者恢复6点元素能量。",
+    "fourPcEffect": "装备者触发其对应元素类型的相关反应后，队伍中附近的所有角色的该元素反应相关的元素伤害加成提升12%，持续15秒。若触发该效果时，装备者处于夜魂加持状态下，还将使队伍中附近的所有角色的与该元素反应相关的元素伤害加成提升28%，持续20秒。装备者处于后台时也能触发上述效果。同名圣遗物套装产生的伤害加成效果无法叠加。",
+    "fourPcBonus": {
+      "dmgBonus": 0.4
+    }
+  },
+  {
+    "id": "emblem_of_severed_fate",
+    "name": "Emblem Of Severed Fate",
+    "nameZh": "绝缘之旗印",
+    "twoPcEffect": "元素充能效率提高20%。",
+    "fourPcEffect": "基于元素充能效率的25%，提高元素爆发造成的伤害。至多通过这种方式获得75%提升。",
+    "twoPcBonus": {
+      "energyRecharge": 0.2
+    },
+    "fourPcDynamic": {
+      "from": "er",
+      "to": "dmgBonus",
+      "ratio": 0.25,
+      "maxCap": 0.75
+    }
+  },
+  {
+    "id": "echoes_of_an_offering",
+    "name": "Echoes Of An Offering",
+    "nameZh": "来歆余响",
+    "twoPcEffect": "攻击力提高18%。",
+    "fourPcEffect": "普通攻击命中敌人时，有36%概率触发「幽谷祝祀」：普通攻击造成的伤害提高，伤害提高值为攻击力的70%，该效果将在普通攻击造成伤害后的0.05秒后清除。普通攻击未触发「幽谷祝祀」时，会使下次触发概率提升20%；0.2秒内至多判定1次触发与否。",
+    "twoPcBonus": {
+      "atkPercent": 0.18
+    },
+    "fourPcDynamic": {
+      "from": "totalAtk",
+      "to": "baseDamageFlat",
+      "ratio": 0.7
+    }
+  },
+  {
+    "id": "flower_of_paradise_lost",
+    "name": "Flower Of Paradise Lost",
+    "nameZh": "乐园遗落之花",
+    "twoPcEffect": "元素精通提高80点。",
+    "fourPcEffect": "装备者绽放、超绽放、烈绽放反应造成的伤害提升40%，造成的月绽放反应伤害提升10%。此外，装备者触发绽放、超绽放、烈绽放、月绽放后，上述效果带来的加成提升25%，该效果持续10秒，至多叠加4次，每1秒至多触发一次。装备者处于队伍后台时依然能触发该效果。",
+    "twoPcBonus": {
+      "elementalMastery": 80.0
+    },
+    "fourPcBonus": {
+      "transformReactionBonus": 0.8,
+      "moonReactionBonus": 0.2
+    }
+  },
+  {
+    "id": "wanderer_s_troupe",
+    "name": "Wanderer S Troupe",
+    "nameZh": "流浪大地的乐团",
+    "twoPcEffect": "元素精通提高80点。",
+    "fourPcEffect": "装备该圣遗物套装的角色为法器、弓箭角色时，角色重击造成的伤害提高35%。",
+    "twoPcBonus": {
+      "elementalMastery": 80.0
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.35
+    }
+  },
+  {
+    "id": "retracing_bolide",
+    "name": "Retracing Bolide",
+    "nameZh": "逆飞的流星",
+    "twoPcEffect": "护盾强效提高35%。",
+    "fourPcEffect": "处于护盾庇护下时，额外获得40%普通攻击和重击伤害加成。",
+    "fourPcBonus": {
+      "dmgBonus": 0.4
+    }
+  },
+  {
+    "id": "thundersoother",
+    "name": "Thundersoother",
+    "nameZh": "平息鸣雷的尊者",
+    "twoPcEffect": "雷元素抗性提高40%。",
+    "fourPcEffect": "对处于雷元素影响下的敌人造成的伤害提升35%。",
+    "fourPcBonus": {
+      "dmgBonus": 0.35
+    }
+  },
+  {
+    "id": "tenacity_of_the_millelith",
+    "name": "Tenacity Of The Millelith",
+    "nameZh": "千岩牢固",
+    "twoPcEffect": "生命值提升20%。",
+    "fourPcEffect": "元素战技命中敌人后，使队伍中附近的所有角色攻击力提升20%，护盾强效提升30%，持续3秒。该效果每0.5秒至多触发一次。装备此圣遗物套装的角色处于队伍后台时，依然能触发该效果。",
+    "twoPcBonus": {
+      "hpPercent": 0.2
+    },
+    "fourPcBonus": {
+      "atkPercent": 0.2
+    }
+  },
+  {
+    "id": "night_of_the_sky_s_unveiling",
+    "name": "Night Of The Sky S Unveiling",
+    "nameZh": "穹境示现之夜",
+    "twoPcEffect": "元素精通提高80点。",
+    "fourPcEffect": "队伍中附近的角色触发月曜反应时，若装备者在场上，将获得持续4秒的「月辉明光·蓄念」效果：队伍的月兆为初辉/满辉时，暴击率提升15%/30%。队伍中的角色每拥有一种不同的「月辉明光」效果，队伍中的所有角色触发的月曜反应造成的伤害提升10%。由「月辉明光」产生的效果无法叠加。",
+    "twoPcBonus": {
+      "elementalMastery": 80.0
+    },
+    "fourPcBonus": {
+      "critRate": 0.3,
+      "moonReactionBonus": 0.2
+    }
+  },
+  {
+    "id": "bloodstained_chivalry",
+    "name": "Bloodstained Chivalry",
+    "nameZh": "染血的骑士道",
+    "twoPcEffect": "造成的物理伤害提高25%。",
+    "fourPcEffect": "击败敌人后的10秒内，施放重击时不消耗体力，且重击造成的伤害提升50%。",
+    "twoPcBonus": {
+      "dmgBonus": 0.25
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.5
+    }
+  },
+  {
+    "id": "thundering_fury",
+    "name": "Thundering Fury",
+    "nameZh": "如雷的盛怒",
+    "twoPcEffect": "获得15%雷元素伤害加成。",
+    "fourPcEffect": "超载、感电、超导、超绽放反应造成的伤害提升40%，超激化反应带来的伤害提升提高20%，月感电反应造成的伤害提升20%。触发上述元素反应或原激化反应时，元素战技冷却时间减少1秒。该效果每0.8秒最多触发一次。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "transformReactionBonus": 0.4,
+      "moonReactionBonus": 0.2
+    }
+  },
+  {
+    "id": "desert_pavilion_chronicle",
+    "name": "Desert Pavilion Chronicle",
+    "nameZh": "沙上楼阁史话",
+    "twoPcEffect": "获得15%风元素伤害加成。",
+    "fourPcEffect": "重击命中敌人后，该角色的普通攻击速度提升10%，普通攻击、重击与下落攻击造成的伤害提升40%，持续15秒。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.4
+    }
+  },
+  {
+    "id": "finale_of_the_deep_galleries",
+    "name": "Finale Of The Deep Galleries",
+    "nameZh": "深廊终曲",
+    "twoPcEffect": "获得15%冰元素伤害加成。",
+    "fourPcEffect": "装备者的元素能量为0时，普通攻击造成的伤害提升60%，元素爆发造成的伤害提升60%。装备者的普通攻击造成伤害后，上述元素爆发伤害提升效果将失效6秒；装备者的元素爆发造成伤害后，上述普通攻击伤害提升效果将失效6秒。角色处于队伍后台也能触发。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.6
+    }
+  },
+  {
+    "id": "deepwood_memories",
+    "name": "Deepwood Memories",
+    "nameZh": "深林的记忆",
+    "twoPcEffect": "获得15%草元素伤害加成。",
+    "fourPcEffect": "元素战技或元素爆发命中敌人后，使命中目标的草元素抗性降低30%，持续8秒。装备者处于队伍后台时，依然能触发该效果。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "resistReduction": 0.3
+    }
+  },
+  {
+    "id": "gilded_dreams",
+    "name": "Gilded Dreams",
+    "nameZh": "饰金之梦",
+    "twoPcEffect": "元素精通提高80点。",
+    "fourPcEffect": "触发元素反应后的8秒内，会根据队伍内其他角色的元素类型，使装备者获得强化：队伍中每存在1个和装备者同类元素的角色，攻击力提升14%；每存在1个和装备者不同元素类型的角色，元素精通提升50点。上述每类效果至多计算3个角色。该效果每8秒至多触发一次。装备者处于队伍后台时，依然能触发该效果。",
+    "twoPcBonus": {
+      "elementalMastery": 80.0
+    },
+    "fourPcBonus": {
+      "atkPercent": 0.14,
+      "elementalMastery": 100.0
+    }
+  },
+  {
+    "id": "nymph_s_dream",
+    "name": "Nymph S Dream",
+    "nameZh": "水仙之梦",
+    "twoPcEffect": "获得15%水元素伤害加成。",
+    "fourPcEffect": "普通攻击、重击、下落攻击、元素战技或元素爆发命中敌人后，将产生1层持续8秒的「镜中水仙」效果。处于1/2/3层及以上「镜中水仙」效果下时，攻击力将提高7%/16%/25%，水元素伤害加成提升4%/9%/15%。由普通攻击、重击、下落攻击、元素战技或元素爆发产生的「镜中水仙」将分别独立存在。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "atkPercent": 0.25,
+      "dmgBonus": 0.15
+    }
+  },
+  {
+    "id": "unfinished_reverie",
+    "name": "Unfinished Reverie",
+    "nameZh": "未竟的遐思",
+    "twoPcEffect": "攻击力提高18%。",
+    "fourPcEffect": "脱离战斗状态3秒后，造成的伤害提升50%。在战斗状态下，附近不存在处于燃烧状态下的敌人超过6秒后，上述伤害提升效果每秒降低10%，直到降低至0%；存在处于燃烧状态下的敌人时，每秒提升10%，直到达到50%。装备此圣遗物套装的角色处于队伍后台时，依然会触发该效果。",
+    "twoPcBonus": {
+      "atkPercent": 0.18
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.5
+    }
+  },
+  {
+    "id": "noblesse_oblige",
+    "name": "Noblesse Oblige",
+    "nameZh": "昔日宗室之仪",
+    "twoPcEffect": "元素爆发造成的伤害提升20%。",
+    "fourPcEffect": "施放元素爆发后，队伍中所有角色攻击力提升20%，持续12秒。该效果不可叠加。",
+    "twoPcBonus": {
+      "dmgBonus": 0.2
+    },
+    "fourPcBonus": {
+      "atkPercent": 0.2
+    }
+  },
+  {
+    "id": "song_of_days_past",
+    "name": "Song Of Days Past",
+    "nameZh": "昔时之歌",
+    "twoPcEffect": "治疗加成提高15%。",
+    "fourPcEffect": "装备者对队伍中的角色进行治疗时，将产生持续6秒的渴盼效果，记录治疗的生命值回复量（包括溢出值）。持续时间结束时，渴盼效果将转变为「彼时的浪潮」效果：队伍中自己的当前场上角色的普通攻击、重击、下落攻击、元素战技与元素爆发命中敌人时，将基于渴盼效果所记录的回复量的8%提高造成的伤害，「彼时的浪潮」将在生效5次或10秒后移除。一次渴盼效果至多记录15000点回复量，同时至多存在一个，能够记录多个装备者的产生的回复量；装备者处于队伍后台时，依然能触发该效果。"
+  },
+  {
+    "id": "fragment_of_harmonic_whimsy",
+    "name": "Fragment Of Harmonic Whimsy",
+    "nameZh": "谐律异想断章",
+    "twoPcEffect": "攻击力提高18%。",
+    "fourPcEffect": "生命之契的数值提升或降低时，角色造成的伤害提升18%，该效果持续6秒，至多叠加3次。",
+    "twoPcBonus": {
+      "atkPercent": 0.18
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.54
+    }
+  },
+  {
+    "id": "archaic_petra",
+    "name": "Archaic Petra",
+    "nameZh": "悠古的磐岩",
+    "twoPcEffect": "获得15%岩元素伤害加成。",
+    "fourPcEffect": "获得结晶反应形成的晶片或触发月结晶反应时，队伍中所有角色获得35%对应元素伤害加成，持续10秒。同时只能通过该效果获得一种元素伤害加成。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.35
+    }
+  },
+  {
+    "id": "long_night_s_oath",
+    "name": "Long Night S Oath",
+    "nameZh": "长夜之誓",
+    "twoPcEffect": "下落攻击造成的伤害提升25%。",
+    "fourPcEffect": "装备者的下落攻击/重击/元素战技命中敌人后，获得1/2/2层「永照的流辉」，由下落攻击、重击或元素战技产生的该效果分别每1秒至多触发一次。永照的流辉：下落攻击造成的伤害提升15%，持续6秒，至多叠加5层，每层持续时间独立计算。",
+    "twoPcBonus": {
+      "dmgBonus": 0.25
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.75
+    }
+  },
+  {
+    "id": "marechaussee_hunter",
+    "name": "Marechaussee Hunter",
+    "nameZh": "逐影猎人",
+    "twoPcEffect": "普通攻击与重击造成的伤害提高15%。",
+    "fourPcEffect": "当前生命值提升或降低时，暴击率提升12%，该效果持续5秒，至多叠加3次。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "critRate": 0.36
+    }
+  },
+  {
+    "id": "shimenawa_s_reminiscence",
+    "name": "Shimenawa S Reminiscence",
+    "nameZh": "追忆之注连",
+    "twoPcEffect": "攻击力提高18%。",
+    "fourPcEffect": "施放元素战技时，如果角色的元素能量高于或等于15点，则会流失15点元素能量，使接下来的10秒内，普通攻击、重击、下落攻击造成的伤害提高50%，持续期间内该效果不会再次触发。",
+    "twoPcBonus": {
+      "atkPercent": 0.18
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.5
+    }
+  },
+  {
+    "id": "gambler",
+    "name": "Gambler",
+    "nameZh": "赌徒",
+    "twoPcEffect": "元素战技造成的伤害提升20%。",
+    "fourPcEffect": "击败敌人时，有100%概率清除元素战技的冷却时间。该效果每15秒至多触发一次。",
+    "twoPcBonus": {
+      "dmgBonus": 0.2
+    }
+  },
+  {
+    "id": "prayers_to_springtime",
+    "name": "Prayers To Springtime",
+    "nameZh": "祭冰之人",
+    "twoPcEffect": "",
+    "fourPcEffect": ""
+  },
+  {
+    "id": "prayers_for_illumination",
+    "name": "Prayers For Illumination",
+    "nameZh": "祭火之人",
+    "twoPcEffect": "",
+    "fourPcEffect": ""
+  },
+  {
+    "id": "prayers_for_wisdom",
+    "name": "Prayers For Wisdom",
+    "nameZh": "祭雷之人",
+    "twoPcEffect": "",
+    "fourPcEffect": ""
+  },
+  {
+    "id": "prayers_for_destiny",
+    "name": "Prayers For Destiny",
+    "nameZh": "祭水之人",
+    "twoPcEffect": "",
+    "fourPcEffect": ""
+  },
+  {
+    "id": "instructor",
+    "name": "Instructor",
+    "nameZh": "教官",
+    "twoPcEffect": "元素精通提高80点。",
+    "fourPcEffect": "触发元素反应后，队伍中所有角色的元素精通提高120点，持续8秒。",
+    "twoPcBonus": {
+      "elementalMastery": 80.0
+    },
+    "fourPcBonus": {
+      "elementalMastery": 120.0
+    }
+  },
+  {
+    "id": "the_exile",
+    "name": "The Exile",
+    "nameZh": "流放者",
+    "twoPcEffect": "元素充能效率提高20%。",
+    "fourPcEffect": "施放元素爆发后，每2秒为队伍中所有角色（不包括自己）恢复2点元素能量。该效果持续6秒，无法叠加。"
+  },
+  {
+    "id": "tiny_miracle",
+    "name": "Tiny Miracle",
+    "nameZh": "奇迹",
+    "twoPcEffect": "所有元素抗性提高20%。",
+    "fourPcEffect": "受到某个元素类型的伤害后，相应的抗性提升30%，持续10秒。该效果每10秒只能触发一次。"
+  },
+  {
+    "id": "defender_s_will",
+    "name": "Defender S Will",
+    "nameZh": "守护之心",
+    "twoPcEffect": "防御力提高30%。",
+    "fourPcEffect": "队伍里每有不同一种元素类型的自己的角色，自身获得30%相应的元素抗性。",
+    "twoPcBonus": {
+      "defPercent": 0.3
+    }
+  },
+  {
+    "id": "martial_artist",
+    "name": "Martial Artist",
+    "nameZh": "武人",
+    "twoPcEffect": "普通攻击与重击造成的伤害提高15%。",
+    "fourPcEffect": "施放元素战技后的8秒内，普通攻击和重击造成的伤害提升25%。",
+    "twoPcBonus": {
+      "dmgBonus": 0.15
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.25
+    }
+  },
+  {
+    "id": "resolution_of_sojourner",
+    "name": "Resolution Of Sojourner",
+    "nameZh": "行者之心",
+    "twoPcEffect": "攻击力提高18%。",
+    "fourPcEffect": "重击的暴击率提升30%。",
+    "twoPcBonus": {
+      "atkPercent": 0.18
+    },
+    "fourPcBonus": {
+      "critRate": 0.3
+    }
+  },
+  {
+    "id": "scholar",
+    "name": "Scholar",
+    "nameZh": "学士",
+    "twoPcEffect": "元素充能效率提高20%。",
+    "fourPcEffect": "获得元素微粒或元素晶球时，队伍中所有弓箭和法器角色额外恢复3点元素能量。该效果每3秒只能触发一次。"
+  },
+  {
+    "id": "brave_heart",
+    "name": "Brave Heart",
+    "nameZh": "勇士之心",
+    "twoPcEffect": "攻击力提高18%。",
+    "fourPcEffect": "对生命值高于50%的敌人，造成的伤害增加30%。",
+    "twoPcBonus": {
+      "atkPercent": 0.18
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.3
+    }
+  },
+  {
+    "id": "berserker",
+    "name": "Berserker",
+    "nameZh": "战狂",
+    "twoPcEffect": "暴击率提高12%。",
+    "fourPcEffect": "生命值低于70%时，暴击率额外提升24%。",
+    "twoPcBonus": {
+      "critRate": 0.12
+    },
+    "fourPcBonus": {
+      "critRate": 0.24
+    }
+  },
+  {
+    "id": "adventurer",
+    "name": "Adventurer",
+    "nameZh": "冒险家",
+    "twoPcEffect": "生命值上限提高1000点。",
+    "fourPcEffect": "开启各类宝箱后的5秒内，持续恢复30%生命值。"
+  },
+  {
+    "id": "lucky_dog",
+    "name": "Lucky Dog",
+    "nameZh": "幸运儿",
+    "twoPcEffect": "防御力提高100点。",
+    "fourPcEffect": "拾取摩拉时，恢复300点生命值。"
+  },
+  {
+    "id": "traveling_doctor",
+    "name": "Traveling Doctor",
+    "nameZh": "游医",
+    "twoPcEffect": "角色受到的治疗效果提高20%。",
+    "fourPcEffect": "施放元素爆发时，恢复20%生命值。"
+  }
+]

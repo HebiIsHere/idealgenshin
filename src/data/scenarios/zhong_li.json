@@ -1,0 +1,27 @@
+{
+  "characterId": "zhong_li",
+  "scenarios": [
+    {
+      "id": "zhongli_skill_stele",
+      "name": "元素战技岩脊",
+      "skillMultiplier": 3.12,
+      "damagePath": "DIRECT",
+      "reactionType": "NONE",
+      "amplifyingMultiplier": 0,
+      "enemyLevel": 100,
+      "enemyResistance": 0.10,
+      "description": "钟离E技能岩脊伤害，用于评估岩伤流配装"
+    },
+    {
+      "id": "zhongli_burst_meteor",
+      "name": "大招天星",
+      "skillMultiplier": 7.41,
+      "damagePath": "DIRECT",
+      "reactionType": "NONE",
+      "amplifyingMultiplier": 0,
+      "enemyLevel": 100,
+      "enemyResistance": 0.10,
+      "description": "钟离Q技能陨石伤害，最高单次伤害技能"
+    }
+  ]
+}

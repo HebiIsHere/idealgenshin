@@ -1,0 +1,48 @@
+{
+  "id": "dahlia",
+  "name": "Dahlia",
+  "nameZh": "塔利雅",
+  "element": "HYDRO",
+  "weaponType": "SWORD",
+  "baseStats": {
+    "hp": 12506,
+    "atk": 189,
+    "def": 560,
+    "critRate": 0.05,
+    "critDmg": 0.5,
+    "em": 0,
+    "er": 1
+  },
+  "ascensionStat": {
+    "type": "HP_PERCENT",
+    "values": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.06,
+      0.06,
+      0.12,
+      0.12,
+      0.12,
+      0.12,
+      0.18,
+      0.18,
+      0.24
+    ]
+  },
+  "relevantSubstats": [
+    "CRIT_RATE",
+    "CRIT_DMG",
+    "ATK_PERCENT",
+    "ENERGY_RECHARGE",
+    "ELEMENTAL_MASTERY"
+  ],
+  "defaultStatScaling": {
+    "atkRatio": 1,
+    "hpRatio": 0,
+    "defRatio": 0,
+    "emRatio": 0
+  }
+}

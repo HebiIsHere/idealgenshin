@@ -1,0 +1,12 @@
+{
+  "id": "iron_sting",
+  "name": "Iron Sting",
+  "nameZh": "铁蜂刺",
+  "rarity": 4,
+  "weaponType": "SWORD",
+  "baseAtk": 510,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 165.384,
+  "passiveName": "注能之刺",
+  "passiveDesc": "造成元素伤害后的6秒内，角色造成的伤害提高6%，该效果最多叠加2层。该效果每1秒可以触发一次。"
+}

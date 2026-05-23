@@ -1,0 +1,12 @@
+{
+  "id": "mitternachts_waltz",
+  "name": "Mitternachts Waltz",
+  "nameZh": "幽夜华尔兹",
+  "rarity": 4,
+  "weaponType": "BOW",
+  "baseAtk": 510,
+  "substatType": "PHYSICAL_DMG_BONUS",
+  "substatValue": 0.517,
+  "passiveName": "极夜二重奏",
+  "passiveDesc": "普通攻击命中敌人后的5秒内，元素战技造成的伤害提升20%；元素战技命中敌人后的5秒内，普通攻击造成的伤害提升20%。"
+}

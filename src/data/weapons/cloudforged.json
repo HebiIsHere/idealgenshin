@@ -1,0 +1,12 @@
+{
+  "id": "cloudforged",
+  "name": "Cloudforged",
+  "nameZh": "筑云",
+  "rarity": 4,
+  "weaponType": "BOW",
+  "baseAtk": 510,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 165.384,
+  "passiveName": "镌岩为坊",
+  "passiveDesc": "元素能量减少后，装备者的元素精通提升40点。该效果持续18秒，至多叠加2层。"
+}

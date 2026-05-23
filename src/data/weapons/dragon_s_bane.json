@@ -1,0 +1,12 @@
+{
+  "id": "dragon_s_bane",
+  "name": "Dragon's Bane",
+  "nameZh": "匣里灭辰",
+  "rarity": 4,
+  "weaponType": "POLEARM",
+  "baseAtk": 454,
+  "substatType": "ELEMENTAL_MASTERY",
+  "substatValue": 220.512,
+  "passiveName": "踏火止水",
+  "passiveDesc": "对处于水元素或火元素影响下的敌人，造成的伤害提高20%。"
+}

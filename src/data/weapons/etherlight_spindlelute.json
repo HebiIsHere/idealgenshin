@@ -1,0 +1,12 @@
+{
+  "id": "etherlight_spindlelute",
+  "name": "Etherlight Spindlelute",
+  "nameZh": "天光的纺琴",
+  "rarity": 4,
+  "weaponType": "CATALYST",
+  "baseAtk": 510,
+  "substatType": "ENERGY_RECHARGE",
+  "substatValue": 0.459,
+  "passiveName": "最后的歌者",
+  "passiveDesc": "施放元素战技后的20秒内，装备者的元素精通提升100点。"
+}

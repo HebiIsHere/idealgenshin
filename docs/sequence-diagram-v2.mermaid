@@ -1,0 +1,86 @@
+%% V2 统一工作流：角色录入 → 伤害计算 → 词条分析
+sequenceDiagram
+    actor User
+    participant Page as CharacterAnalyzerPage
+    participant Tab1 as CharacterSetupTab
+    participant Tab2 as DamageCalcTab
+    participant Tab3 as AnalysisTab
+    participant Store as Zustand Store
+    participant Worker as OptimizerWorker
+    participant Engine as DamageFormula
+    participant StatCalc as StatCalculator
+    participant SaveSvc as SaveService
+
+    %% ===== Tab1: 角色与装备录入 =====
+    User->>Page: 进入角色分析页
+    Page->>Tab1: 展示 Tab1（角色与装备）
+
+    User->>Tab1: 选择角色
+    Tab1->>Store: selectCharacter(id)
+    Store-->>Tab1: 角色数据更新
+
+    User->>Tab1: 选择武器（下拉）
+    Tab1->>Store: setWeaponConfig(weaponData, level)
+    Note over Tab1: 自动填充 baseAtk + substat
+
+    User->>Tab1: 填写武器被动（乘区输入框）
+    Tab1->>Store: setWeaponPassiveBonus(zoneBonusInput)
+
+    User->>Tab1: 填写命座加成（乘区输入框）
+    Tab1->>Store: setConstellationConfig(level, bonus)
+
+    User->>Tab1: 录入/导入圣遗物
+    Tab1->>Store: setAllArtifacts(artifacts)
+    Store->>Store: 标记 Tab2/3 结果为 expired
+
+    %% ===== Tab2: 伤害计算 =====
+    User->>Page: 切换到 Tab2
+    Page->>Tab2: 展示 Tab2（伤害计算）
+
+    Tab2->>Store: 读取角色+武器+命座+圣遗物
+    Tab2->>Tab2: 加载角色典型场景列表
+
+    User->>Tab2: 选择典型场景（如"蒸发重击"）
+    Tab2->>Store: setSelectedScenario(scenarioId)
+
+    Tab2->>StatCalc: compute(build)
+    Note over StatCalc: 叠加角色基础 + 武器副词条<br/>+ 圣遗物 + 命座加成<br/>+ 武器被动
+    StatCalc-->>Tab2: computedStats
+
+    Tab2->>Engine: calculate(damageContext)
+    Note over Engine: extraBonuses = weaponPassive<br/>+ constellationBonus
+    Engine-->>Tab2: currentDamageResult
+
+    Tab2->>User: 展示伤害数值 + 计算过程分解
+
+    %% ===== Tab3: 词条分析 =====
+    User->>Page: 切换到 Tab3
+    Page->>Tab3: 展示 Tab3（词条分析）
+
+    User->>Tab3: 选择优化模式 + 点击"开始优化"
+    Tab3->>Store: dispatch(runRedistribution(build, allocations))
+
+    Store->>Worker: Comlink 代理调用 redistribute(req)
+    Note over Worker: 在 Web Worker 线程中执行
+
+    Worker->>StatCalc: compute(build) → 当前 ComputedStats
+    Worker->>Engine: calculate(ctx) → 当前伤害
+    Worker->>Worker: 枚举 + 评估词条分配方案
+    Worker->>Engine: calculate(optimizedCtx) → 优化后伤害
+    Worker-->>Store: RedistributeResult + breakdowns
+
+    Store->>Tab3: 优化结果 + 前后对比数据
+    Tab3->>Tab3: 计算 DamageComparison
+    Tab3->>Tab3: 计算 ZoneAnalysis（差分法）
+    Tab3->>User: 展示伤害前后对比 + 乘区词条分析表
+
+    %% ===== 存档 =====
+    User->>Tab3: 点击"保存角色"
+    Tab3->>SaveSvc: saveCharacter(characterSave)
+    SaveSvc->>SaveSvc: 写入 localStorage
+    SaveSvc-->>Tab3: 保存成功
+
+    User->>Tab3: 点击"导出JSON"
+    Tab3->>SaveSvc: exportToJSON([save], includeUid)
+    SaveSvc-->>Tab3: JSON字符串
+    Tab3->>User: 下载JSON文件

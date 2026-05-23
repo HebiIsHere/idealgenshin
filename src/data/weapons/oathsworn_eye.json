@@ -1,0 +1,12 @@
+{
+  "id": "oathsworn_eye",
+  "name": "Oathsworn Eye",
+  "nameZh": "证誓之明瞳",
+  "rarity": 4,
+  "weaponType": "CATALYST",
+  "baseAtk": 565,
+  "substatType": "ATK_PERCENT",
+  "substatValue": 0.276,
+  "passiveName": "微光的海渊民",
+  "passiveDesc": "施放元素战技后，元素充能效率提升24%，持续10秒。"
+}
