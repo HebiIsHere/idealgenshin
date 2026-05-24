@@ -1,22 +1,18 @@
 import React from 'react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import type { SubstatType } from '../../types';
 import { STAT_DISPLAY_NAMES } from '../../data/constants';
 import { formatStatValue } from '../../utils/format';
 
 interface StatDisplayProps {
-  /** Stat type. */
   type: SubstatType;
-  /** Value to display. */
   value: number;
-  /** Optional label override. */
   label?: string;
-  /** Whether to highlight this stat. */
   highlight?: boolean;
-  /** Additional value to show (e.g. optimized vs current). */
   compareValue?: number;
 }
 
-/** Display a stat name and value, optionally with a comparison. */
 function StatDisplay({
   type,
   value,
@@ -28,49 +24,36 @@ function StatDisplay({
   const formattedValue = formatStatValue(type, value);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '4px 0',
-      }}
-    >
-      <span
-        style={{
-          fontSize: '0.875rem',
-          color: highlight ? '#D4A843' : '#A0A0B0',
-          fontWeight: highlight ? 600 : 400,
-        }}
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
+      <Typography
+        variant="body2"
+        sx={{ color: highlight ? 'primary.main' : 'text.secondary', fontWeight: highlight ? 600 : 400 }}
       >
         {displayName}
-      </span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span
-          style={{
-            fontSize: '0.875rem',
-            color: highlight ? '#D4A843' : '#E0E0E0',
-            fontWeight: highlight ? 600 : 400,
-          }}
+      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography
+          variant="body2"
+          sx={{ color: highlight ? 'primary.main' : 'text.primary', fontWeight: highlight ? 600 : 400 }}
         >
           {formattedValue}
-        </span>
+        </Typography>
         {compareValue !== undefined && (
           <>
-            <span style={{ fontSize: '0.75rem', color: '#A0A0B0' }}>→</span>
-            <span
-              style={{
-                fontSize: '0.875rem',
-                color: compareValue > value ? '#74C2A8' : compareValue < value ? '#EF7938' : '#E0E0E0',
+            <Typography variant="caption" color="text.secondary">→</Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: compareValue > value ? 'success.main' : compareValue < value ? 'error.main' : 'text.primary',
                 fontWeight: 600,
               }}
             >
               {formatStatValue(type, compareValue)}
-            </span>
+            </Typography>
           </>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 

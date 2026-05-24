@@ -381,8 +381,11 @@ function DamageCalcTab(): React.ReactElement {
 
   if (!selectedCharacter) {
     return (
-      <Paper sx={{ p: 4, textAlign: 'center' }}>
-        <Typography color="text.secondary">请先在"角色与装备"标签页选择角色</Typography>
+      <Paper sx={{ p: 4, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+        <Typography color="text.secondary">请先在「角色与装备」标签页选择角色</Typography>
+        <Typography variant="body2" color="text.secondary">
+          选择角色后即可计算伤害，查看各乘区详细拆解
+        </Typography>
       </Paper>
     );
   }

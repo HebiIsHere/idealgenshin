@@ -10,7 +10,12 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #1A1A2E;
-  color: #E0E0E0;
+  color: #E0D8CC;
+}
+
+/* Smooth transitions for interactive elements */
+a, button, .MuiButton-root, .MuiChip-root, .MuiTab-root {
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 /* Scrollbar styling for dark theme */
@@ -36,4 +41,13 @@ body {
 ::selection {
   background-color: rgba(212, 168, 67, 0.3);
   color: #FFFFFF;
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

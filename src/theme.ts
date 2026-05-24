@@ -26,8 +26,8 @@ export const genshinTheme = createTheme({
       paper: '#16213E',
     },
     text: {
-      primary: '#E0E0E0',
-      secondary: '#A0A0B0',
+      primary: '#E0D8CC',
+      secondary: '#A09888',
     },
     error: {
       main: '#EF7938',

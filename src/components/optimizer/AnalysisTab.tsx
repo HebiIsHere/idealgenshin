@@ -193,7 +193,10 @@ function AnalysisTab(): React.ReactElement {
   if (!selectedCharacter) {
     return (
       <Paper sx={{ p: 4, textAlign: 'center' }}>
-        <Typography color="text.secondary">请先在"角色与装备"标签页选择角色</Typography>
+        <Typography color="text.secondary">请先在「角色与装备」标签页选择角色</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          选择角色后即可进行词条重分配优化或生成理想模板
+        </Typography>
       </Paper>
     );
   }
