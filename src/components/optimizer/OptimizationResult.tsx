@@ -51,7 +51,7 @@ const ZONE_ORDER: (keyof typeof ZONE_LABELS)[] = [
 ];
 
 /** 提取每个乘区的详细计算步骤。 */
-function getZoneDetail(key: string, zoneName: string | undefined, value: number | string, result: DamageResult): { steps: string[]; displayValue: string } | null {
+function getZoneDetail(key: string, _zoneName: string | undefined, value: number | string, result: DamageResult): { steps: string[]; displayValue: string } | null {
   const d = result;
   switch (key) {
     case 'baseDamage': {

@@ -5,10 +5,6 @@ import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Alert from '@mui/material/Alert';
 import Divider from '@mui/material/Divider';
 import ScenarioSelect from './ScenarioSelect';
@@ -469,8 +465,6 @@ function DamageCalcTab(): React.ReactElement {
 
                 const detail = getZoneDetail(key, zoneName, value as number | string, damageResult);
                 if (!detail) return null;
-
-                const isBase = key === 'baseDamage';
 
                 return (
                   <Box key={key} sx={{ mb: 1.5 }}>

@@ -325,7 +325,7 @@ export class DamageFormula {
       critDebug: (ctx as any).__critDebug,
       resistDebug: (ctx as any).__resistDebug,
       elevDebug: (ctx as any).__elevDebug,
-      moonDebug: { em: ctx.stats.em, emBonus, moonReactionBonus, result: moonMultiplier },
+      moonDebug: { moonRate, levelMultiplier: 1, em: ctx.stats.em, emBonus, moonReactionBonus, result: moonMultiplier },
     };
   }
 }
