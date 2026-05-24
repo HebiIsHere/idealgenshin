@@ -1,5 +1,6 @@
 import type { DamageContext, DamageResult } from '../types';
 import { ReactionType, DamagePath } from '../types';
+import { getMoonsignEMBonus, MOON_RATES } from '../data/constants';
 import {
   BaseDamageZone,
   BonusZone,
@@ -287,7 +288,8 @@ export class DamageFormula {
    * Unlike regular moonsign (MoonsignZone, level+EM based), this path uses
    * BaseDamageZone with the character's skill multiplier and ATK scaling.
    *
-   * Final = BaseDamage(含技能倍率) × Crit × Resist × Elevation × Independent
+   * Final = BaseDamage(含技能倍率×属性) × MoonRate × (1+EM加成+反应加成) × Crit × Resist × Elevation × Independent
+   * MoonRate = MOON_RATES[reactionType] (直伤月反应倍率)
    * No bonus zone, no defense zone.
    */
   private static calculateMoonsignDirect(ctx: DamageContext): DamageResult {
@@ -297,7 +299,14 @@ export class DamageFormula {
     const elevationMultiplier = new ElevationZone().calculate(ctx);
     const independentMultiplier = new IndependentZone().calculate(ctx);
 
-    const totalDamage = baseDamage * critMultiplier * resistanceMultiplier * elevationMultiplier * independentMultiplier;
+    // 月反应精通向加成（直伤月反应走 ATK 缩放，但反应增幅部分仍需 EM）
+    // 公式: 技能倍率 × 反应倍率 × (1 + EM加成 + 反应加成) × 暴击 × 抗性 × 擢升 × 独立
+    const moonRate = MOON_RATES[ctx.reactionType] ?? 1;
+    const emBonus = getMoonsignEMBonus(ctx.stats.em);
+    const moonReactionBonus = ctx.extraBonuses?.moonReactionBonus ?? 0;
+    const moonMultiplier = moonRate * (1 + emBonus + moonReactionBonus);
+
+    const totalDamage = baseDamage * critMultiplier * resistanceMultiplier * elevationMultiplier * independentMultiplier * moonMultiplier;
 
     return {
       totalDamage,
@@ -307,7 +316,7 @@ export class DamageFormula {
       critMultiplier,
       resistanceMultiplier,
       defenseMultiplier: 1,
-      reactionMultiplier: 1,
+      reactionMultiplier: moonMultiplier,
       damagePath: DamagePath.MOONSIGN_DIRECT,
       aggravationBonus: 0,
       elevationMultiplier,
@@ -316,6 +325,7 @@ export class DamageFormula {
       critDebug: (ctx as any).__critDebug,
       resistDebug: (ctx as any).__resistDebug,
       elevDebug: (ctx as any).__elevDebug,
+      moonDebug: { em: ctx.stats.em, emBonus, moonReactionBonus, result: moonMultiplier },
     };
   }
 }

@@ -40,8 +40,8 @@
     "ELEMENTAL_MASTERY"
   ],
   "defaultStatScaling": {
-    "atkRatio": 1,
-    "hpRatio": 0,
+    "atkRatio": 0,
+    "hpRatio": 1,
     "defRatio": 0,
     "emRatio": 0
   }

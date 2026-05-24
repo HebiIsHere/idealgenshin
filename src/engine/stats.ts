@@ -11,7 +11,7 @@ import { ELEMENT_DMG_BONUS_STAT } from '../data/constants';
 /**
  * StatCalculator — 从 CharacterBuild 计算最终 ComputedStats。
  *
- * Genshin 属性叠加规则:
+ * 属性叠加规则:
  * - Total = (Base) × (1 + sum_of_%_bonuses) + sum_of_flat_bonuses
  * - CRIT Rate, CRIT DMG, EM, ER 为纯加法: base + sum_of_all_sources
  * - Damage Bonus 为加法: sum_of_all_dmg_bonus_sources

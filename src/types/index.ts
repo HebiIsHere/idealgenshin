@@ -1,5 +1,5 @@
 /**
- * Global TypeScript type definitions for the Genshin Artifact Optimizer.
+ * Global TypeScript type definitions for 理想原生 (Ideal Nascent).
  * All percentage values are stored as decimals internally (e.g. 50% → 0.5).
  */
 
@@ -29,7 +29,7 @@ export enum SubstatType {
   HEALING_BONUS = 'HEALING_BONUS',
 }
 
-/** Elemental types in Genshin Impact. */
+/** 元素类型。 */
 export enum ElementType {
   PYRO = 'PYRO',
   HYDRO = 'HYDRO',

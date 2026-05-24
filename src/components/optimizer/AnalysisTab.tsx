@@ -16,13 +16,16 @@ import ZoneAnalysisTable from './ZoneAnalysisTable';
 import OptimizationResult from './OptimizationResult';
 import ComparisonChart from './ComparisonChart';
 import LoadingOverlay from '../common/LoadingOverlay';
+import CharacterStatPanel from '../character/CharacterStatPanel';
 import { useCharacterStore } from '../../store/slices/characterSlice';
 import { useArtifactStore } from '../../store/slices/artifactSlice';
 import { useOptimizerStore } from '../../store/slices/optimizerSlice';
 import { DEFAULT_WEAPON } from '../../data/weapons';
 import { getScenariosByCharacterId } from '../../data/scenarios';
 import { SUBSTAT_MID_VALUES, MAX_TOTAL_ROLLS, STAT_DISPLAY_NAMES } from '../../data/constants';
-import type { CharacterBuild, SubstatAllocation, ArtifactInstance } from '../../types';
+import { StatCalculator } from '../../engine/stats';
+import { computeStatsFromAllocation } from '../../utils/buildStats';
+import type { CharacterBuild, SubstatAllocation, ArtifactInstance, ComputedStats } from '../../types';
 import { ArtifactSlotType, SubstatType } from '../../types';
 
 /** 优化模式枚举。 */
@@ -30,7 +33,7 @@ type OptimizeMode = 'redistribute' | 'ideal';
 
 /**
  * AnalysisTab — Tab3: 词条分析与方案。
- * 优化模式选择 → 开始优化 → 伤害前后对比 + 乘区词条分析表 + 优化结果。
+ * 优化模式选择 → 开始优化 → 伤害前后对比 + 乘区词条分析表 + 优化结果 + 优化后角色面板。
  */
 function AnalysisTab(): React.ReactElement {
   const {
@@ -97,6 +100,24 @@ function AnalysisTab(): React.ReactElement {
       setBonus,
     };
   }, [selectedCharacter, artifacts, characterLevel, skillMultiplier, reactionType, teamBuffs, weaponConfig, constellationConfig, talentConfig, setBonus]);
+
+  // 当前面板
+  const currentStats = useMemo(() => {
+    if (!currentBuild) return null;
+    return StatCalculator.compute(currentBuild);
+  }, [currentBuild]);
+
+  // 同词条重优化——优化后面板
+  const redistributeStats = useMemo<ComputedStats | null>(() => {
+    if (!currentBuild || !redistributeResult) return null;
+    return computeStatsFromAllocation(currentBuild, redistributeResult.optimizedAllocations);
+  }, [currentBuild, redistributeResult]);
+
+  // 理想模板——优化后面板
+  const idealStats = useMemo<ComputedStats | null>(() => {
+    if (!currentBuild || !idealResult) return null;
+    return computeStatsFromAllocation(currentBuild, idealResult.idealAllocations);
+  }, [currentBuild, idealResult]);
 
   // 提取当前词条分配（小数点词条，平攻/平血/平防自动折算为百分比）
   const currentAllocations = useMemo<SubstatAllocation[]>(() => {
@@ -188,6 +209,14 @@ function AnalysisTab(): React.ReactElement {
         </Alert>
       )}
 
+      {/* 当前角色面板 */}
+      <Paper sx={{ p: 2 }}>
+        <CharacterStatPanel stats={currentStats} />
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+          ※ 当前装备面板
+        </Typography>
+      </Paper>
+
       {/* 优化模式选择 */}
       <Paper sx={{ p: 2 }}>
         <Typography variant="subtitle1" sx={{ mb: 1.5, color: 'primary.main' }}>
@@ -256,6 +285,16 @@ function AnalysisTab(): React.ReactElement {
       {/* 重分配优化结果 */}
       {optimizeMode === 'redistribute' && redistributeResult && (
         <>
+          {/* 优化后角色面板 */}
+          {redistributeStats && (
+            <Paper sx={{ p: 2 }}>
+              <CharacterStatPanel stats={redistributeStats} />
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                ※ 优化后角色面板（同词条重分配）
+              </Typography>
+            </Paper>
+          )}
+
           {/* 伤害前后对比 */}
           {damageComparison && <DamageComparisonView comparison={damageComparison} />}
 
@@ -284,6 +323,16 @@ function AnalysisTab(): React.ReactElement {
       {/* 理想模板结果 */}
       {optimizeMode === 'ideal' && idealResult && (
         <>
+          {/* 理想后面板 */}
+          {idealStats && (
+            <Paper sx={{ p: 2 }}>
+              <CharacterStatPanel stats={idealStats} />
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                ※ 理想模板角色面板（{idealRollCount} 词条）
+              </Typography>
+            </Paper>
+          )}
+
           <Paper sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
               理论伤害

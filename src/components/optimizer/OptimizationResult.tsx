@@ -2,6 +2,7 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
+import Divider from '@mui/material/Divider';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -21,34 +22,6 @@ const DAMAGE_PATH_LABELS: Record<DamagePath, string> = {
   [DamagePath.MOONSIGN_DIRECT]: '直伤月曜',
 };
 
-/**
- * Format a breakdown value for display.
- * Handles both number and DamagePath enum types.
- */
-function formatBreakdownValue(_key: string, value: number | DamagePath | undefined): string {
-  if (value === undefined) return '-';
-  if (typeof value === 'string') {
-    // DamagePath is a string enum
-    return DAMAGE_PATH_LABELS[value as DamagePath] ?? String(value);
-  }
-  return formatNumber(value, 4);
-}
-
-/**
- * Format a breakdown value for the right-column display.
- * Returns a multiplier-style string for numbers, or a label for DamagePath.
- */
-function formatBreakdownDisplay(key: string, value: number | DamagePath | undefined): string {
-  if (value === undefined) return '-';
-  if (typeof value === 'string') {
-    return DAMAGE_PATH_LABELS[value as DamagePath] ?? String(value);
-  }
-  if (key === 'baseDamage') {
-    return formatDamage(value);
-  }
-  return `×${formatNumber(value, 4)}`;
-}
-
 /** Mapping from DamageResult multiplier field key to Chinese display name. */
 const ZONE_LABELS: Partial<Record<keyof Omit<DamageResult, 'totalDamage' | 'scalingMultiplier'>, string>> = {
   baseDamage: '基础伤害区',
@@ -59,7 +32,8 @@ const ZONE_LABELS: Partial<Record<keyof Omit<DamageResult, 'totalDamage' | 'scal
   reactionMultiplier: '反应区',
   damagePath: '伤害路径',
   aggravationBonus: '激化加成',
-  elevationMultiplier: '擢升倍率',
+  elevationMultiplier: '擢升乘区',
+  independentMultiplier: '独立乘区',
 };
 
 /** Ordered zone keys for display. */
@@ -73,7 +47,95 @@ const ZONE_ORDER: (keyof typeof ZONE_LABELS)[] = [
   'reactionMultiplier',
   'aggravationBonus',
   'elevationMultiplier',
+  'independentMultiplier',
 ];
+
+/** 提取每个乘区的详细计算步骤。 */
+function getZoneDetail(key: string, zoneName: string | undefined, value: number | string, result: DamageResult): { steps: string[]; displayValue: string } | null {
+  const d = result;
+  switch (key) {
+    case 'baseDamage': {
+      const b = d.baseDebug;
+      const steps: string[] = [];
+      if (b) {
+        steps.push(`ATK = ${formatNumber(b.totalAtk)}`);
+        steps.push(`攻击倍率 = ${formatNumber(b.skillMultiplier)}`);
+        steps.push(`${formatNumber(b.totalAtk)} × ${formatNumber(b.skillMultiplier)} = ${formatNumber(b.rawBase)}`);
+        if (b.baseDamageFlat) steps.push(`+ 固定值: ${formatNumber(b.baseDamageFlat)}`);
+        steps.push(`= ${formatNumber(b.result)}`);
+      } else {
+        steps.push(`${formatNumber(value as number)}`);
+      }
+      return { steps, displayValue: formatNumber(value as number) };
+    }
+    case 'bonusMultiplier': {
+      const b = d.bonusDebug;
+      if (!b) return null;
+      return { steps: [`增伤 = ${(b.dmgBonus * 100).toFixed(1)}%`, `1 + ${(b.dmgBonus * 100).toFixed(1)}% = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
+    }
+    case 'critMultiplier': {
+      const b = d.critDebug;
+      if (!b) return null;
+      return { steps: [`暴击率 = ${(b.critRate * 100).toFixed(1)}%`, `暴击伤害 = ${(b.critDmg * 100).toFixed(1)}%`, `有效暴击率 = ${(b.effectiveCritRate * 100).toFixed(1)}%`, `1 + ${(b.effectiveCritRate * 100).toFixed(1)}% × ${(b.critDmg * 100).toFixed(1)}% = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
+    }
+    case 'resistanceMultiplier': {
+      const b = d.resistDebug;
+      if (!b) return null;
+      const r = b.effectiveRes;
+      const formulaDesc = r < 0 ? `1 − ${r.toFixed(2)}/2` : r < 0.75 ? `1 − ${r.toFixed(2)}` : `1/(1+4×${r.toFixed(2)})`;
+      return { steps: [`敌方抗性 = ${(b.enemyResistance * 100).toFixed(1)}%`, `减抗 = ${(b.resistReduction * 100).toFixed(1)}%`, `有效抗性 = ${(r * 100).toFixed(1)}%`, `${formulaDesc} = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
+    }
+    case 'defenseMultiplier': {
+      const b = d.defenseDebug;
+      if (!b) return null;
+      return { steps: [`角色 ${b.characterLevel} 级 vs 敌方 ${b.enemyLevel} 级`, `(${b.charTerm})/(${b.charTerm}+${formatNumber(b.effectiveEnemyDef)}) = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
+    }
+    case 'reactionMultiplier': {
+      const amp = d.ampDebug;
+      const trans = d.transDebug;
+      const moon = d.moonDebug;
+      if (amp) {
+        const steps = [`反应系数 = ${amp.baseMultiplier}`, `EM增幅 = ${(amp.emBonus * 100).toFixed(1)}%`];
+        if (amp.ampReactionBonus) steps.push(`反应加成 = ${(amp.ampReactionBonus * 100).toFixed(1)}%`);
+        steps.push(`= ${formatNumber(amp.result, 6)}`);
+        return { steps, displayValue: `×${formatNumber(value as number, 6)}` };
+      }
+      if (trans) {
+        const steps = [`系数 ${trans.rate} × 等级 ${formatNumber(trans.levelMultiplier)}`, `EM增幅 = ${(trans.emBonus * 100).toFixed(1)}%`];
+        if (trans.transformReactionBonus) steps.push(`剧变加成 = ${(trans.transformReactionBonus * 100).toFixed(1)}%`);
+        steps.push(`= ${formatNumber(trans.result)}`);
+        return { steps, displayValue: `×${formatNumber(value as number, 4)}` };
+      }
+      if (moon) {
+        const steps = [`月反应倍率 = ${moon.moonRate}`, `EM增幅 = ${(moon.emBonus * 100).toFixed(1)}%`];
+        if (moon.moonReactionBonus) steps.push(`月反应加成 = ${(moon.moonReactionBonus * 100).toFixed(1)}%`);
+        steps.push(`= ${formatNumber(moon.result)}`);
+        return { steps, displayValue: `×${formatNumber(value as number, 4)}` };
+      }
+      return { steps: [`${formatNumber(value as number, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
+    }
+    case 'aggravationBonus': {
+      const b = d.cataDebug;
+      if (!b) return null;
+      return { steps: [`基础 ${b.baseRate} × 等级 ${formatNumber(b.levelMultiplier)}`, `EM增幅 = ${(b.emBonus * 100).toFixed(1)}%`, `= ${formatNumber(b.result)}`], displayValue: formatNumber(value as number) };
+    }
+    case 'elevationMultiplier': {
+      const b = d.elevDebug;
+      if (!b) return null;
+      return { steps: [`擢升加成 = ${(b.elevationBonus * 100).toFixed(0)}%`, `1 + ${(b.elevationBonus * 100).toFixed(1)}% = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
+    }
+    case 'independentMultiplier': {
+      const b = d.indepDebug;
+      if (!b) return null;
+      return { steps: [`天赋加成 = ${(b.talentBonus * 100).toFixed(0)}%`, `上下文加成 = ${(b.ctxBonus * 100).toFixed(0)}%`, `= ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
+    }
+    case 'damagePath': {
+      return { steps: [], displayValue: DAMAGE_PATH_LABELS[value as DamagePath] ?? String(value) };
+    }
+    default:
+      return null;
+  }
+}
 
 interface OptimizationResultProps {
   /** Original damage value. */
@@ -93,7 +155,7 @@ interface OptimizationResultProps {
 }
 
 /**
- * Render a single DamageResult breakdown inside an Accordion.
+ * Render a single DamageResult breakdown inside an Accordion with detailed per-zone steps.
  */
 function DamageBreakdownAccordion({
   label,
@@ -117,47 +179,103 @@ function DamageBreakdownAccordion({
         </Typography>
       </AccordionSummary>
       <AccordionDetails sx={{ px: 2, pt: 0, pb: 2 }}>
-        {/* Per-zone details */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+        {/* Per-zone details with steps */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           {ZONE_ORDER.map((key) => {
             const zoneName = ZONE_LABELS[key];
             const value = breakdown[key];
-            const isBase = key === 'baseDamage';
             const isNonNumeric = key === 'damagePath';
 
-            // Skip fields with default/empty values that aren't meaningful
             if (isNonNumeric && value === undefined) return null;
             if (key === 'aggravationBonus' && (value === undefined || value === 0)) return null;
             if (key === 'elevationMultiplier' && (value === undefined || value === 1)) return null;
+            if (key === 'independentMultiplier' && (value === undefined || value === 1)) return null;
+
+            const detail = getZoneDetail(key, zoneName, value as number | string, breakdown);
+            if (!detail) return null;
 
             return (
-              <Box key={key} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', py: 0.25 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, minWidth: 80 }}>
-                  {zoneName}
-                </Typography>
-                <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'text.secondary', flex: 1, textAlign: 'center' }}>
-                  {isNonNumeric
-                    ? formatBreakdownValue(key, value as number | DamagePath | undefined)
-                    : isBase
-                      ? `${formatNumber(value as number)}`
-                      : `${formatNumber(value as number, 4)}`}
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600, minWidth: 60, textAlign: 'right' }}>
-                  {formatBreakdownDisplay(key, value as number | DamagePath | undefined)}
-                </Typography>
+              <Box key={key} sx={{ mb: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.25 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {zoneName}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 600,
+                      color: isNonNumeric ? 'text.secondary' : 'primary.main',
+                      bgcolor: 'rgba(212,168,67,0.06)',
+                      px: 0.75,
+                      py: 0.1,
+                      borderRadius: 0.5,
+                      fontFamily: 'monospace',
+                      fontSize: '0.8rem',
+                    }}
+                  >
+                    {detail.displayValue}
+                  </Typography>
+                </Box>
+                {detail.steps.length > 0 && (
+                  <Box sx={{ ml: 2, pl: 1.5, borderLeft: '2px solid', borderColor: 'divider' }}>
+                    {detail.steps.map((s, i) => (
+                      <Typography
+                        key={i}
+                        variant="caption"
+                        sx={{
+                          display: 'block',
+                          fontFamily: 'monospace',
+                          fontSize: '0.7rem',
+                          lineHeight: 1.7,
+                          color: i === detail.steps.length - 1 ? 'text.primary' : 'text.secondary',
+                          fontWeight: i === detail.steps.length - 1 ? 600 : 400,
+                        }}
+                      >
+                        {s}
+                      </Typography>
+                    ))}
+                  </Box>
+                )}
               </Box>
             );
           })}
         </Box>
 
-        {/* Total */}
-        <Box sx={{ mt: 1.5, pt: 1, borderTop: '1px dashed', borderColor: 'divider', display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2" sx={{ fontWeight: 700 }}>
-            总伤害
-          </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
-            {formatDamage(breakdown.totalDamage)}
-          </Typography>
+        {/* 乘区流水公式 */}
+        <Divider sx={{ my: 1 }} />
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: 0.5 }}>
+          {ZONE_ORDER.map((key) => {
+            const value = breakdown[key];
+            if (key === 'damagePath') return null;
+            if (key === 'aggravationBonus' && (value === undefined || value === 0)) return null;
+            if (key === 'elevationMultiplier' && (value === undefined || value === 1)) return null;
+            if (key === 'independentMultiplier' && (value === undefined || value === 1)) return null;
+            if (value === undefined) return null;
+
+            const zoneName = ZONE_LABELS[key];
+            const isBase = key === 'baseDamage';
+            const displayVal = isBase ? formatNumber(value as number) : `×${formatNumber(value as number, 6)}`;
+
+            return (
+              <Box key={key} sx={{ textAlign: 'center' }}>
+                <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'primary.main', fontWeight: 600, fontSize: '0.7rem' }}>
+                  {displayVal}
+                </Typography>
+                <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', fontSize: '0.55rem' }}>
+                  {zoneName}
+                </Typography>
+              </Box>
+            );
+          })}
+          <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'text.secondary', fontSize: '0.7rem' }}>=</Typography>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'primary.main', fontWeight: 700, fontSize: '0.7rem' }}>
+              {formatDamage(breakdown.totalDamage)}
+            </Typography>
+            <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', fontSize: '0.55rem' }}>
+              总伤害
+            </Typography>
+          </Box>
         </Box>
       </AccordionDetails>
     </Accordion>

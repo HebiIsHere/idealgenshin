@@ -337,13 +337,14 @@ function parseWeapon(equipList: any[]): ParsedWeapon {
   // Weapon level from weapon object or propMap
   const level = Number(weapon.weapon?.level ?? weapon.reliquary?.level ?? 90);
 
-  // Refinement rank from affixMap (keys are affix IDs, values are refinement + 1)
+  // Refinement rank from affixMap.
+  // Enka affixMap values are 0-indexed dupes count (0=R1, 4=R5). Add 1 to get rank.
   let refinement = 1;
   const affixMap = weapon.weapon?.affixMap;
   if (affixMap && typeof affixMap === 'object') {
     const affixValues = Object.values(affixMap) as number[];
     if (affixValues.length > 0) {
-      refinement = Math.max(1, Math.min(5, affixValues[0]));
+      refinement = Math.max(1, Math.min(5, affixValues[0] + 1));
     }
   }
 
