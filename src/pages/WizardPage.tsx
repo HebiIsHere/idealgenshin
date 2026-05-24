@@ -76,40 +76,55 @@ function StatScalingInput({ value, onChange }: { value: StatScaling; onChange: (
     { key: 'atkRatio', label: '攻击力' }, { key: 'hpRatio', label: '生命值' }, { key: 'defRatio', label: '防御力' }, { key: 'emRatio', label: '元素精通' },
   ];
   const active = stats.filter(s => (value[s.key] ?? 0) > 0);
-  const idx = active.length;
 
-  const setStat = (i: number, k: keyof StatScaling) => {
+  const setEntry = (i: number, k: keyof StatScaling, r: number) => {
     const next = { atkRatio: 0, hpRatio: 0, defRatio: 0, emRatio: 0 } as StatScaling;
+    // Keep the other entry if exists
     const other = i === 0 ? 1 : 0;
-    if (idx >= 2 && active[other]) next[active[other].key] = active[other].ratio ?? 1;
-    next[k] = (active[i]?.ratio ?? 1);
+    if (active.length >= 2 && active[other]) {
+      next[active[other].key] = active[other].ratio ?? 1;
+    }
+    next[k] = r;
     onChange(next);
   };
-  const setRatio = (i: number, r: number) => {
+
+  const addEntry = () => {
+    const unused = stats.find(s => !active.some(a => a.key === s.key));
+    if (unused && active.length < 2) {
+      const next = { ...value };
+      next[unused.key] = 1;
+      onChange(next);
+    }
+  };
+
+  const removeEntry = (k: keyof StatScaling) => {
     const next = { ...value };
-    if (active[i]) next[active[i].key] = r;
+    next[k] = 0;
     onChange(next);
   };
 
   return (
     <Box>
-      <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>属性缩放（最多两项）</Typography>
-      {[0, 1].map((i) => (
-        <Box key={i} sx={{ display: 'flex', gap: 1, mb: 0.5, alignItems: 'center' }}>
+      <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>倍率种类（最多两项混合）</Typography>
+      {active.map((s, i) => (
+        <Box key={s.key} sx={{ display: 'flex', gap: 1, mb: 0.5, alignItems: 'center' }}>
           <FormControl size="small" sx={{ width: 100 }}>
-            <Select value={active[i]?.key ?? ''} displayEmpty
-              onChange={(e) => setStat(i, e.target.value as keyof StatScaling)}>
-              <MenuItem value="">—</MenuItem>
-              {stats.map(s => <MenuItem key={s.key} value={s.key}>{s.label}</MenuItem>)}
+            <Select value={s.key} onChange={(e) => setEntry(i, e.target.value as keyof StatScaling, s.ratio ?? 1)}>
+              {stats.map(st => <MenuItem key={st.key} value={st.key}>{st.label}</MenuItem>)}
             </Select>
           </FormControl>
-          {active[i] && (
-            <TextField size="small" type="number" value={active[i].ratio ?? 1} sx={{ width: 80 }}
-              slotProps={{ htmlInput: { step: 0.01, min: 0, max: 10 } }}
-              onChange={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v)) setRatio(i, v); }} />
+          <TextField size="small" type="number" value={((s.ratio ?? 1) * 100).toFixed(1)} sx={{ width: 80 }}
+            slotProps={{ htmlInput: { step: 0.1, min: 0, max: 10000 } }}
+            onChange={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v)) setEntry(i, s.key, v / 100); }} />
+          <Typography variant="body2" color="text.secondary">%</Typography>
+          {active.length > 1 && (
+            <Button size="small" color="error" onClick={() => removeEntry(s.key)} sx={{ minWidth: 24, fontSize: '0.7rem' }}>×</Button>
           )}
         </Box>
       ))}
+      {active.length < 2 && (
+        <Button size="small" variant="outlined" onClick={addEntry} sx={{ mt: 0.5 }}>+ 添加倍率种类</Button>
+      )}
     </Box>
   );
 }
@@ -152,9 +167,8 @@ function WizardPage(): React.ReactElement {
   // Custom stat scaling (card 7)
   const [customScaling, setCustomScaling] = useState<StatScaling>({ atkRatio: 1, hpRatio: 0, defRatio: 0, emRatio: 0 });
 
-  // Lauma prayer config
-  const [laumaCons, setLaumaCons] = useState<string>('c0');
-  const [laumaEM, setLaumaEM] = useState<number>(0);
+  // Free team bonus inputs (separate from TeamBuffPanel)
+  const [teamFreeBonus, setTeamFreeBonus] = useState<ZBType>({});
 
   // ---- Reactions ----
   const isNod = selectedCharacter ? isNodKraiCharacter(selectedCharacter.id) : false;
@@ -191,7 +205,7 @@ function WizardPage(): React.ReactElement {
     if (reactionType === 'MOON_BLOOM' as any) {
       prayerBonus.prayerFlat = calcLaumaPrayer(laumaEM, laumaCons);
     }
-    const mergedTeamBonuses: ZBType = { ...teamBuffBonuses, ...prayerBonus };
+    const mergedTeamBonuses: ZBType = { ...teamBuffBonuses, ...prayerBonus, ...teamFreeBonus };
     return {
       character: selectedCharacter,
       weaponConfig: weaponConfig ?? { weaponData: DEFAULT_WEAPON, weaponLevel: 90, refinement: 1, passiveBonus: {} },
@@ -278,13 +292,39 @@ function WizardPage(): React.ReactElement {
         return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>圣遗物配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>逐部位填入圣遗物主/副词条属性</Typography><ArtifactEditor /><Box sx={{ mt: 2 }}><ArtifactSetSelect importedSetNames={[]} importedSetCounts={{}} /></Box></Box>);
 
       case 'talents':
-        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>天赋与命座</Typography><Box sx={{ maxHeight: 280, overflowY: 'auto', mb: 2, '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { background: 'rgba(212,168,67,0.15)', borderRadius: 2 } }}><TalentInput /></Box><ConstellationInput /><Divider sx={{ my: 2 }} /><Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>天赋/命座额外加成</Typography><BonusRow label="大权区" value={tb.authorityMultiplier ?? 1} onChange={(v) => setTb({ ...tb, authorityMultiplier: v })} hint="那维莱特式有条件倍率" /><BonusRow label="月兆角色数" value={tb.moonCharacterCount ?? 0} onChange={(v) => setTb({ ...tb, moonCharacterCount: v })} hint="人" /><BonusRow label="精通区" value={tb.elementalMastery ?? 0} onChange={(v) => setTb({ ...tb, elementalMastery: v })} hint="EM" /><BonusRow label="增伤区" value={(tb.dmgBonus ?? 0) * 100} onChange={(v) => setTb({ ...tb, dmgBonus: v / 100 })} hint="%" /><BonusRow label="暴击率" value={(tb.critRate ?? 0) * 100} onChange={(v) => setTb({ ...tb, critRate: v / 100 })} hint="%" /><BonusRow label="暴击伤害" value={(tb.critDmg ?? 0) * 100} onChange={(v) => setTb({ ...tb, critDmg: v / 100 })} hint="%" /><BonusRow label="擢升区" value={(tb.elevationBonus ?? 0) * 100} onChange={(v) => setTb({ ...tb, elevationBonus: v / 100 })} hint="%" /><BonusRow label="减抗" value={(tb.resistReduction ?? 0) * 100} onChange={(v) => setTb({ ...tb, resistReduction: v / 100 })} hint="%" /></Box>);
+        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>天赋与命座</Typography>
+          <Box sx={{ maxHeight: 180, overflowY: 'auto', mb: 1, '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { background: 'rgba(212,168,67,0.15)', borderRadius: 2 } }}><TalentInput /></Box>
+          <Box sx={{ mb: 1 }}><ConstellationInput /></Box>
+          <Divider sx={{ my: 1 }} />
+          <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>⑤ 自由输入（覆盖/补充天赋数值）</Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5 }}>
+            <BonusRow label="大权区" value={tb.authorityMultiplier ?? 1} onChange={(v) => setTb({ ...tb, authorityMultiplier: v })} hint="那维莱特式有条件倍率" />
+            <BonusRow label="月兆角色数" value={tb.moonCharacterCount ?? 0} onChange={(v) => setTb({ ...tb, moonCharacterCount: v })} hint="人" />
+            <BonusRow label="精通区" value={tb.elementalMastery ?? 0} onChange={(v) => setTb({ ...tb, elementalMastery: v })} hint="EM" />
+            <BonusRow label="增伤区" value={(tb.dmgBonus ?? 0) * 100} onChange={(v) => setTb({ ...tb, dmgBonus: v / 100 })} hint="%" />
+            <BonusRow label="暴击率" value={(tb.critRate ?? 0) * 100} onChange={(v) => setTb({ ...tb, critRate: v / 100 })} hint="%" />
+            <BonusRow label="暴击伤害" value={(tb.critDmg ?? 0) * 100} onChange={(v) => setTb({ ...tb, critDmg: v / 100 })} hint="%" />
+            <BonusRow label="擢升区" value={(tb.elevationBonus ?? 0) * 100} onChange={(v) => setTb({ ...tb, elevationBonus: v / 100 })} hint="%" />
+            <BonusRow label="减抗" value={(tb.resistReduction ?? 0) * 100} onChange={(v) => setTb({ ...tb, resistReduction: v / 100 })} hint="%" />
+          </Box></Box>);
 
       case 'teambuffs': {
         const isMB = reactionType === ('MOON_BLOOM' as any);
-        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>队伍 Buff</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>添加辅助角色、圣遗物套装、元素共鸣等增益</Typography><TeamBuffPanel config={teamBuffConfig} onChange={setTeamBuffConfig} /><Divider sx={{ my: 2 }} /><Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>队伍额外加成</Typography><BonusRow label="羽毛附伤" value={0} onChange={() => {}} hint="通过队伍Buff面板添加" /><BonusRow label="月兆角色数" value={0} onChange={() => {}} hint="通过队伍Buff面板添加" />
-          {isMB && (<Box sx={{ p: 1.5, bgcolor: 'rgba(212,168,67,0.06)', borderRadius: 2, mb: 1 }}><Typography variant="body2" sx={{ mb: 1, color: 'primary.main' }}>祷歌型附伤（菈乌玛·月绽放）</Typography><Box sx={{ display: 'flex', gap: 1, mb: 1 }}><FormControl size="small" sx={{ width: 120 }}><Select value={laumaCons} onChange={(e) => setLaumaCons(e.target.value)}><MenuItem value="c0">0 命</MenuItem><MenuItem value="c2">2 命</MenuItem><MenuItem value="c3">3 命</MenuItem></Select></FormControl><TextField label="菈乌玛精通" type="number" size="small" value={laumaEM} onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v)) setLaumaEM(v); }} sx={{ width: 120 }} /></Box><Typography variant="caption" color="text.secondary">祷歌附伤 = {laumaEM} × {laumaCons === 'c0' ? '3.75' : laumaCons === 'c2' ? '5.0' : '5.5'} = {Math.round(calcLaumaPrayer(laumaEM, laumaCons)).toLocaleString()}</Typography></Box>)}
-          <BonusRow label="精通区" value={0} onChange={() => {}} hint="通过队伍Buff面板添加" /><BonusRow label="增伤区" value={0} onChange={() => {}} hint="通过队伍Buff面板添加" /><BonusRow label="暴击率" value={0} onChange={() => {}} hint="通过队伍Buff面板添加" /><BonusRow label="暴击伤害" value={0} onChange={() => {}} hint="通过队伍Buff面板添加" /><BonusRow label="擢升区" value={0} onChange={() => {}} hint="通过队伍Buff面板添加" /><BonusRow label="减抗" value={0} onChange={() => {}} hint="通过队伍Buff面板添加" /></Box>);
+        const tfb = teamFreeBonus;
+        const setTfb = (v: ZBType) => setTeamFreeBonus(v);
+        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>队伍 Buff</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>添加辅助角色、圣遗物套装、元素共鸣等增益</Typography><TeamBuffPanel config={teamBuffConfig} onChange={setTeamBuffConfig} /><Divider sx={{ my: 1 }} /><Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>⑤ 自由输入（覆盖/补充队伍数值）</Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5 }}>
+            <BonusRow label="羽毛附伤" value={tfb.featherFlat ?? 0} onChange={(v) => setTfb({ ...tfb, featherFlat: v })} hint="固定值" />
+            <BonusRow label="月兆角色数" value={tfb.moonCharacterCount ?? 0} onChange={(v) => setTfb({ ...tfb, moonCharacterCount: v })} hint="人" />
+            <BonusRow label="精通区" value={tfb.elementalMastery ?? 0} onChange={(v) => setTfb({ ...tfb, elementalMastery: v })} hint="EM" />
+            <BonusRow label="增伤区" value={(tfb.dmgBonus ?? 0) * 100} onChange={(v) => setTfb({ ...tfb, dmgBonus: v / 100 })} hint="%" />
+            <BonusRow label="暴击率" value={(tfb.critRate ?? 0) * 100} onChange={(v) => setTfb({ ...tfb, critRate: v / 100 })} hint="%" />
+            <BonusRow label="暴击伤害" value={(tfb.critDmg ?? 0) * 100} onChange={(v) => setTfb({ ...tfb, critDmg: v / 100 })} hint="%" />
+            <BonusRow label="擢升区" value={(tfb.elevationBonus ?? 0) * 100} onChange={(v) => setTfb({ ...tfb, elevationBonus: v / 100 })} hint="%" />
+            <BonusRow label="减抗" value={(tfb.resistReduction ?? 0) * 100} onChange={(v) => setTfb({ ...tfb, resistReduction: v / 100 })} hint="%" />
+          </Box>
+          {isMB && (<Box sx={{ mt: 1, p: 1.5, bgcolor: 'rgba(212,168,67,0.06)', borderRadius: 2 }}><Typography variant="body2" sx={{ mb: 1, color: 'primary.main' }}>祷歌型附伤（菈乌玛·月绽放专用）</Typography><Box sx={{ display: 'flex', gap: 1, mb: 1 }}><FormControl size="small" sx={{ width: 120 }}><Select value={laumaCons} onChange={(e) => setLaumaCons(e.target.value)}><MenuItem value="c0">0 命</MenuItem><MenuItem value="c2">2 命</MenuItem><MenuItem value="c3">3 命</MenuItem></Select></FormControl><TextField label="菈乌玛精通" type="number" size="small" value={laumaEM} onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v)) setLaumaEM(v); }} sx={{ width: 120 }} /></Box><Typography variant="caption" color="text.secondary">= {laumaEM} × {laumaCons === 'c0' ? '3.75' : laumaCons === 'c2' ? '5.0' : '5.5'} = {Math.round(calcLaumaPrayer(laumaEM, laumaCons)).toLocaleString()}</Typography></Box>)}
+        </Box>);
       }
 
       case 'scenario':
