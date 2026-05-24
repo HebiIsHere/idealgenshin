@@ -12,10 +12,9 @@ import { ReactionType } from '../../types';
  */
 export class MoonsignZone implements DamageZone {
   calculate(ctx: DamageContext): number {
-    const moonCount = ctx.extraBonuses?.moonCharacterCount ?? 0;
-    const perCharBonus = ctx.extraBonuses?.moonPerCharBonus ?? 0.05;
-    const result = 1 + moonCount * perCharBonus;
-    (ctx as any).__moonSignDebug = { moonCharacters: moonCount, perCharBonus, result };
+    const moonBonus = ctx.extraBonuses?.moonSignBonus ?? 0;
+    const result = 1 + moonBonus;
+    (ctx as any).__moonSignDebug = { moonBonus, result };
     return result;
   }
 

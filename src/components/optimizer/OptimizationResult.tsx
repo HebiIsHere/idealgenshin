@@ -155,7 +155,7 @@ function getZoneDetail(key: string, _zoneName: string | undefined, value: number
   }
   const moonSignD = d.moonSignDebug;
   if (moonSignD && moonSignD.result > 1) {
-    return { steps: [`月兆角色 = ${moonSignD.moonCharacters}人`, `= ${formatNumber(moonSignD.result, 4)}`], displayValue: `×${formatNumber(moonSignD.result, 4)}` };
+    return { steps: [`月兆加成 = ${(moonSignD.moonBonus * 100).toFixed(1)}%`, `= ${formatNumber(moonSignD.result, 4)}`], displayValue: `×${formatNumber(moonSignD.result, 4)}` };
   }
 
   return null;

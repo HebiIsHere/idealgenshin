@@ -148,7 +148,7 @@ function TeamBuffPanel({ config, onChange }: TeamBuffPanelProps): React.ReactEle
     { key: 'independentBonus', label: '独立乘区%', step: 0.01 },
     { key: 'elevationBonus', label: '擢升乘区%', step: 0.01 },
     { key: 'featherFlat', label: '羽毛附伤', step: 1 },
-    { key: 'moonCharacterCount', label: '月兆角色数', step: 1 },
+    { key: 'moonSignBonus', label: '月兆加成%', step: 0.01 },
   ];
 
   return (

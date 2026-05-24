@@ -244,7 +244,7 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
   }
   const moonSignD = d.moonSignDebug;
   if (moonSignD && moonSignD.result > 1) {
-    return { zoneLabel: '月兆区', value: moonSignD.result, displayValue: `×${formatNumber(moonSignD.result, 4)}`, steps: [`月兆角色 = ${moonSignD.moonCharacters}人`, `每人 +${(moonSignD.perCharBonus * 100).toFixed(0)}%`, `1 + ${moonSignD.moonCharacters} × ${(moonSignD.perCharBonus * 100).toFixed(0)}% = ${formatNumber(moonSignD.result, 4)}`] };
+    return { zoneLabel: '月兆区', value: moonSignD.result, displayValue: `×${formatNumber(moonSignD.result, 4)}`, steps: [`月兆加成 = ${(moonSignD.moonBonus * 100).toFixed(0)}%`, `1 + ${(moonSignD.moonBonus * 100).toFixed(0)}% = ${formatNumber(moonSignD.result, 4)}`] };
   }
 }
 

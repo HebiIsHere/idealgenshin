@@ -347,7 +347,7 @@ export interface DamageResult {
   featherDebug?: { flat: number; scalingSum: number; result: number };
   prayerDebug?: { flat: number; scalingSum: number; result: number };
   masteryDebug?: { em: number; emBonus: number; result: number; type: string };
-  moonSignDebug?: { moonCharacters: number; perCharBonus: number; result: number };
+  moonSignDebug?: { moonBonus: number; result: number };
 }
 
 // ===== Optimizer Request/Response =====
@@ -518,10 +518,8 @@ export interface ZoneBonusInput {
   prayerFlat?: number;
   /** 祷歌型附伤：属性×缩放比。 */
   prayerScaling?: { atkRatio?: number; hpRatio?: number; defRatio?: number; emRatio?: number };
-  /** 月兆角色数量（用于月兆区计算）。 */
-  moonCharacterCount?: number;
-  /** 每月兆角色提供的月兆区加成（默认 0.05）。 */
-  moonPerCharBonus?: number;
+  /** 月兆区加成（百分比，如 0.10 = +10%）。 */
+  moonSignBonus?: number;
 }
 
 /** Weapon configuration selected by the user. */

@@ -326,7 +326,7 @@ function WizardPage(): React.ReactElement {
           <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>自由输入（天赋与命座数值）</Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5 }}>
             <BonusRow label="大权区" value={tb.authorityMultiplier ?? 1} onChange={(v) => setTb({ ...tb, authorityMultiplier: v })} hint="那维莱特式" />
-            <BonusRow label="月兆角色数" value={tb.moonCharacterCount ?? 0} onChange={(v) => setTb({ ...tb, moonCharacterCount: v })} hint="人" />
+            <BonusRow label="月兆区" value={(tb.moonSignBonus ?? 0) * 100} onChange={(v) => setTb({ ...tb, moonSignBonus: v / 100 })} hint="%" />
             <BonusRow label="精通区" value={tb.elementalMastery ?? 0} onChange={(v) => setTb({ ...tb, elementalMastery: v })} hint="EM" />
             <BonusRow label="增伤区" value={(tb.dmgBonus ?? 0) * 100} onChange={(v) => setTb({ ...tb, dmgBonus: v / 100 })} hint="%" />
             <BonusRow label="暴击率" value={(tb.critRate ?? 0) * 100} onChange={(v) => setTb({ ...tb, critRate: v / 100 })} hint="%" />
