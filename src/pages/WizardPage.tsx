@@ -39,9 +39,10 @@ import LoadingOverlay from '../components/common/LoadingOverlay';
 import SectionStepper from '../components/wizard/SectionStepper';
 import SectionRoller from '../components/wizard/SectionRoller';
 
-import { DEFAULT_WEAPON } from '../data/weapons';
+import { DEFAULT_WEAPON, getWeaponById } from '../data/weapons';
 import { SUBSTAT_MID_VALUES } from '../data/constants';
 import talentRef from '../data/talents/ref.json';
+import avatarMap from '../data/avatar_to_character.json';
 import { getReactionOptions, isNodKraiCharacter } from '../data/reactions';
 import { getScenariosByCharacterId } from '../data/scenarios';
 import { formatDamage, formatNumber } from '../utils/format';
@@ -142,10 +143,10 @@ function WizardPage(): React.ReactElement {
     setSkillMultiplier, setReactionType, setAmplifyingMultiplier, setCharacterLevel,
     teamBuffs, weaponConfig, constellationConfig, talentConfig, setBonus,
     statConversions, setConversions, setWeaponConfig, setTalentConfig, setConstellationBonus,
-    selectedScenarioId,
+    selectedScenarioId, selectCharacter, setWeaponRefinement,
   } = useCharacterStore();
 
-  const { artifacts } = useArtifactStore();
+  const { artifacts, showcaseCharacters, selectedShowcaseIdx } = useArtifactStore();
   const { isCalculating, progress, redistributeResult, idealResult, damageComparison,
     runOptimizationWithComparison, runIdealTemplate } = useOptimizerStore();
 
@@ -171,6 +172,27 @@ function WizardPage(): React.ReactElement {
   }, [selectedCharacter]);
 
   // ---- Reactions ----
+  // Enka import sync: auto-fill character + weapon when showcase data changes
+  React.useEffect(() => {
+    if (showcaseCharacters.length === 0) return;
+    const sc = showcaseCharacters[selectedShowcaseIdx];
+    if (!sc) return;
+
+    const mapEntry = (avatarMap as Record<string, { projectId: string; zhName: string }>)[sc.characterId];
+    if (mapEntry?.projectId && mapEntry.projectId !== selectedCharacter?.id) {
+      selectCharacter(mapEntry.projectId);
+    }
+    if (sc.characterLevel !== characterLevel) {
+      setCharacterLevel(sc.characterLevel);
+    }
+    if (sc.weaponProjectId && sc.weaponProjectId !== weaponConfig?.weaponData?.id) {
+      const wd = getWeaponById(sc.weaponProjectId);
+      if (wd) {
+        setWeaponConfig(wd, sc.weaponLevel, sc.weaponRefinement);
+      }
+    }
+  }, [showcaseCharacters, selectedShowcaseIdx]);
+
   const isNod = selectedCharacter ? isNodKraiCharacter(selectedCharacter.id) : false;
   const charElement = selectedCharacter?.element ?? ElementType.PYRO;
   const reactionOptions = useMemo(() => getReactionOptions(charElement, isNod), [charElement, isNod]);
