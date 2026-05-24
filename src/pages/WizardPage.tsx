@@ -308,16 +308,21 @@ function WizardPage(): React.ReactElement {
       case 'weapon':
         return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>武器配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择武器并查看基础属性</Typography>
           <WeaponSelect />
-          {weaponConfig && (<><Box sx={{ mt: 1, mb: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}><Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600 }}>{weaponConfig.weaponData.nameZh}</Typography><Typography variant="body2" color="text.secondary">基础攻击力: {weaponConfig.weaponData.baseAtk}</Typography>{weaponConfig.weaponData.substatType && weaponConfig.weaponData.substatValue > 0 && <Typography variant="body2" color="text.secondary">{({ ATK_PERCENT: '攻击力%', DEF_PERCENT: '防御力%', HP_PERCENT: '生命值%', CRIT_RATE: '暴击率%', CRIT_DMG: '暴击伤害%', ELEMENTAL_MASTERY: '元素精通', ENERGY_RECHARGE: '充能效率%', PHYSICAL_DMG_BONUS: '物理伤害%' } as Record<string,string>)[weaponConfig.weaponData.substatType] || weaponConfig.weaponData.substatType}: {weaponConfig.weaponData.substatType === 'ELEMENTAL_MASTERY' ? Math.round(weaponConfig.weaponData.substatValue) : `${(weaponConfig.weaponData.substatValue*100).toFixed(1)}%`}</Typography>}<Typography variant="body2" color="text.secondary">等级: {weaponConfig.weaponLevel} 精炼: R{weaponConfig.refinement}</Typography></Box>
-            <WeaponPassiveInput /></>)}
+          {weaponConfig && (<Box sx={{ mt: 1, mb: 2, display: 'flex', gap: 2, flexWrap: 'wrap', p: 1.5, bgcolor: 'rgba(212,168,67,0.06)', borderRadius: 2 }}><Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600 }}>{weaponConfig.weaponData.nameZh}</Typography><Typography variant="body2" color="text.secondary">基础攻击力: {weaponConfig.weaponData.baseAtk}</Typography>{weaponConfig.weaponData.substatType && weaponConfig.weaponData.substatValue > 0 && <Typography variant="body2" color="text.secondary">{({ ATK_PERCENT: '攻击力%', DEF_PERCENT: '防御力%', HP_PERCENT: '生命值%', CRIT_RATE: '暴击率%', CRIT_DMG: '暴击伤害%', ELEMENTAL_MASTERY: '元素精通', ENERGY_RECHARGE: '充能效率', PHYSICAL_DMG_BONUS: '物理伤害%' } as Record<string,string>)[weaponConfig.weaponData.substatType] || weaponConfig.weaponData.substatType}: {weaponConfig.weaponData.substatType === 'ELEMENTAL_MASTERY' ? Math.round(weaponConfig.weaponData.substatValue) : `${(weaponConfig.weaponData.substatValue*100).toFixed(1)}%`}</Typography>}<Typography variant="body2" color="text.secondary">等级: {weaponConfig.weaponLevel} · 精炼: R{weaponConfig.refinement}</Typography></Box>)}
           <Divider sx={{ my: 1 }} />
           <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>自由输入（武器加成数值）</Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5 }}>
-            <BonusRow label="羽毛附伤" value={wb.featherFlat ?? 0} onChange={(v) => setWb({ ...wb, featherFlat: v })} hint="固定值" />
-            <BonusRow label="精通区" value={wb.elementalMastery ?? 0} onChange={(v) => setWb({ ...wb, elementalMastery: v })} hint="EM" />
+            <BonusRow label="攻击力%" value={(wb.atkPercent ?? 0) * 100} onChange={(v) => setWb({ ...wb, atkPercent: v / 100 })} hint="%" />
+            <BonusRow label="防御力%" value={(wb.defPercent ?? 0) * 100} onChange={(v) => setWb({ ...wb, defPercent: v / 100 })} hint="%" />
+            <BonusRow label="生命值%" value={(wb.hpPercent ?? 0) * 100} onChange={(v) => setWb({ ...wb, hpPercent: v / 100 })} hint="%" />
+            <BonusRow label="攻击力" value={wb.atkFlat ?? 0} onChange={(v) => setWb({ ...wb, atkFlat: v })} hint="固定值" />
+            <BonusRow label="防御力" value={wb.defFlat ?? 0} onChange={(v) => setWb({ ...wb, defFlat: v })} hint="固定值" />
+            <BonusRow label="生命值" value={wb.hpFlat ?? 0} onChange={(v) => setWb({ ...wb, hpFlat: v })} hint="固定值" />
             <BonusRow label="增伤区" value={(wb.dmgBonus ?? 0) * 100} onChange={(v) => setWb({ ...wb, dmgBonus: v / 100 })} hint="%" />
+            <BonusRow label="精通区" value={wb.elementalMastery ?? 0} onChange={(v) => setWb({ ...wb, elementalMastery: v })} hint="EM" />
             <BonusRow label="暴击率" value={(wb.critRate ?? 0) * 100} onChange={(v) => setWb({ ...wb, critRate: v / 100 })} hint="%" />
             <BonusRow label="暴击伤害" value={(wb.critDmg ?? 0) * 100} onChange={(v) => setWb({ ...wb, critDmg: v / 100 })} hint="%" />
+            <BonusRow label="羽毛附伤" value={wb.featherFlat ?? 0} onChange={(v) => setWb({ ...wb, featherFlat: v })} hint="固定值" />
           </Box></Box>);
 
       case 'artifacts':
