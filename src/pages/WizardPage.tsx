@@ -162,6 +162,16 @@ function WizardPage(): React.ReactElement {
   const [laumaCons, setLaumaCons] = useState<string>('c0');
   const [laumaEM, setLaumaEM] = useState<number>(0);
 
+  // Imported artifact set detection for ArtifactSetSelect
+  const importedSetCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const a of Object.values(artifacts)) {
+      if (a?.setName) counts[a.setName] = (counts[a.setName] || 0) + 1;
+    }
+    return counts;
+  }, [artifacts]);
+  const importedSetNames = Object.keys(importedSetCounts);
+
   // Talent entries for reference display
   const talentEntries = useMemo(() => {
     if (!selectedCharacter) return [] as { key: string; name: string; description: string; params: string[] }[];
@@ -326,7 +336,7 @@ function WizardPage(): React.ReactElement {
           </Box></Box>);
 
       case 'artifacts':
-        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>圣遗物配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>逐部位填入圣遗物主/副词条属性</Typography><ArtifactEditor /><Box sx={{ mt: 2 }}><ArtifactSetSelect importedSetNames={[]} importedSetCounts={{}} /></Box></Box>);
+        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>圣遗物配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>逐部位填入圣遗物主/副词条属性</Typography><ArtifactEditor /><Box sx={{ mt: 2 }}><ArtifactSetSelect importedSetNames={importedSetNames} importedSetCounts={importedSetCounts} /></Box></Box>);
 
       case 'talents':
         return (<Box>
