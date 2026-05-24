@@ -170,6 +170,10 @@ function WizardPage(): React.ReactElement {
   // Free team bonus inputs (separate from TeamBuffPanel)
   const [teamFreeBonus, setTeamFreeBonus] = useState<ZBType>({});
 
+  // Lauma prayer config
+  const [laumaCons, setLaumaCons] = useState<string>('c0');
+  const [laumaEM, setLaumaEM] = useState<number>(0);
+
   // ---- Reactions ----
   const isNod = selectedCharacter ? isNodKraiCharacter(selectedCharacter.id) : false;
   const charElement = selectedCharacter?.element ?? ElementType.PYRO;
