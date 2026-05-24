@@ -11,10 +11,6 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import { useWizardStore, type WizardSection } from '../store/slices/wizardSlice';
@@ -28,6 +24,8 @@ import { mergeExtraBonuses } from '../utils/mergeExtraBonuses';
 
 import CharacterSelect from '../components/character/CharacterSelect';
 import CharacterStatPanel from '../components/character/CharacterStatPanel';
+import TalentInput from '../components/character/TalentInput';
+import ConstellationInput from '../components/character/ConstellationInput';
 import WeaponSelect from '../components/weapon/WeaponSelect';
 import WeaponPassiveInput from '../components/weapon/WeaponPassiveInput';
 import ArtifactEditor from '../components/artifact/ArtifactEditor';
@@ -308,7 +306,19 @@ function WizardPage(): React.ReactElement {
         return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>选择角色</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择一位需要分析的角色</Typography><CharacterSelect /><Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}><TextField label="角色等级" type="number" size="small" value={characterLevel} onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1 && v <= 90) setCharacterLevel(v); }} slotProps={{ htmlInput: { min: 1, max: 90 } }} sx={{ width: 120 }} /></Box></Box>);
 
       case 'weapon':
-        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>武器配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择武器并配置精炼等级</Typography><WeaponSelect />{weaponConfig && <Box sx={{ mt: 2 }}><WeaponPassiveInput /></Box>}<Divider sx={{ my: 2 }} /><Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>额外加成（武器提供）</Typography><BonusRow label="羽毛附伤" value={wb.featherFlat ?? 0} onChange={(v) => setWb({ ...wb, featherFlat: v })} hint="固定值" /><BonusRow label="精通区" value={wb.elementalMastery ?? 0} onChange={(v) => setWb({ ...wb, elementalMastery: v })} hint="EM" /><BonusRow label="增伤区" value={(wb.dmgBonus ?? 0) * 100} onChange={(v) => setWb({ ...wb, dmgBonus: v / 100 })} hint="%" /><BonusRow label="暴击率" value={(wb.critRate ?? 0) * 100} onChange={(v) => setWb({ ...wb, critRate: v / 100 })} hint="%" /><BonusRow label="暴击伤害" value={(wb.critDmg ?? 0) * 100} onChange={(v) => setWb({ ...wb, critDmg: v / 100 })} hint="%" /></Box>);
+        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>武器配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择武器并查看基础属性</Typography>
+          <WeaponSelect />
+          {weaponConfig && (<><Box sx={{ mt: 1, mb: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}><Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600 }}>{weaponConfig.weaponData.nameZh}</Typography><Typography variant="body2" color="text.secondary">基础攻击力: {weaponConfig.weaponData.baseAtk}</Typography>{weaponConfig.weaponData.substatType && weaponConfig.weaponData.substatValue > 0 && <Typography variant="body2" color="text.secondary">{({ ATK_PERCENT: '攻击力%', DEF_PERCENT: '防御力%', HP_PERCENT: '生命值%', CRIT_RATE: '暴击率%', CRIT_DMG: '暴击伤害%', ELEMENTAL_MASTERY: '元素精通', ENERGY_RECHARGE: '充能效率%', PHYSICAL_DMG_BONUS: '物理伤害%' } as Record<string,string>)[weaponConfig.weaponData.substatType] || weaponConfig.weaponData.substatType}: {weaponConfig.weaponData.substatType === 'ELEMENTAL_MASTERY' ? Math.round(weaponConfig.weaponData.substatValue) : `${(weaponConfig.weaponData.substatValue*100).toFixed(1)}%`}</Typography>}<Typography variant="body2" color="text.secondary">等级: {weaponConfig.weaponLevel} 精炼: R{weaponConfig.refinement}</Typography></Box>
+            <WeaponPassiveInput /></>)}
+          <Divider sx={{ my: 1 }} />
+          <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>自由输入（武器加成数值）</Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5 }}>
+            <BonusRow label="羽毛附伤" value={wb.featherFlat ?? 0} onChange={(v) => setWb({ ...wb, featherFlat: v })} hint="固定值" />
+            <BonusRow label="精通区" value={wb.elementalMastery ?? 0} onChange={(v) => setWb({ ...wb, elementalMastery: v })} hint="EM" />
+            <BonusRow label="增伤区" value={(wb.dmgBonus ?? 0) * 100} onChange={(v) => setWb({ ...wb, dmgBonus: v / 100 })} hint="%" />
+            <BonusRow label="暴击率" value={(wb.critRate ?? 0) * 100} onChange={(v) => setWb({ ...wb, critRate: v / 100 })} hint="%" />
+            <BonusRow label="暴击伤害" value={(wb.critDmg ?? 0) * 100} onChange={(v) => setWb({ ...wb, critDmg: v / 100 })} hint="%" />
+          </Box></Box>);
 
       case 'artifacts':
         return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>圣遗物配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>逐部位填入圣遗物主/副词条属性</Typography><ArtifactEditor /><Box sx={{ mt: 2 }}><ArtifactSetSelect importedSetNames={[]} importedSetCounts={{}} /></Box></Box>);
@@ -316,36 +326,10 @@ function WizardPage(): React.ReactElement {
       case 'talents':
         return (<Box>
           <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>天赋与命座</Typography>
-          {/* 天赋参考（折叠展示） */}
-          <Box sx={{ mb: 2 }}>
-            {talentEntries.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">{selectedCharacter ? '暂无天赋数据' : '请先选择角色'}</Typography>
-            ) : (
-              talentEntries.map((talent) => (
-                <Accordion key={talent.key} disableGutters sx={{ mb: 0.5, bgcolor: 'rgba(212,168,67,0.04)', '&:before': { display: 'none' } }}>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '1rem' }} />} sx={{ minHeight: 36, '& .MuiAccordionSummary-content': { my: 0.5, alignItems: 'center', gap: 1 } }}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>{talent.name}</Typography>
-                    {talent.params.length > 0 && (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {talent.params.slice(0, 2).map((p, i) => (<Chip key={i} label={p.split('|').pop() || p} size="small" variant="outlined" sx={{ fontSize: '0.6rem', height: 18, '& .MuiChip-label': { px: 0.75 } }} />))}
-                      </Box>
-                    )}
-                  </AccordionSummary>
-                  <AccordionDetails sx={{ pt: 0, pb: 1 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.6, whiteSpace: 'pre-wrap', mb: talent.params.length > 0 ? 1 : 0 }}>{talent.description || '暂无描述'}</Typography>
-                    {talent.params.length > 0 && (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, p: 0.75, borderRadius: 1, bgcolor: 'rgba(255,255,255,0.03)' }}>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.25 }}>Lv.10 倍率：</Typography>
-                        {talent.params.map((p, i) => (<Typography key={i} variant="caption" sx={{ color: 'primary.main', lineHeight: 1.5 }}>{p}</Typography>))}
-                      </Box>
-                    )}
-                  </AccordionDetails>
-                </Accordion>
-              ))
-            )}
-          </Box>
+          <Box sx={{ mb: 2 }}><TalentInput /></Box>
+          <Box sx={{ mb: 2 }}><ConstellationInput /></Box>
           <Divider sx={{ my: 1 }} />
-          <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>自由输入（天赋与命座数值）</Typography>
+          <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>自由输入（覆盖/补充）</Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5 }}>
             <BonusRow label="大权区" value={tb.authorityMultiplier ?? 1} onChange={(v) => setTb({ ...tb, authorityMultiplier: v })} hint="那维莱特式" />
             <BonusRow label="月兆区" value={(tb.moonSignBonus ?? 0) * 100} onChange={(v) => setTb({ ...tb, moonSignBonus: v / 100 })} hint="%" />
