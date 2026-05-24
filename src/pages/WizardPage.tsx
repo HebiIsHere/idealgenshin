@@ -11,6 +11,10 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import { useWizardStore, type WizardSection } from '../store/slices/wizardSlice';
@@ -29,9 +33,6 @@ import WeaponPassiveInput from '../components/weapon/WeaponPassiveInput';
 import ArtifactEditor from '../components/artifact/ArtifactEditor';
 import ArtifactSetSelect from '../components/artifact/ArtifactSetSelect';
 import ArtifactImport from '../components/artifact/ArtifactImport';
-import TalentInput from '../components/character/TalentInput';
-import ConstellationInput from '../components/character/ConstellationInput';
-import ZoneBonusInput from '../components/common/ZoneBonusInput';
 import TeamBuffPanel, { TeamBuffConfig, defaultTeamBuffConfig, computeTeamBuffBonuses } from '../components/optimizer/TeamBuffPanel';
 import ScenarioSelect from '../components/optimizer/ScenarioSelect';
 import LoadingOverlay from '../components/common/LoadingOverlay';
@@ -40,6 +41,7 @@ import SectionRoller from '../components/wizard/SectionRoller';
 
 import { DEFAULT_WEAPON } from '../data/weapons';
 import { SUBSTAT_MID_VALUES } from '../data/constants';
+import talentRef from '../data/talents/ref.json';
 import { getReactionOptions, isNodKraiCharacter } from '../data/reactions';
 import { getScenariosByCharacterId } from '../data/scenarios';
 import { formatDamage, formatNumber } from '../utils/format';
@@ -161,6 +163,13 @@ function WizardPage(): React.ReactElement {
   const [laumaCons, setLaumaCons] = useState<string>('c0');
   const [laumaEM, setLaumaEM] = useState<number>(0);
 
+  // Talent entries for reference display
+  const talentEntries = useMemo(() => {
+    if (!selectedCharacter) return [] as { key: string; name: string; description: string; params: string[] }[];
+    const ref = (talentRef as Record<string, { talents: { key: string; name: string; description: string; params: string[] }[] }>)[selectedCharacter.id];
+    return ref?.talents ?? [];
+  }, [selectedCharacter]);
+
   // ---- Reactions ----
   const isNod = selectedCharacter ? isNodKraiCharacter(selectedCharacter.id) : false;
   const charElement = selectedCharacter?.element ?? ElementType.PYRO;
@@ -267,7 +276,7 @@ function WizardPage(): React.ReactElement {
     const wb = weaponConfig?.passiveBonus ?? {};
     const setWb = (v: ZBType) => { if (weaponConfig) setWeaponConfig(weaponConfig.weaponData, weaponConfig.weaponLevel, weaponConfig.refinement, v); };
     const tb = talentConfig?.bonus ?? {};
-    const setTb = (v: ZBType) => setTalentConfig(v);
+    const setTb = (v: ZBType) => { setTalentConfig(v); setConstellationBonus(v); };
 
     switch (s) {
       case 'import':
@@ -285,14 +294,36 @@ function WizardPage(): React.ReactElement {
       case 'talents':
         return (<Box>
           <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>天赋与命座</Typography>
+          {/* 天赋参考（折叠展示） */}
           <Box sx={{ mb: 2 }}>
-            <TalentInput />
-          </Box>
-          <Box sx={{ mb: 2 }}>
-            <ConstellationInput />
+            {talentEntries.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">{selectedCharacter ? '暂无天赋数据' : '请先选择角色'}</Typography>
+            ) : (
+              talentEntries.map((talent) => (
+                <Accordion key={talent.key} disableGutters sx={{ mb: 0.5, bgcolor: 'rgba(212,168,67,0.04)', '&:before': { display: 'none' } }}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: '1rem' }} />} sx={{ minHeight: 36, '& .MuiAccordionSummary-content': { my: 0.5, alignItems: 'center', gap: 1 } }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>{talent.name}</Typography>
+                    {talent.params.length > 0 && (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {talent.params.slice(0, 2).map((p, i) => (<Chip key={i} label={p.split('|').pop() || p} size="small" variant="outlined" sx={{ fontSize: '0.6rem', height: 18, '& .MuiChip-label': { px: 0.75 } }} />))}
+                      </Box>
+                    )}
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ pt: 0, pb: 1 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.6, whiteSpace: 'pre-wrap', mb: talent.params.length > 0 ? 1 : 0 }}>{talent.description || '暂无描述'}</Typography>
+                    {talent.params.length > 0 && (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, p: 0.75, borderRadius: 1, bgcolor: 'rgba(255,255,255,0.03)' }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.25 }}>Lv.10 倍率：</Typography>
+                        {talent.params.map((p, i) => (<Typography key={i} variant="caption" sx={{ color: 'primary.main', lineHeight: 1.5 }}>{p}</Typography>))}
+                      </Box>
+                    )}
+                  </AccordionDetails>
+                </Accordion>
+              ))
+            )}
           </Box>
           <Divider sx={{ my: 1 }} />
-          <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>⑤ 自由输入（覆盖/补充）</Typography>
+          <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>自由输入（天赋与命座数值）</Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5 }}>
             <BonusRow label="大权区" value={tb.authorityMultiplier ?? 1} onChange={(v) => setTb({ ...tb, authorityMultiplier: v })} hint="那维莱特式" />
             <BonusRow label="月兆角色数" value={tb.moonCharacterCount ?? 0} onChange={(v) => setTb({ ...tb, moonCharacterCount: v })} hint="人" />
