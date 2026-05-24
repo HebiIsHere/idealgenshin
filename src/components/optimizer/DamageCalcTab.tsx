@@ -384,7 +384,7 @@ function DamageCalcTab(): React.ReactElement {
             label="单次攻击倍率"
             type="number"
             size="small"
-            slotProps={{ htmlInput: { step: 0.01, min: 0, max: 1000 } }}
+            slotProps={{ htmlInput: { step: 0.0001, min: 0, max: 1000 } }}
             value={skillMultiplier}
             onChange={(e) => {
               const v = parseFloat(e.target.value);
