@@ -14,3 +14,7 @@ export { CatalyzeZone } from './catalyze';
 export { MoonsignZone } from './moonsign';
 export { ElevationZone } from './elevation';
 export { IndependentZone } from './independent';
+export { AuthorityZone } from './authority';
+export { FeatherZone } from './feather';
+export { PrayerZone } from './prayer';
+export { MasteryZone } from './mastery';

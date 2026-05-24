@@ -35,15 +35,15 @@ const DAMAGE_PATH_LABELS: Record<DamagePath, string> = {
 
 /** 乘区标签。 */
 const ZONE_LABELS: Partial<Record<keyof Omit<DamageResult, 'totalDamage' | 'scalingMultiplier'>, string>> = {
-  baseDamage: '基础伤害区',
+  baseDamage: '倍率区',
   bonusMultiplier: '增伤区',
   critMultiplier: '暴击区',
   resistanceMultiplier: '抗性区',
   defenseMultiplier: '防御区',
-  reactionMultiplier: '反应区',
+  reactionMultiplier: '反应区(系数×月兆)',
   damagePath: '伤害路径',
   aggravationBonus: '激化加成',
-  elevationMultiplier: '擢升乘区',
+  elevationMultiplier: '擢升区',
   independentMultiplier: '独立乘区',
 };
 
@@ -212,6 +212,39 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
     }
     default:
       return null;
+  }
+
+  // ── 补充大权区 / 羽毛附伤 / 祷歌附伤 / 精通区 / 月兆区 debug ──
+  const authorityD = d.authorityDebug;
+  if (authorityD && authorityD.result > 1) {
+    return { zoneLabel: '大权区', value: authorityD.result, displayValue: `×${formatNumber(authorityD.result, 4)}`, steps: [`有条件倍率 = ${formatNumber(authorityD.authorityMultiplier)}`, `= ${formatNumber(authorityD.result, 4)}`] };
+  }
+  const featherD = d.featherDebug;
+  if (featherD && featherD.result > 0) {
+    const fsteps = [`固定值 = ${formatNumber(featherD.flat)}`];
+    if (featherD.scalingSum > 0) fsteps.push(`属性×倍率 = ${formatNumber(featherD.scalingSum)}`);
+    fsteps.push(`= ${formatNumber(featherD.result)}`);
+    return { zoneLabel: '羽毛型附伤', value: featherD.result, displayValue: `+${formatNumber(featherD.result)}`, steps: fsteps };
+  }
+  const prayerD = d.prayerDebug;
+  if (prayerD && prayerD.result > 0) {
+    const psteps = [`固定值 = ${formatNumber(prayerD.flat)}`];
+    if (prayerD.scalingSum > 0) psteps.push(`属性×倍率 = ${formatNumber(prayerD.scalingSum)}`);
+    psteps.push(`= ${formatNumber(prayerD.result)}`);
+    return { zoneLabel: '祷歌型附伤', value: prayerD.result, displayValue: `+${formatNumber(prayerD.result)}`, steps: psteps };
+  }
+  const masteryD = d.masteryDebug;
+  if (masteryD && masteryD.result > 1) {
+    const tLabel = masteryD.type === 'amplifying' ? '增幅' : masteryD.type === 'transformative' ? '剧变' : '月反应';
+    const msteps = [`EM = ${masteryD.em}`, `EM加成 = ${(masteryD.emBonus * 100).toFixed(1)}% (${tLabel})`];
+    const bonus = (masteryD as any).ampBonus ?? (masteryD as any).transBonus ?? (masteryD as any).moonBonus ?? 0;
+    if (bonus > 0) msteps.push(`反应增伤 = ${(bonus * 100).toFixed(1)}%`);
+    msteps.push(`1 + ${(masteryD.emBonus * 100).toFixed(1)}%${bonus > 0 ? ' + ' + (bonus * 100).toFixed(1) + '%' : ''} = ${formatNumber(masteryD.result, 6)}`);
+    return { zoneLabel: '精通区', value: masteryD.result, displayValue: `×${formatNumber(masteryD.result, 6)}`, steps: msteps };
+  }
+  const moonSignD = d.moonSignDebug;
+  if (moonSignD && moonSignD.result > 1) {
+    return { zoneLabel: '月兆区', value: moonSignD.result, displayValue: `×${formatNumber(moonSignD.result, 4)}`, steps: [`月兆角色 = ${moonSignD.moonCharacters}人`, `每人 +${(moonSignD.perCharBonus * 100).toFixed(0)}%`, `1 + ${moonSignD.moonCharacters} × ${(moonSignD.perCharBonus * 100).toFixed(0)}% = ${formatNumber(moonSignD.result, 4)}`] };
   }
 }
 

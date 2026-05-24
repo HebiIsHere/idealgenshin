@@ -1,6 +1,6 @@
 import type { DamageContext, DamageResult } from '../types';
 import { ReactionType, DamagePath } from '../types';
-import { getMoonsignEMBonus, MOON_RATES } from '../data/constants';
+import { MOON_RATES, getLevelMultiplier, TRANSFORM_RATES_V52 } from '../data/constants';
 import {
   BaseDamageZone,
   BonusZone,
@@ -13,319 +13,170 @@ import {
   MoonsignZone,
   ElevationZone,
   IndependentZone,
+  AuthorityZone,
+  FeatherZone,
+  PrayerZone,
+  MasteryZone,
 } from './zones';
 
 /**
- * DamageFormula — orchestrates the 5-path damage zone pipeline.
+ * DamageFormula — 统一伤害公式管道。
  *
- * Paths:
- * - DIRECT:     Base → Bonus → Crit → Resist → Defense (no reaction)
- * - AMPLIFYING: Base → Bonus → Crit → Resist → Defense → Amplifying
- * - TRANSFORMATIVE: TransformativeZone → Resist (no base/bonus/crit/defense)
- * - CATALYZE:   Base → CatalyzeZone(+additive) → Bonus → Crit → Resist → Defense
- * - MOONSIGN:   MoonsignZone → Crit → Resist → Elevation (no bonus/defense)
+ * 公式（大一统）：
+ *   伤害 = [ 反应系数 × (倍率区 × 大权区 + 羽毛型附伤) × 月兆区 + 祷歌型附伤 ]
+ *          × 精通区 × 增伤区 × 暴击区 × 擢升区 × 防御 × 抗性
+ *
+ * 六条路径（DIRECT / AMPLIFYING / TRANSFORMATIVE / CATALYZE / MOONSIGN / MOONSIGN_DIRECT）
+ * 共享同一管道，通过各乘区的开关值（1 / 实际值）实现差异化。
  */
 export class DamageFormula {
 
-  /**
-   * Calculate damage from a DamageContext.
-   * Routes to the appropriate formula path based on reaction type.
-   * @param ctx - Complete damage context including stats, skill, and enemy info
-   * @returns DamageResult with total damage, per-zone multipliers, and path info
-   */
+  /* ================================================================
+   * Public API
+   * ================================================================ */
+
   static calculate(ctx: DamageContext): DamageResult {
     const path = DamageFormula.resolvePath(ctx.reactionType);
 
-    switch (path) {
-      case DamagePath.DIRECT:
-        return DamageFormula.calculateDirect(ctx);
-      case DamagePath.AMPLIFYING:
-        return DamageFormula.calculateAmplifying(ctx);
-      case DamagePath.TRANSFORMATIVE:
-        return DamageFormula.calculateTransformative(ctx);
-      case DamagePath.CATALYZE:
-        return DamageFormula.calculateCatalyze(ctx);
-      case DamagePath.MOONSIGN:
-        return DamageFormula.calculateMoonsign(ctx);
-      case DamagePath.MOONSIGN_DIRECT:
-        return DamageFormula.calculateMoonsignDirect(ctx);
-      default:
-        return DamageFormula.calculateDirect(ctx);
-    }
+    // ── Layer 1: 原始基础伤害 ──
+    const rawBase = DamageFormula.computeRawBase(ctx, path);
+    const authority = new AuthorityZone().calculate(ctx);
+    const feather = new FeatherZone().calculate(ctx);
+    const innerDamage = rawBase * authority + feather;
+
+    // ── Layer 2: 反应化 ──
+    const reactionCoeff = DamageFormula.getReactionCoefficient(ctx, path);
+    const moonSign = DamageFormula.computeMoonSign(ctx, path);
+    const prayer = DamageFormula.computePrayer(ctx, path);
+    const reactedBase = reactionCoeff * innerDamage * moonSign + prayer;
+
+    // ── Layer 3: 外层乘区 ──
+    const mastery = new MasteryZone().calculate(ctx);
+    const bonus = DamageFormula.computeBonus(ctx, path);
+    const crit = DamageFormula.computeCrit(ctx, path);
+    const elevation = new ElevationZone().calculate(ctx);
+    const defense = new DefenseZone().calculate(ctx);
+    const resistance = new ResistanceZone().calculate(ctx);
+    const independent = new IndependentZone().calculate(ctx);
+
+    const totalDamage =
+      reactedBase * mastery * bonus * crit * elevation * defense * resistance * independent;
+
+    // ── Debug ──
+    const cataBonus = (path === DamagePath.CATALYZE) ? (ctx as any).__cataDebug : undefined;
+    const transDebug = (path === DamagePath.TRANSFORMATIVE) ? (ctx as any).__transDebug : undefined;
+    const ampDebug = (path === DamagePath.AMPLIFYING) ? (ctx as any).__ampDebug : undefined;
+    const moonDebug = (path === DamagePath.MOONSIGN) ? (ctx as any).__moonDebug : undefined;
+
+    return {
+      totalDamage,
+      baseDamage: rawBase,
+      scalingMultiplier: 1,
+      bonusMultiplier: bonus,
+      critMultiplier: crit,
+      resistanceMultiplier: resistance,
+      defenseMultiplier: defense,
+      reactionMultiplier: reactionCoeff * moonSign,
+      damagePath: path,
+      aggravationBonus: cataBonus ? new CatalyzeZone().calculate(ctx) : 0,
+      elevationMultiplier: elevation,
+      independentMultiplier: independent,
+      baseDebug: (ctx as any).__baseDebug,
+      bonusDebug: bonus > 1 ? (ctx as any).__bonusDebug : undefined,
+      critDebug: crit > 1 ? (ctx as any).__critDebug : undefined,
+      resistDebug: (ctx as any).__resistDebug,
+      defenseDebug: (ctx as any).__defenseDebug,
+      ampDebug,
+      transDebug,
+      cataDebug: (ctx as any).__cataDebug,
+      moonDebug: (ctx as any).__moonDebug,
+      elevDebug: elevation > 1 ? (ctx as any).__elevDebug : undefined,
+      indepDebug: independent > 1 ? (ctx as any).__indepDebug : undefined,
+      authorityDebug: authority > 1 ? (ctx as any).__authorityDebug : undefined,
+      featherDebug: feather > 0 ? (ctx as any).__featherDebug : undefined,
+      prayerDebug: prayer > 0 ? (ctx as any).__prayerDebug : undefined,
+      masteryDebug: mastery > 1 ? (ctx as any).__masteryDebug : undefined,
+    };
   }
 
-  /**
-   * Resolve a ReactionType to a DamagePath.
-   * @param type - The reaction type
-   * @returns The corresponding damage calculation path
-   */
   static resolvePath(type: ReactionType): DamagePath {
     if (type === ReactionType.NONE) return DamagePath.DIRECT;
     if (type === ReactionType.VAPORIZE || type === ReactionType.MELT) return DamagePath.AMPLIFYING;
-    if ([
-      ReactionType.OVERLOADED,
-      ReactionType.SUPERCONDUCT,
-      ReactionType.ELECTRO_CHARGED,
-      ReactionType.SWIRL,
-      ReactionType.HYPERBLOOM,
-      ReactionType.BLOOM,
-      ReactionType.BURGEON,
-      ReactionType.BURNING,
-      ReactionType.SHATTER,
-    ].includes(type)) return DamagePath.TRANSFORMATIVE;
+    if ([ReactionType.OVERLOADED, ReactionType.SUPERCONDUCT, ReactionType.ELECTRO_CHARGED,
+      ReactionType.SWIRL, ReactionType.HYPERBLOOM, ReactionType.BLOOM, ReactionType.BURGEON,
+      ReactionType.BURNING, ReactionType.SHATTER].includes(type)) return DamagePath.TRANSFORMATIVE;
     if (type === ReactionType.AGGRAVATION || type === ReactionType.SPREAD) return DamagePath.CATALYZE;
-    if ([
-      ReactionType.MOON_BLOOM,
-      ReactionType.MOON_ELECTRO,
-      ReactionType.MOON_CRYSTAL,
-    ].includes(type)) return DamagePath.MOONSIGN;
-    if (type === ReactionType.REACTION_MOON_ELECTRO || type === ReactionType.REACTION_MOON_CRYSTAL) {
+    if ([ReactionType.MOON_BLOOM, ReactionType.MOON_ELECTRO, ReactionType.MOON_CRYSTAL].includes(type))
+      return DamagePath.MOONSIGN;
+    if (type === ReactionType.REACTION_MOON_ELECTRO || type === ReactionType.REACTION_MOON_CRYSTAL)
       return DamagePath.MOONSIGN_DIRECT;
+    return DamagePath.DIRECT;
+  }
+
+  /* ================================================================
+   * Per-path helpers
+   * ================================================================ */
+
+  /** Layer 1: 倍率区 = 属性缩放 or 等级乘数 or 属性+激化附加。 */
+  private static computeRawBase(ctx: DamageContext, path: DamagePath): number {
+    if (path === DamagePath.TRANSFORMATIVE) {
+      const rate = TRANSFORM_RATES_V52[ctx.reactionType] ?? 0;
+      const lvl = getLevelMultiplier(ctx.characterLevel ?? 90);
+      return rate * lvl;
     }
-    return DamagePath.DIRECT; // fallback
+    if (path === DamagePath.MOONSIGN) {
+      // 纯月反应：倍率区 = 等级乘数（MoonRate 在反应系数处理）
+      return getLevelMultiplier(ctx.characterLevel ?? 90);
+    }
+    // 直伤 / 增幅 / 激化 / 直伤月反应：属性缩放
+    const base = new BaseDamageZone().calculate(ctx);
+    if (path === DamagePath.CATALYZE) {
+      return base + new CatalyzeZone().calculate(ctx);
+    }
+    return base;
   }
 
-  /**
-   * Direct damage path (no reaction).
-   * Final = Base × Bonus × Crit × Resist × Defense × Independent
-   */
-  private static calculateDirect(ctx: DamageContext): DamageResult {
-    const baseDamage = new BaseDamageZone().calculate(ctx);
-    const bonusMultiplier = new BonusZone().calculate(ctx);
-    const critMultiplier = new CritZone().calculate(ctx);
-    const resistanceMultiplier = new ResistanceZone().calculate(ctx);
-    const defenseMultiplier = new DefenseZone().calculate(ctx);
-    const independentMultiplier = new IndependentZone().calculate(ctx);
-
-    const totalDamage =
-      baseDamage *
-      bonusMultiplier *
-      critMultiplier *
-      resistanceMultiplier *
-      defenseMultiplier *
-      independentMultiplier;
-
-    return {
-      totalDamage,
-      baseDamage,
-      scalingMultiplier: 1,
-      bonusMultiplier,
-      critMultiplier,
-      resistanceMultiplier,
-      defenseMultiplier,
-      reactionMultiplier: 1,
-      damagePath: DamagePath.DIRECT,
-      aggravationBonus: 0,
-      elevationMultiplier: 1,
-      independentMultiplier,
-      baseDebug: (ctx as any).__baseDebug,
-      bonusDebug: (ctx as any).__bonusDebug,
-      critDebug: (ctx as any).__critDebug,
-      resistDebug: (ctx as any).__resistDebug,
-      defenseDebug: (ctx as any).__defenseDebug,
-    };
+  /** Layer 2a: 反应系数。 */
+  private static getReactionCoefficient(ctx: DamageContext, path: DamagePath): number {
+    if (path === DamagePath.AMPLIFYING) {
+      return new AmplifyingZone().calculate(ctx);
+    }
+    if (path === DamagePath.MOONSIGN) {
+      return MOON_RATES[ctx.reactionType] ?? 1;
+    }
+    if (path === DamagePath.MOONSIGN_DIRECT) {
+      return MOON_RATES[ctx.reactionType] ?? 1;
+    }
+    return 1;
   }
 
-  /**
-   * Amplifying damage path (Vaporize / Melt).
-   * Final = Base × Bonus × Crit × Resist × Defense × Reaction × Independent
-   */
-  private static calculateAmplifying(ctx: DamageContext): DamageResult {
-    const baseDamage = new BaseDamageZone().calculate(ctx);
-    const bonusMultiplier = new BonusZone().calculate(ctx);
-    const critMultiplier = new CritZone().calculate(ctx);
-    const resistanceMultiplier = new ResistanceZone().calculate(ctx);
-    const defenseMultiplier = new DefenseZone().calculate(ctx);
-    const reactionMultiplier = new AmplifyingZone().calculate(ctx);
-    const independentMultiplier = new IndependentZone().calculate(ctx);
-
-    const totalDamage =
-      baseDamage *
-      bonusMultiplier *
-      critMultiplier *
-      resistanceMultiplier *
-      defenseMultiplier *
-      reactionMultiplier *
-      independentMultiplier;
-
-    return {
-      totalDamage,
-      baseDamage,
-      scalingMultiplier: 1,
-      bonusMultiplier,
-      critMultiplier,
-      resistanceMultiplier,
-      defenseMultiplier,
-      reactionMultiplier,
-      damagePath: DamagePath.AMPLIFYING,
-      aggravationBonus: 0,
-      elevationMultiplier: 1,
-      independentMultiplier,
-      baseDebug: (ctx as any).__baseDebug,
-      bonusDebug: (ctx as any).__bonusDebug,
-      critDebug: (ctx as any).__critDebug,
-      resistDebug: (ctx as any).__resistDebug,
-      defenseDebug: (ctx as any).__defenseDebug,
-      ampDebug: (ctx as any).__ampDebug,
-    };
+  /** Layer 2b: 月兆区。仅月反应路径激活。 */
+  private static computeMoonSign(ctx: DamageContext, path: DamagePath): number {
+    if (path === DamagePath.MOONSIGN || path === DamagePath.MOONSIGN_DIRECT) {
+      return new MoonsignZone().calculate(ctx);
+    }
+    return 1;
   }
 
-  /**
-   * Transformative damage path.
-   * Transformative = ZoneBaseDamage × Resist × Independent
-   * No base damage, no bonus, no crit, no defense, no skill multiplier.
-   */
-  private static calculateTransformative(ctx: DamageContext): DamageResult {
-    const baseDamage = new TransformativeZone().calculate(ctx);
-    const resistanceMultiplier = new ResistanceZone().calculate(ctx);
-    const independentMultiplier = new IndependentZone().calculate(ctx);
-
-    const totalDamage = baseDamage * resistanceMultiplier * independentMultiplier;
-
-    return {
-      totalDamage,
-      baseDamage,
-      scalingMultiplier: 1,
-      bonusMultiplier: 1,
-      critMultiplier: 1,
-      resistanceMultiplier,
-      defenseMultiplier: 1,
-      reactionMultiplier: 1,
-      damagePath: DamagePath.TRANSFORMATIVE,
-      aggravationBonus: 0,
-      elevationMultiplier: 1,
-      independentMultiplier,
-      resistDebug: (ctx as any).__resistDebug,
-      transDebug: (ctx as any).__transDebug,
-    };
+  /** Layer 2c: 祷歌型附伤。仅月反应路径可能非零。 */
+  private static computePrayer(ctx: DamageContext, path: DamagePath): number {
+    if (path === DamagePath.MOONSIGN || path === DamagePath.MOONSIGN_DIRECT) {
+      return new PrayerZone().calculate(ctx);
+    }
+    return 0;
   }
 
-  /**
-   * Catalyze damage path (Aggravation / Spread).
-   * effectiveBase = baseDamage + aggravationBonus
-   * Final = effectiveBase × Bonus × Crit × Resist × Defense × Independent
-   */
-  private static calculateCatalyze(ctx: DamageContext): DamageResult {
-    const baseDamage = new BaseDamageZone().calculate(ctx);
-    const aggravationBonus = new CatalyzeZone().calculate(ctx);
-    const effectiveBase = baseDamage + aggravationBonus;
-    const bonusMultiplier = new BonusZone().calculate(ctx);
-    const critMultiplier = new CritZone().calculate(ctx);
-    const resistanceMultiplier = new ResistanceZone().calculate(ctx);
-    const defenseMultiplier = new DefenseZone().calculate(ctx);
-    const independentMultiplier = new IndependentZone().calculate(ctx);
-
-    const totalDamage =
-      effectiveBase *
-      bonusMultiplier *
-      critMultiplier *
-      resistanceMultiplier *
-      defenseMultiplier *
-      independentMultiplier;
-
-    return {
-      totalDamage,
-      baseDamage,
-      scalingMultiplier: 1,
-      bonusMultiplier,
-      critMultiplier,
-      resistanceMultiplier,
-      defenseMultiplier,
-      reactionMultiplier: 1,
-      damagePath: DamagePath.CATALYZE,
-      aggravationBonus,
-      elevationMultiplier: 1,
-      independentMultiplier,
-      baseDebug: (ctx as any).__baseDebug,
-      cataDebug: (ctx as any).__cataDebug,
-      bonusDebug: (ctx as any).__bonusDebug,
-      critDebug: (ctx as any).__critDebug,
-      resistDebug: (ctx as any).__resistDebug,
-      defenseDebug: (ctx as any).__defenseDebug,
-    };
+  /** Layer 3a: 增伤区。剧变和直伤月反应跳过。 */
+  private static computeBonus(ctx: DamageContext, path: DamagePath): number {
+    if (path === DamagePath.TRANSFORMATIVE) return 1;
+    if (path === DamagePath.MOONSIGN_DIRECT) return 1;
+    if (path === DamagePath.MOONSIGN) return 1;
+    return new BonusZone().calculate(ctx);
   }
 
-  /**
-   * Moonsign damage path.
-   * Final = MoonBaseDamage × Crit × Resist × Elevation × Independent
-   * No bonus zone, no defense zone, no skill multiplier.
-   */
-  private static calculateMoonsign(ctx: DamageContext): DamageResult {
-    const baseDamage = new MoonsignZone().calculate(ctx);
-    const critMultiplier = new CritZone().calculate(ctx);
-    const resistanceMultiplier = new ResistanceZone().calculate(ctx);
-    const elevationMultiplier = new ElevationZone().calculate(ctx);
-    const independentMultiplier = new IndependentZone().calculate(ctx);
-
-    const totalDamage = baseDamage * critMultiplier * resistanceMultiplier * elevationMultiplier * independentMultiplier;
-
-    return {
-      totalDamage,
-      baseDamage,
-      scalingMultiplier: 1,
-      bonusMultiplier: 1,
-      critMultiplier,
-      resistanceMultiplier,
-      defenseMultiplier: 1,
-      reactionMultiplier: 1,
-      damagePath: DamagePath.MOONSIGN,
-      aggravationBonus: 0,
-      elevationMultiplier,
-      independentMultiplier,
-      moonDebug: (ctx as any).__moonDebug,
-      critDebug: (ctx as any).__critDebug,
-      resistDebug: (ctx as any).__resistDebug,
-      elevDebug: (ctx as any).__elevDebug,
-    };
-  }
-
-  /**
-   * Direct-damage Moonsign path (直伤月反应).
-   * Used by REACTION_MOON_ELECTRO and REACTION_MOON_CRYSTAL.
-   * These are skill/passive hits that deal "extra damage treated as moonsign reaction",
-   * e.g. 伊涅芙 passive: 攻击力×65% → 视为月感电反应伤害.
-   *
-   * Unlike regular moonsign (MoonsignZone, level+EM based), this path uses
-   * BaseDamageZone with the character's skill multiplier and ATK scaling.
-   *
-   * Final = BaseDamage(含技能倍率×属性) × MoonRate × (1+EM加成+反应加成) × Crit × Resist × Elevation × Independent
-   * MoonRate = MOON_RATES[reactionType] (直伤月反应倍率)
-   * No bonus zone, no defense zone.
-   */
-  private static calculateMoonsignDirect(ctx: DamageContext): DamageResult {
-    const baseDamage = new BaseDamageZone().calculate(ctx);
-    const critMultiplier = new CritZone().calculate(ctx);
-    const resistanceMultiplier = new ResistanceZone().calculate(ctx);
-    const elevationMultiplier = new ElevationZone().calculate(ctx);
-    const independentMultiplier = new IndependentZone().calculate(ctx);
-
-    // 月反应精通向加成（直伤月反应走 ATK 缩放，但反应增幅部分仍需 EM）
-    // 公式: 技能倍率 × 反应倍率 × (1 + EM加成 + 反应加成) × 暴击 × 抗性 × 擢升 × 独立
-    const moonRate = MOON_RATES[ctx.reactionType] ?? 1;
-    const emBonus = getMoonsignEMBonus(ctx.stats.em);
-    const moonReactionBonus = ctx.extraBonuses?.moonReactionBonus ?? 0;
-    const moonMultiplier = moonRate * (1 + emBonus + moonReactionBonus);
-
-    const totalDamage = baseDamage * critMultiplier * resistanceMultiplier * elevationMultiplier * independentMultiplier * moonMultiplier;
-
-    return {
-      totalDamage,
-      baseDamage,
-      scalingMultiplier: 1,
-      bonusMultiplier: 1,
-      critMultiplier,
-      resistanceMultiplier,
-      defenseMultiplier: 1,
-      reactionMultiplier: moonMultiplier,
-      damagePath: DamagePath.MOONSIGN_DIRECT,
-      aggravationBonus: 0,
-      elevationMultiplier,
-      independentMultiplier,
-      baseDebug: (ctx as any).__baseDebug,
-      critDebug: (ctx as any).__critDebug,
-      resistDebug: (ctx as any).__resistDebug,
-      elevDebug: (ctx as any).__elevDebug,
-      moonDebug: { moonRate, levelMultiplier: 1, em: ctx.stats.em, emBonus, moonReactionBonus, result: moonMultiplier },
-    };
+  /** Layer 3b: 暴击区。剧变跳过。 */
+  private static computeCrit(ctx: DamageContext, path: DamagePath): number {
+    if (path === DamagePath.TRANSFORMATIVE) return 1;
+    return new CritZone().calculate(ctx);
   }
 }

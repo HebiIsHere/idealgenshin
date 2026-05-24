@@ -343,6 +343,11 @@ export interface DamageResult {
   moonDebug?: { moonRate: number; levelMultiplier: number; em: number; emBonus: number; moonReactionBonus: number; result: number };
   elevDebug?: { elevationBonus: number; result: number };
   indepDebug?: { talentBonus: number; ctxBonus: number; result: number };
+  authorityDebug?: { authorityMultiplier: number; result: number };
+  featherDebug?: { flat: number; scalingSum: number; result: number };
+  prayerDebug?: { flat: number; scalingSum: number; result: number };
+  masteryDebug?: { em: number; emBonus: number; result: number; type: string };
+  moonSignDebug?: { moonCharacters: number; perCharBonus: number; result: number };
 }
 
 // ===== Optimizer Request/Response =====
@@ -503,6 +508,20 @@ export interface ZoneBonusInput {
   independentBonus?: number;
   /** Elevation bonus for Moonsign path (e.g. 0.3 = +30%). */
   elevationBonus?: number;
+  /** 大权区倍率（有条件额外倍率，如那维莱特）。 */
+  authorityMultiplier?: number;
+  /** 羽毛型附伤：固定值（申鹤式附加伤害）。 */
+  featherFlat?: number;
+  /** 羽毛型附伤：属性×缩放比。 */
+  featherScaling?: { atkRatio?: number; hpRatio?: number; defRatio?: number; emRatio?: number };
+  /** 祷歌型附伤：固定值（菈乌玛式附加伤害）。 */
+  prayerFlat?: number;
+  /** 祷歌型附伤：属性×缩放比。 */
+  prayerScaling?: { atkRatio?: number; hpRatio?: number; defRatio?: number; emRatio?: number };
+  /** 月兆角色数量（用于月兆区计算）。 */
+  moonCharacterCount?: number;
+  /** 每月兆角色提供的月兆区加成（默认 0.05）。 */
+  moonPerCharBonus?: number;
 }
 
 /** Weapon configuration selected by the user. */

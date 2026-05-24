@@ -24,15 +24,15 @@ const DAMAGE_PATH_LABELS: Record<DamagePath, string> = {
 
 /** Mapping from DamageResult multiplier field key to Chinese display name. */
 const ZONE_LABELS: Partial<Record<keyof Omit<DamageResult, 'totalDamage' | 'scalingMultiplier'>, string>> = {
-  baseDamage: '基础伤害区',
+  baseDamage: '倍率区',
   bonusMultiplier: '增伤区',
   critMultiplier: '暴击区',
   resistanceMultiplier: '抗性区',
   defenseMultiplier: '防御区',
-  reactionMultiplier: '反应区',
+  reactionMultiplier: '反应区(系数×月兆)',
   damagePath: '伤害路径',
   aggravationBonus: '激化加成',
-  elevationMultiplier: '擢升乘区',
+  elevationMultiplier: '擢升区',
   independentMultiplier: '独立乘区',
 };
 
@@ -135,6 +135,30 @@ function getZoneDetail(key: string, _zoneName: string | undefined, value: number
     default:
       return null;
   }
+
+  // 补充 debug: 大权区 / 羽毛附伤 / 祷歌附伤 / 精通区 / 月兆区
+  const authorityD = d.authorityDebug;
+  if (authorityD && authorityD.result > 1) {
+    return { steps: [`有条件倍率 = ${formatNumber(authorityD.authorityMultiplier)}`, `= ${formatNumber(authorityD.result, 4)}`], displayValue: `×${formatNumber(authorityD.result, 4)}` };
+  }
+  const featherD = d.featherDebug;
+  if (featherD && featherD.result > 0) {
+    return { steps: [`固定值 = ${formatNumber(featherD.flat)}`, `缩放 = ${formatNumber(featherD.scalingSum)}`, `= ${formatNumber(featherD.result)}`], displayValue: `+${formatNumber(featherD.result)}` };
+  }
+  const prayerD = d.prayerDebug;
+  if (prayerD && prayerD.result > 0) {
+    return { steps: [`固定值 = ${formatNumber(prayerD.flat)}`, `缩放 = ${formatNumber(prayerD.scalingSum)}`, `= ${formatNumber(prayerD.result)}`], displayValue: `+${formatNumber(prayerD.result)}` };
+  }
+  const masteryD = d.masteryDebug;
+  if (masteryD && masteryD.result > 1) {
+    return { steps: [`EM = ${masteryD.em}`, `EM加成 = ${(masteryD.emBonus * 100).toFixed(1)}%`, `= ${formatNumber(masteryD.result, 6)}`], displayValue: `×${formatNumber(masteryD.result, 6)}` };
+  }
+  const moonSignD = d.moonSignDebug;
+  if (moonSignD && moonSignD.result > 1) {
+    return { steps: [`月兆角色 = ${moonSignD.moonCharacters}人`, `= ${formatNumber(moonSignD.result, 4)}`], displayValue: `×${formatNumber(moonSignD.result, 4)}` };
+  }
+
+  return null;
 }
 
 interface OptimizationResultProps {
