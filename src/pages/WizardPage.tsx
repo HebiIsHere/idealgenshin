@@ -284,12 +284,11 @@ function WizardPage(): React.ReactElement {
 
       case 'talents':
         return (<Box>
-          <Box sx={{ mb: 1 }}>
-            <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600, color: 'primary.main' }}>天赋详情</Typography>
-            <Box sx={{ maxHeight: 160, overflowY: 'auto', '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { background: 'rgba(212,168,67,0.15)', borderRadius: 2 } }}><TalentInput /></Box>
+          <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>天赋与命座</Typography>
+          <Box sx={{ mb: 2 }}>
+            <TalentInput />
           </Box>
-          <Box sx={{ mb: 1 }}>
-            <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600, color: 'primary.main' }}>命座模拟</Typography>
+          <Box sx={{ mb: 2 }}>
             <ConstellationInput />
           </Box>
           <Divider sx={{ my: 1 }} />
@@ -328,7 +327,7 @@ function WizardPage(): React.ReactElement {
   }, [selectedCharacter, characterLevel, skillMultiplier, reactionType, amplifyingMultiplier, weaponConfig, talentConfig, teamBuffConfig, reactionOptions, reactIdx, handleReactionChange, selectedScenario, damageResult, redistributeResult, idealResult, damageComparison, idealRollCount, resultLabels, customScaling, laumaCons, laumaEM, setSkillMultiplier, setCharacterLevel, setTalentConfig, setWeaponConfig, setConstellationBonus]);
 
   return (
-    <Box sx={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', bgcolor: 'background.default' }}>
+    <Box sx={{ position: 'relative', width: '100vw', height: '100vh', bgcolor: 'background.default' }}>
       <LoadingOverlay visible={isCalculating} progress={progress} message="正在计算…" />
       <IconButton onClick={exitWizard} sx={{ position: 'fixed', top: 16, left: 16, zIndex: 20, color: 'text.secondary', '&:hover': { color: 'primary.main' } }}><ArrowBackIcon /></IconButton>
       <SectionStepper resultLabels={resultLabels} />

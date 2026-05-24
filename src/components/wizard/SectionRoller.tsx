@@ -32,9 +32,13 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
         width: '100%',
         height: '100vh',
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
+        overflowY: 'auto',
         px: { xs: 2, md: 6 },
+        py: { xs: 4, md: 6 },
+        '&::-webkit-scrollbar': { width: 4 },
+        '&::-webkit-scrollbar-thumb': { background: 'rgba(212,168,67,0.15)', borderRadius: 2 },
       }}
     >
       <Paper
@@ -51,6 +55,7 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
           opacity: animating ? 0 : 1,
           transform: animating ? 'translateY(16px)' : 'translateY(0)',
           transition: 'opacity 160ms cubic-bezier(0.16,1,0.3,1), transform 160ms cubic-bezier(0.16,1,0.3,1)',
+          my: 'auto',
         }}
       >
         {renderSection(sections[displayed] ?? sections[currentIndex])}
