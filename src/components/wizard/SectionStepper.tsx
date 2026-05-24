@@ -8,6 +8,7 @@ import { useWizardStore, WIZARD_SECTIONS, type WizardSection } from '../../store
 import { useCharacterStore } from '../../store/slices/characterSlice';
 
 const SECTION_LABELS: Record<string, string> = {
+  import: 'Enka 导入',
   character: '角色选择',
   weapon: '武器配置',
   artifacts: '圣遗物',

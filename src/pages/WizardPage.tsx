@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Chip from '@mui/material/Chip';
 
@@ -35,7 +36,7 @@ import { SUBSTAT_MID_VALUES } from '../data/constants';
 import { getReactionOptions, isNodKraiCharacter } from '../data/reactions';
 import { getScenariosByCharacterId } from '../data/scenarios';
 import { formatDamage, formatNumber } from '../utils/format';
-import type { CharacterBuild, ArtifactInstance, DamageContext, DamageResult, SubstatAllocation } from '../types';
+import type { CharacterBuild, ArtifactInstance, DamageContext, DamageResult } from '../types';
 import { ArtifactSlotType, SubstatType, ElementType } from '../types';
 
 function WizardPage(): React.ReactElement {
@@ -50,8 +51,7 @@ function WizardPage(): React.ReactElement {
     selectedCharacter, characterLevel, skillMultiplier, reactionType, amplifyingMultiplier,
     setSkillMultiplier, setReactionType, setAmplifyingMultiplier, setCharacterLevel,
     teamBuffs, weaponConfig, constellationConfig, talentConfig, setBonus,
-    statConversions, setConversions, setWeaponConfig, setWeaponRefinement,
-    selectedScenarioId,
+    statConversions, setConversions,
   } = useCharacterStore();
 
   const { artifacts } = useArtifactStore();
@@ -90,6 +90,7 @@ function WizardPage(): React.ReactElement {
 
   const scenarios = selectedCharacter ? getScenariosByCharacterId(selectedCharacter.id)?.scenarios ?? [] : [];
   const selectedScenario = scenarios.find((s) => s.id === selectedScenarioId) ?? null;
+  const _selectedScenarioId = selectedScenario?.id ?? null;
 
   const currentBuild = useMemo<CharacterBuild | null>(() => {
     if (!selectedCharacter) return null;
@@ -168,12 +169,12 @@ function WizardPage(): React.ReactElement {
   const renderSection = useCallback((section: WizardSection): React.ReactNode => {
     const s = String(section);
     if (s.startsWith('result_')) {
-      if (s.includes('理想模板') || (idealResult && resultLabels[s]?.includes('理想'))) {
+      if (resultLabels[s]?.includes('理想') || (idealResult && !s.includes('重优化'))) {
         return (<Box><Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>理想模板</Typography>
           {idealResult ? (<Box sx={{ textAlign: 'center' }}><Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 700 }}>{Math.round(idealResult.theoreticalDamage).toLocaleString('en-US')}</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>理论伤害（{idealRollCount} 词条）</Typography></Box>) : <Typography color="text.secondary">计算中…</Typography>}</Box>);
       }
-      if (s.includes('重优化') || (redistributeResult && resultLabels[s]?.includes('重优化'))) {
+      if (resultLabels[s]?.includes('重优化') || (redistributeResult && !s.includes('理想'))) {
         return (<Box><Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>同词条重优化</Typography>
           {redistributeResult ? (<Box><Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, mb: 2 }}>
             <Box sx={{ textAlign: 'center' }}><Typography variant="caption" color="text.secondary">优化前</Typography><Typography variant="h6">{formatDamage(redistributeResult.originalDamage)}</Typography></Box>
@@ -186,41 +187,44 @@ function WizardPage(): React.ReactElement {
     }
 
     switch (s) {
+      case 'import':
+        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>Enka 导入</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>输入 UID 自动导入角色展柜数据，省去手动填写</Typography>
+          <ArtifactImport /></Box>);
       case 'character':
-        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>选择角色与等级</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>请选择需要分析的角色</Typography>
+        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>选择角色</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择一位需要分析的角色</Typography>
           <CharacterSelect />
           <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box component="input" type="number" min={1} max={90} value={characterLevel}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1 && v <= 90) setCharacterLevel(v); }}
-              sx={{ width: 80, p: 1, borderRadius: 1, border: '1px solid', borderColor: 'rgba(212,168,67,0.2)', bgcolor: '#16213E', color: 'text.primary', fontSize: '0.9rem' }} />
-            <Typography variant="body2" color="text.secondary">级</Typography>
+            <TextField label="角色等级" type="number" size="small" value={characterLevel}
+              onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1 && v <= 90) setCharacterLevel(v); }}
+              slotProps={{ htmlInput: { min: 1, max: 90 } }} sx={{ width: 120 }} />
           </Box></Box>);
       case 'weapon':
         return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>武器配置</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择武器并配置精炼等级</Typography>
-          <WeaponSelect />{weaponConfig && <WeaponPassiveInput />}</Box>);
+          <WeaponSelect />{weaponConfig && <Box sx={{ mt: 2 }}><WeaponPassiveInput /></Box>}</Box>);
       case 'artifacts':
         return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>圣遗物配置</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>填入圣遗物属性，或使用 Enka 自动导入</Typography>
-          <ArtifactImport /><ArtifactEditor /><ArtifactSetSelect importedSetNames={[]} importedSetCounts={{}} /></Box>);
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>逐部位填入圣遗物主/副词条属性</Typography>
+          <ArtifactEditor /><Box sx={{ mt: 2 }}><ArtifactSetSelect importedSetNames={[]} importedSetCounts={{}} /></Box></Box>);
       case 'talents':
         return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>天赋与命座</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>查看角色天赋效果，手动填入加成数值</Typography>
-          <TalentInput /><Box sx={{ mt: 2 }}><Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>命座模拟</Typography><ConstellationInput /></Box></Box>);
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>查看天赋详情，手动填入各乘区加成</Typography>
+          <TalentInput /><Box sx={{ mt: 2 }}><ConstellationInput /></Box></Box>);
       case 'teambuffs':
         return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>队伍 Buff</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>添加辅助、圣遗物、共鸣等队伍增益</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>添加辅助角色、圣遗物套装、元素共鸣等增益</Typography>
           <TeamBuffPanel config={teamBuffConfig} onChange={setTeamBuffConfig} /></Box>);
       case 'scenario':
         return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>攻击配置与场景</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>设置技能倍率、反应类型及敌人参数</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>设置技能倍率、反应类型及敌人等级/抗性</Typography>
           <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2" color="text.secondary">技能倍率</Typography>
-            <Box component="input" type="number" step={0.0001} min={0} max={1000} value={skillMultiplier}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { const v = parseFloat(e.target.value); if (!isNaN(v)) setSkillMultiplier(v); }}
-              sx={{ width: 120, p: 1, borderRadius: 1, border: '1px solid', borderColor: 'rgba(212,168,67,0.2)', bgcolor: '#16213E', color: 'text.primary', fontSize: '0.9rem' }} />
-            <Typography variant="body2" color="text.secondary">= {(skillMultiplier * 100).toFixed(2)}%</Typography></Box>
+            <TextField label="技能倍率" type="number" size="small" value={skillMultiplier}
+              onChange={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v)) setSkillMultiplier(v); }}
+              slotProps={{ htmlInput: { step: 0.0001, min: 0, max: 1000 } }} sx={{ width: 140 }} />
+            <Typography variant="body2" color="text.secondary">= {(skillMultiplier * 100).toFixed(2)}%</Typography>
+          </Box>
           <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>反应类型</Typography>
           <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 2 }}>{reactionOptions.map((opt, i) => (
             <Chip key={opt.type} label={opt.label} color={reactIdx === i ? 'primary' : 'default'} variant={reactIdx === i ? 'filled' : 'outlined'} onClick={() => handleReactionChange(i)} size="small" />))}</Box>
@@ -230,8 +234,7 @@ function WizardPage(): React.ReactElement {
     }
   }, [selectedCharacter, characterLevel, skillMultiplier, reactionType, amplifyingMultiplier, weaponConfig,
     teamBuffConfig, reactionOptions, reactIdx, handleReactionChange, selectedScenario,
-    damageResult, redistributeResult, idealResult, damageComparison, idealRollCount, resultLabels,
-    setCharacterLevel, setSkillMultiplier]);
+    damageResult, redistributeResult, idealResult, damageComparison, idealRollCount, resultLabels]);
 
   return (
     <Box sx={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', bgcolor: 'background.default' }}>

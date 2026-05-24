@@ -1,55 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
-import { useWizardStore, type WizardSection, WIZARD_SECTIONS } from '../../store/slices/wizardSlice';
+import Paper from '@mui/material/Paper';
+import { useWizardStore, type WizardSection } from '../../store/slices/wizardSlice';
 
 interface SectionRollerProps {
-  /** Render function for each section */
   renderSection: (section: WizardSection) => React.ReactNode;
 }
 
 function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElement {
   const currentIndex = useWizardStore((s) => s.currentIndex);
   const sections = useWizardStore((s) => s.sections);
-  const nextSection = useWizardStore((s) => s.nextSection);
+  const [displayed, setDisplayed] = useState(currentIndex);
+  const [animating, setAnimating] = useState(false);
+  const prevIndex = useRef(currentIndex);
+
+  useEffect(() => {
+    if (currentIndex !== prevIndex.current) {
+      setAnimating(true);
+      const timer = setTimeout(() => {
+        setDisplayed(currentIndex);
+        setAnimating(false);
+      }, 160);
+      prevIndex.current = currentIndex;
+      return () => clearTimeout(timer);
+    }
+  }, [currentIndex]);
 
   return (
     <Box
       sx={{
-        position: 'relative',
         width: '100%',
         height: '100vh',
-        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: { xs: 2, md: 6 },
       }}
     >
-      {/* 滚筒容器 */}
-      <Box
+      <Paper
+        elevation={0}
         sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
           width: '100%',
-          transition: 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)',
-          transform: `translateY(-${currentIndex * 100}vh)`,
+          maxWidth: 600,
+          p: { xs: 3, md: 5 },
+          borderRadius: 3,
+          border: '1px solid',
+          borderColor: 'rgba(212,168,67,0.1)',
+          bgcolor: 'rgba(22,33,62,0.6)',
+          backdropFilter: 'blur(12px)',
+          opacity: animating ? 0 : 1,
+          transform: animating ? 'translateY(16px)' : 'translateY(0)',
+          transition: 'opacity 160ms cubic-bezier(0.16,1,0.3,1), transform 160ms cubic-bezier(0.16,1,0.3,1)',
         }}
       >
-        {sections.map((section) => (
-          <Box
-            key={String(section)}
-            sx={{
-              height: '100vh',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              px: { xs: 2, md: 4 },
-            }}
-          >
-            <Box sx={{ width: '100%', maxWidth: 680, mx: 'auto' }}>
-              {renderSection(section)}
-            </Box>
-          </Box>
-        ))}
-      </Box>
+        {renderSection(sections[displayed] ?? sections[currentIndex])}
+      </Paper>
     </Box>
   );
 }

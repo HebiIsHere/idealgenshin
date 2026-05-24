@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 /** 滚筒板块标识 */
 export const WIZARD_SECTIONS = [
+  'import',      // Enka 导入
   'character',   // 角色选择
   'weapon',      // 武器配置
   'artifacts',   // 圣遗物
