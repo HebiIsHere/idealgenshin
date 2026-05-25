@@ -544,7 +544,7 @@ function WizardPage(): React.ReactElement {
       default:
         return <Typography color="text.secondary">未知板块</Typography>;
     }
-  }, [selectedCharacter, characterLevel, skillMultiplier, amplifyingMultiplier, weaponConfig, talentConfig, teamBuffConfig, reactionOptions, reactIdx, handleReactionChange, damageResult, redistributeResult, idealResult, damageComparison, idealRollCount, resultLabels, customScaling, laumaCons, laumaEM, talentExpand, constExpand, setSkillMultiplier, setCharacterLevel, setTalentConfig, setWeaponConfig, setConstellationBonus]);
+  }, [selectedCharacter, characterLevel, skillMultiplier, amplifyingMultiplier, weaponConfig, talentConfig, teamBuffConfig, reactionOptions, reactIdx, handleReactionChange, damageResult, redistributeResult, idealResult, damageComparison, idealRollCount, resultLabels, customScaling, laumaCons, laumaEM, talentExpand, constExpand, setSkillMultiplier, setCharacterLevel, setTalentConfig, setWeaponConfig, setConstellationBonus, constellationConfig, talentConfig]);
 
   return (
     <Box sx={{ position: 'relative', width: '100vw', height: '100vh', bgcolor: 'background.default' }}>
