@@ -20,9 +20,6 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/enka-api/, ''),
       },
     },
-    warmup: {
-      clientFiles: ['./src/main.tsx', './src/pages/WizardPage.tsx', './src/pages/LandingPage.tsx'],
-    },
   },
   preview: {
     host: '0.0.0.0',
