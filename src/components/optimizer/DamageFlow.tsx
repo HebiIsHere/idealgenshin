@@ -75,8 +75,8 @@ function DamageFlow({ result, computedStats }: DamageFlowProps): React.ReactElem
           {result.baseDebug && (
             <>
               <FlowRow label="总攻击力" value={fmt(result.baseDebug.totalAtk)} />
-              {(result.baseDebug.atkRatio ?? 0) > 0 && (
-                <FlowRow label="倍率" value={`×${fmt(result.baseDebug.atkRatio ?? 0)}`} sub={result.baseDebug.atkRatio > 0 ? `${(result.baseDebug.atkRatio * 100).toFixed(4)}%` : ''} />
+              {(result.baseDebug.atkRatio! ?? 0) > 0 && (
+                <FlowRow label="倍率" value={`×${fmt(result.baseDebug.atkRatio! ?? 0)}`} sub={result.baseDebug.atkRatio! > 0 ? `${(result.baseDebug.atkRatio! * 100).toFixed(4)}%` : ''} />
               )}
               {(result.baseDebug.hpRatio ?? 0) > 0 && (
                 <FlowRow label="生命倍率" value={`×${fmt(result.baseDebug.hpRatio ?? 0)}`} />

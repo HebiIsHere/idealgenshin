@@ -4,8 +4,6 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
-import Slider from '@mui/material/Slider';
-import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
@@ -187,7 +185,7 @@ function WizardPage(): React.ReactElement {
   const isNod = selectedCharacter ? isNodKraiCharacter(selectedCharacter.id) : false;
   const charElement = selectedCharacter?.element ?? ElementType.PYRO;
   const reactionOptions = useMemo(() => getReactionOptions(charElement, isNod), [charElement, isNod]);
-  const reactIdx = useMemo(() => reactionOptions.findIndex((o) => o.type === reactionType), [reactionOptions]);
+  const reactIdx = useMemo(() => reactionOptions.findIndex((o) => o.type === reactionType), [reactionOptions, reactionType]);
 
   React.useEffect(() => {
     const first = reactionOptions[0];
@@ -214,12 +212,12 @@ function WizardPage(): React.ReactElement {
     return {
       character: selectedCharacter,
       weaponConfig: weaponConfig ?? { weaponData: DEFAULT_WEAPON, weaponLevel: 90, refinement: 1, passiveBonus: {} },
-      artifacts: artifactList, characterLevel, skillMultiplier, amplifyingMultiplier,
+      artifacts: artifactList, characterLevel, skillMultiplier, reactionType, amplifyingMultiplier,
       teamBuffs, constellationConfig, talentConfig, setBonus, teamBuffBonuses: mergedTeamBonuses,
       statScaling: customScaling,
       statConversions: [...statConversions, ...setConversions].length > 0 ? [...statConversions, ...setConversions] : undefined,
     };
-  }, [selectedCharacter, artifacts, characterLevel, skillMultiplier, amplifyingMultiplier,
+  }, [selectedCharacter, artifacts, characterLevel, skillMultiplier, reactionType, amplifyingMultiplier,
     teamBuffs, weaponConfig, constellationConfig, talentConfig, setBonus, statConversions, setConversions, teamBuffBonuses, customScaling, laumaEM, laumaCons]);
 
   const computedStats = useMemo(() => { if (!currentBuild) return null; return StatCalculator.compute(currentBuild); }, [currentBuild]);

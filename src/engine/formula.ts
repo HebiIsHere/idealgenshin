@@ -8,7 +8,6 @@ import {
   ResistanceZone,
   DefenseZone,
   AmplifyingZone,
-  TransformativeZone,
   CatalyzeZone,
   MoonsignZone,
   ElevationZone,

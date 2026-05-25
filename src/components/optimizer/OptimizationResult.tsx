@@ -138,24 +138,24 @@ function getZoneDetail(key: string, _zoneName: string | undefined, value: number
 
   // 补充 debug: 大权区 / 羽毛附伤 / 祷歌附伤 / 精通区 / 月兆区
   const authorityD = d.authorityDebug;
-  if (authorityD && authorityD.result > 1) {
-    return { steps: [`有条件倍率 = ${formatNumber(authorityD.result)}`, `= ${formatNumber(authorityD.result, 4)}`], displayValue: `×${formatNumber(authorityD.result, 4)}` };
+  if (authorityD && authorityD!.result > 1) {
+    return { steps: [`有条件倍率 = ${formatNumber(authorityD!.result)}`, `= ${formatNumber(authorityD!.result, 4)}`], displayValue: `×${formatNumber(authorityD!.result, 4)}` };
   }
   const featherD = d.featherDebug;
-  if (featherD && featherD.result > 0) {
-    return { steps: [`固定值 = ${formatNumber(featherD.flat)}`, `缩放 = ${formatNumber(featherD.scalingSum)}`, `= ${formatNumber(featherD.result)}`], displayValue: `+${formatNumber(featherD.result)}` };
+  if (featherD && featherD!.result > 0) {
+    return { steps: [`固定值 = ${formatNumber(featherD!.flat)}`, `缩放 = ${formatNumber(featherD!.scalingSum)}`, `= ${formatNumber(featherD!.result)}`], displayValue: `+${formatNumber(featherD!.result)}` };
   }
   const prayerD = d.prayerDebug;
-  if (prayerD && prayerD.result > 0) {
-    return { steps: [`固定值 = ${formatNumber(prayerD.flat)}`, `缩放 = ${formatNumber(prayerD.scalingSum)}`, `= ${formatNumber(prayerD.result)}`], displayValue: `+${formatNumber(prayerD.result)}` };
+  if (prayerD && prayerD!.result > 0) {
+    return { steps: [`固定值 = ${formatNumber(prayerD!.flat)}`, `缩放 = ${formatNumber(prayerD!.scalingSum)}`, `= ${formatNumber(prayerD!.result)}`], displayValue: `+${formatNumber(prayerD!.result)}` };
   }
   const masteryD = d.masteryDebug;
-  if (masteryD && masteryD.result > 1) {
-    return { steps: [`EM = ${masteryD.em}`, `EM加成 = ${(masteryD.emBonus * 100).toFixed(4)}%`, `= ${formatNumber(masteryD.result, 6)}`], displayValue: `×${formatNumber(masteryD.result, 6)}` };
+  if (masteryD && masteryD!.result > 1) {
+    return { steps: [`EM = ${masteryD!.em}`, `EM加成 = ${(masteryD!.emBonus * 100).toFixed(4)}%`, `= ${formatNumber(masteryD!.result, 6)}`], displayValue: `×${formatNumber(masteryD!.result, 6)}` };
   }
   const moonSignD = d.moonSignDebug;
-  if (moonSignD && moonSignD.result > 1) {
-    return { steps: [`月兆加成 = ${(moonSignD.moonBonus * 100).toFixed(4)}%`, `= ${formatNumber(moonSignD.result, 4)}`], displayValue: `×${formatNumber(moonSignD.result, 4)}` };
+  if (moonSignD && moonSignD!.result > 1) {
+    return { steps: [`月兆加成 = ${(moonSignD!.moonBonus * 100).toFixed(4)}%`, `= ${formatNumber(moonSignD!.result, 4)}`], displayValue: `×${formatNumber(moonSignD!.result, 4)}` };
   }
 
   return null;

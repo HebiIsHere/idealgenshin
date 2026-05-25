@@ -58,7 +58,6 @@ function SectionStepper({ resultLabels = {} }: SectionStepperProps): React.React
         const originalIdx = sections.indexOf(key);
         const isCurrent = originalIdx === currentIndex;
         const isPast = originalIdx < currentIndex;
-        const isFuture = originalIdx > currentIndex;
         const resultItem = isResult(key);
         const hidden = resultItem && !isCurrentResult;
 
