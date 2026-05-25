@@ -76,19 +76,19 @@ function DamageFlow({ result, computedStats }: DamageFlowProps): React.ReactElem
             <>
               <FlowRow label="总攻击力" value={fmt(result.baseDebug.totalAtk)} />
               {(result.baseDebug.atkRatio ?? 0) > 0 && (
-                <FlowRow label="倍率" value={`×${fmt(result.baseDebug. ?? 0)}`} sub={result.baseDebug.atkRatio > 0 ? `${(result.baseDebug.atkRatio * 100).toFixed(4)}%` : ''} />
+                <FlowRow label="倍率" value={`×${fmt(result.baseDebug.atkRatio ?? 0)}`} sub={result.baseDebug.atkRatio > 0 ? `${(result.baseDebug.atkRatio * 100).toFixed(4)}%` : ''} />
               )}
               {(result.baseDebug.hpRatio ?? 0) > 0 && (
-                <FlowRow label="生命倍率" value={`×${fmt(result.baseDebug. ?? 0)}`} />
+                <FlowRow label="生命倍率" value={`×${fmt(result.baseDebug.hpRatio ?? 0)}`} />
               )}
               {(result.baseDebug.defRatio ?? 0) > 0 && (
-                <FlowRow label="防御倍率" value={`×${fmt(result.baseDebug. ?? 0)}`} />
+                <FlowRow label="防御倍率" value={`×${fmt(result.baseDebug.defRatio ?? 0)}`} />
               )}
               {(result.baseDebug.emRatio ?? 0) > 0 && (
-                <FlowRow label="精通倍率" value={`×${fmt(result.baseDebug. ?? 0)}`} />
+                <FlowRow label="精通倍率" value={`×${fmt(result.baseDebug.emRatio ?? 0)}`} />
               )}
               {result.baseDebug.baseDmgMultiplier && result.baseDebug.baseDmgMultiplier !== 1 && (
-                <FlowRow label="倍率提升" value={`×${fmt(result.baseDebug. ?? 0)}`} />
+                <FlowRow label="倍率提升" value={`×${fmt(result.baseDebug.baseDmgMultiplier ?? 1)}`} />
               )}
               {(() => {
                 const parts: string[] = [];
