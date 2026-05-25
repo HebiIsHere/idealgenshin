@@ -332,7 +332,7 @@ export interface DamageResult {
   /** Independent multiplier (talent/constellation special bonuses). */
   independentMultiplier?: number;
   /** Debug: per-zone calculation breakdowns. */
-  baseDebug?: { totalAtk: number; skillMultiplier: number; rawBase: number; baseDamageFlat: number; result: number };
+  baseDebug?: { totalAtk: number; totalHp?: number; totalDef?: number; em?: number; atkRatio?: number; hpRatio?: number; defRatio?: number; emRatio?: number; skillMultiplier: number; baseDmgMultiplier?: number; rawBase: number; baseDamageFlat: number; result: number };
   bonusDebug?: { dmgBonus: number; result: number };
   critDebug?: { critRate: number; critDmg: number; effectiveCritRate: number; result: number };
   resistDebug?: { enemyResistance: number; resistReduction: number; effectiveRes: number; result: number };
@@ -343,7 +343,7 @@ export interface DamageResult {
   moonDebug?: { moonRate: number; levelMultiplier: number; em: number; emBonus: number; moonReactionBonus: number; result: number };
   elevDebug?: { elevationBonus: number; result: number };
   indepDebug?: { talentBonus: number; ctxBonus: number; result: number };
-  authorityDebug?: { authorityMultiplier: number; result: number };
+  authorityDebug?: { bonus: number; result: number };
   featherDebug?: { flat: number; scalingSum: number; result: number };
   prayerDebug?: { flat: number; scalingSum: number; result: number };
   masteryDebug?: { em: number; emBonus: number; result: number; type: string };

@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import { formatDamage } from '../../utils/format';
-import type { DamageResult, DamagePath } from '../../types';
+import type { DamageResult } from '../../types';
 
 const PATH_NAMES: Record<string, string> = {
   DIRECT: '直伤',

@@ -1,6 +1,6 @@
 import type { DamageContext } from '../../types';
 import type { DamageZone } from './base';
-import { ReactionType } from '../../types';
+// import { ReactionType } from '../../types';
 
 /**
  * MoonsignZone — 月兆区乘数。

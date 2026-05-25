@@ -30,7 +30,7 @@ interface WizardState {
   /** 下一步 */
   nextSection: () => void;
   /** 插入结果板块 */
-  insertResultSection: (label: string) => number;
+  insertResultSection: ((_label): string) => number;
   /** 移除结果板块 */
   removeResultSections: () => void;
   /** 是否有未完成板块 */
@@ -56,7 +56,7 @@ export const useWizardStore = create<WizardState>((set, get) => ({
     }
   },
 
-  insertResultSection: (label) => {
+  insertResultSection: ((_label)) => {
     resultCounter++;
     const key = `result_${resultCounter}` as WizardSection;
     set((state) => {

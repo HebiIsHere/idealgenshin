@@ -47,7 +47,7 @@ import talentRef from '../data/talents/ref.json';
 import constellationRef from '../data/constellations/ref.json';
 import avatarMap from '../data/avatar_to_character.json';
 import { getReactionOptions, isNodKraiCharacter } from '../data/reactions';
-import { formatDamage, formatNumber } from '../utils/format';
+import { formatDamage } from '../utils/format';
 import type { CharacterBuild, ArtifactInstance, DamageContext, DamageResult, StatScaling, ZoneBonusInput as ZBType } from '../types';
 import { ArtifactSlotType, SubstatType, ElementType, ReactionType } from '../types';
 

@@ -54,7 +54,7 @@ function SectionStepper({ resultLabels = {} }: SectionStepperProps): React.React
         alignItems: 'flex-start',
       }}
     >
-      {allSections.map((key, idx) => {
+      {allSections.map((key) => {
         const originalIdx = sections.indexOf(key);
         const isCurrent = originalIdx === currentIndex;
         const isPast = originalIdx < currentIndex;
