@@ -15,7 +15,6 @@ import type { ComputedStats } from '../../types';
 interface CharacterStatPanelProps {
   stats: ComputedStats | null;
   showActions?: boolean;
-  compact?: boolean;
   onCalcDamage?: () => void;
   onRedistribute?: () => void;
   onIdealTemplate?: () => void;
@@ -43,38 +42,11 @@ function StatRow({ label, value, accent }: { label: string; value: string; accen
 function CharacterStatPanel({
   stats,
   showActions = false,
-  compact = false,
   onCalcDamage,
   onRedistribute,
   onIdealTemplate,
 }: CharacterStatPanelProps): React.ReactElement {
   const [expanded, setExpanded] = React.useState(false);
-
-  if (compact && stats) {
-    return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-          ATK {stats.totalAtk.toFixed(0)}
-        </Typography>
-        <Typography variant="caption" sx={{ color: 'primary.main', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-          CR {(stats.critRate * 100).toFixed(1)}%
-        </Typography>
-        <Typography variant="caption" sx={{ color: 'primary.main', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-          CD {(stats.critDmg * 100).toFixed(1)}%
-        </Typography>
-        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-          EM {stats.em.toFixed(0)}
-        </Typography>
-        {showActions && (
-          <Box sx={{ display: 'flex', gap: 0.5, ml: 'auto' }}>
-            <Button variant="contained" size="small" onClick={onCalcDamage} sx={{ fontSize: '0.65rem', px: 1, py: 0.25, minWidth: 0 }}>计算</Button>
-            <Button variant="outlined" size="small" onClick={onRedistribute} sx={{ fontSize: '0.65rem', px: 1, py: 0.25, minWidth: 0 }}>重优化</Button>
-            <Button variant="outlined" size="small" onClick={onIdealTemplate} sx={{ fontSize: '0.65rem', px: 1, py: 0.25, minWidth: 0 }}>理想</Button>
-          </Box>
-        )}
-      </Box>
-    );
-  }
 
   if (!stats) {
     return (
