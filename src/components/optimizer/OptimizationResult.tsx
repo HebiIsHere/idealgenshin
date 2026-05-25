@@ -139,7 +139,7 @@ function getZoneDetail(key: string, _zoneName: string | undefined, value: number
   // 补充 debug: 大权区 / 羽毛附伤 / 祷歌附伤 / 精通区 / 月兆区
   const authorityD = d.authorityDebug;
   if (authorityD && authorityD.result > 1) {
-    return { steps: [`有条件倍率 = ${formatNumber(authorityD.authorityMultiplier)}`, `= ${formatNumber(authorityD.result, 4)}`], displayValue: `×${formatNumber(authorityD.result, 4)}` };
+    return { steps: [`有条件倍率 = ${formatNumber(authorityD.result)}`, `= ${formatNumber(authorityD.result, 4)}`], displayValue: `×${formatNumber(authorityD.result, 4)}` };
   }
   const featherD = d.featherDebug;
   if (featherD && featherD.result > 0) {

@@ -215,7 +215,7 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
   // ── 补充大权区 / 羽毛附伤 / 祷歌附伤 / 精通区 / 月兆区 debug ──
   const authorityD = d.authorityDebug;
   if (authorityD && authorityD.result > 1) {
-    return { zoneLabel: '大权区', value: authorityD.result, displayValue: `×${formatNumber(authorityD.result, 4)}`, steps: [`有条件倍率 = ${formatNumber(authorityD.authorityMultiplier)}`, `= ${formatNumber(authorityD.result, 4)}`] };
+    return { zoneLabel: '大权区', value: authorityD.result, displayValue: `×${formatNumber(authorityD.result, 4)}`, steps: [`有条件倍率 = ${formatNumber(authorityD.result)}`, `= ${formatNumber(authorityD.result, 4)}`] };
   }
   const featherD = d.featherDebug;
   if (featherD && featherD.result > 0) {

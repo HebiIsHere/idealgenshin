@@ -56,7 +56,7 @@ export const useWizardStore = create<WizardState>((set, get) => ({
     }
   },
 
-  insertResultSection: (label) => {
+  insertResultSection: (_label) => {
     resultCounter++;
     const key = `result_${resultCounter}` as WizardSection;
     set((state) => {

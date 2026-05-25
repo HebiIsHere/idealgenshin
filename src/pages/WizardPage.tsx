@@ -49,65 +49,7 @@ import avatarMap from '../data/avatar_to_character.json';
 import { getReactionOptions, isNodKraiCharacter } from '../data/reactions';
 import { formatDamage } from '../utils/format';
 import type { CharacterBuild, ArtifactInstance, DamageContext, DamageResult, StatScaling, ZoneBonusInput as ZBType } from '../types';
-import { ArtifactSlotType, SubstatType, ElementType, ReactionType } from '../types';
-
-function StatScalingInput({ value, onChange }: { value: StatScaling; onChange: (v: StatScaling) => void }) {
-  const stats: { key: keyof StatScaling; label: string }[] = [
-    { key: 'atkRatio', label: '攻击力' }, { key: 'hpRatio', label: '生命值' }, { key: 'defRatio', label: '防御力' }, { key: 'emRatio', label: '元素精通' },
-  ];
-  const active = stats.filter(s => (value[s.key] ?? 0) > 0);
-
-  const setEntry = (i: number, k: keyof StatScaling, r: number) => {
-    const next = { atkRatio: 0, hpRatio: 0, defRatio: 0, emRatio: 0 } as StatScaling;
-    // Keep the other entry if exists
-    const other = i === 0 ? 1 : 0;
-    if (active.length >= 2 && active[other]) {
-      next[active[other].key] = active[other].ratio ?? 1;
-    }
-    next[k] = r;
-    onChange(next);
-  };
-
-  const addEntry = () => {
-    const unused = stats.find(s => !active.some(a => a.key === s.key));
-    if (unused && active.length < 2) {
-      const next = { ...value };
-      next[unused.key] = 1;
-      onChange(next);
-    }
-  };
-
-  const removeEntry = (k: keyof StatScaling) => {
-    const next = { ...value };
-    next[k] = 0;
-    onChange(next);
-  };
-
-  return (
-    <Box>
-      <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>倍率种类（最多两项混合）</Typography>
-      {active.map((s, i) => (
-        <Box key={s.key} sx={{ display: 'flex', gap: 1, mb: 0.5, alignItems: 'center' }}>
-          <FormControl size="small" sx={{ width: 100 }}>
-            <Select value={s.key} onChange={(e) => setEntry(i, e.target.value as keyof StatScaling, s.ratio ?? 1)}>
-              {stats.map(st => <MenuItem key={st.key} value={st.key}>{st.label}</MenuItem>)}
-            </Select>
-          </FormControl>
-          <TextField size="small" type="number" value={((s.ratio ?? 1) * 100).toFixed(4)} sx={{ width: 80 }}
-            slotProps={{ htmlInput: { step: 0.1, min: 0, max: 10000 } }}
-            onChange={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v)) setEntry(i, s.key, v / 100); }} />
-          <Typography variant="body2" color="text.secondary">%</Typography>
-          {active.length > 1 && (
-            <Button size="small" color="error" onClick={() => removeEntry(s.key)} sx={{ minWidth: 24, fontSize: '0.7rem' }}>×</Button>
-          )}
-        </Box>
-      ))}
-      {active.length < 2 && (
-        <Button size="small" variant="outlined" onClick={addEntry} sx={{ mt: 0.5 }}>+ 添加倍率种类</Button>
-      )}
-    </Box>
-  );
-}
+import { ArtifactSlotType, SubstatType, ElementType } from '../types';
 
 /* Lauma prayer: EM × multiplier based on constellation */
 function calcLaumaPrayer(em: number, cons: string): number {
@@ -129,7 +71,7 @@ function WizardPage(): React.ReactElement {
   const [saveManagerOpen, setSaveManagerOpen] = useState(false);
 
   const {
-    selectedCharacter, characterLevel, skillMultiplier, reactionType, amplifyingMultiplier,
+    selectedCharacter, characterLevel, skillMultiplier, amplifyingMultiplier,
     setSkillMultiplier, setReactionType, setAmplifyingMultiplier, setCharacterLevel,
     teamBuffs, weaponConfig, constellationConfig, talentConfig, setBonus,
     statConversions, setConversions, setWeaponConfig, setTalentConfig, setConstellationBonus,
@@ -245,7 +187,7 @@ function WizardPage(): React.ReactElement {
   const isNod = selectedCharacter ? isNodKraiCharacter(selectedCharacter.id) : false;
   const charElement = selectedCharacter?.element ?? ElementType.PYRO;
   const reactionOptions = useMemo(() => getReactionOptions(charElement, isNod), [charElement, isNod]);
-  const reactIdx = useMemo(() => reactionOptions.findIndex((o) => o.type === reactionType), [reactionOptions, reactionType]);
+  const reactIdx = useMemo(() => reactionOptions.findIndex((o) => o.type === reactionType), [reactionOptions]);
 
   React.useEffect(() => {
     const first = reactionOptions[0];
@@ -272,12 +214,12 @@ function WizardPage(): React.ReactElement {
     return {
       character: selectedCharacter,
       weaponConfig: weaponConfig ?? { weaponData: DEFAULT_WEAPON, weaponLevel: 90, refinement: 1, passiveBonus: {} },
-      artifacts: artifactList, characterLevel, skillMultiplier, reactionType, amplifyingMultiplier,
+      artifacts: artifactList, characterLevel, skillMultiplier, amplifyingMultiplier,
       teamBuffs, constellationConfig, talentConfig, setBonus, teamBuffBonuses: mergedTeamBonuses,
       statScaling: customScaling,
       statConversions: [...statConversions, ...setConversions].length > 0 ? [...statConversions, ...setConversions] : undefined,
     };
-  }, [selectedCharacter, artifacts, characterLevel, skillMultiplier, reactionType, amplifyingMultiplier,
+  }, [selectedCharacter, artifacts, characterLevel, skillMultiplier, amplifyingMultiplier,
     teamBuffs, weaponConfig, constellationConfig, talentConfig, setBonus, statConversions, setConversions, teamBuffBonuses, customScaling, laumaEM, laumaCons]);
 
   const computedStats = useMemo(() => { if (!currentBuild) return null; return StatCalculator.compute(currentBuild); }, [currentBuild]);
@@ -604,7 +546,7 @@ function WizardPage(): React.ReactElement {
       default:
         return <Typography color="text.secondary">未知板块</Typography>;
     }
-  }, [selectedCharacter, characterLevel, skillMultiplier, reactionType, amplifyingMultiplier, weaponConfig, talentConfig, teamBuffConfig, reactionOptions, reactIdx, handleReactionChange, damageResult, redistributeResult, idealResult, damageComparison, idealRollCount, resultLabels, customScaling, laumaCons, laumaEM, talentExpand, constExpand, setSkillMultiplier, setCharacterLevel, setTalentConfig, setWeaponConfig, setConstellationBonus]);
+  }, [selectedCharacter, characterLevel, skillMultiplier, amplifyingMultiplier, weaponConfig, talentConfig, teamBuffConfig, reactionOptions, reactIdx, handleReactionChange, damageResult, redistributeResult, idealResult, damageComparison, idealRollCount, resultLabels, customScaling, laumaCons, laumaEM, talentExpand, constExpand, setSkillMultiplier, setCharacterLevel, setTalentConfig, setWeaponConfig, setConstellationBonus]);
 
   return (
     <Box sx={{ position: 'relative', width: '100vw', height: '100vh', bgcolor: 'background.default' }}>
