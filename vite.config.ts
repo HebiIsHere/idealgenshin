@@ -10,9 +10,6 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
-    headers: {
-      'Cache-Control': 'no-store',
-    },
     proxy: {
       '/enka-api': {
         target: 'https://enka.network',
@@ -51,8 +48,7 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       'react', 'react-dom', 'react-router-dom',
-      '@mui/material', '@mui/icons-material',
-      '@mui/material/styles', '@mui/system',
+      '@mui/material', '@mui/material/styles',
       'zustand', 'recharts', 'comlink', 'uuid',
     ],
   },
