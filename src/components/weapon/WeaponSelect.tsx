@@ -22,7 +22,7 @@ const SUBSTAT_LABELS: Record<string, string> = {
 function substatDisplay(type: string, value: number): string {
   const label = SUBSTAT_LABELS[type] || type;
   if (type === 'ELEMENTAL_MASTERY') return `${label} ${Math.round(value)}`;
-  return `${label} ${(value * 100).toFixed(1)}%`;
+  return `${label} ${(value * 100).toFixed(4)}%`;
 }
 
 /** Weapon selector with type-based filtering, auto-fill, and substat display. */

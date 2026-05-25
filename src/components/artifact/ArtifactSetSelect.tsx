@@ -48,16 +48,16 @@ function ArtifactSetSelect({ importedSetNames = [], importedSetCounts = {} }: Pr
       .filter((set): set is ArtifactSetData => !!set && (importedSetCounts[set.nameZh] || 0) >= 2);
   }, [importedSetNames, importedSetCounts]);
 
-  // 仅在 Enka 导入后自动检测一次，不覆盖用户的后续手动修改
+  // 仅在 Enka 导入后自动检测一次；新数据导入时重新检测
   useEffect(() => {
-    if (userTouchedRef.current) return; // 用户已手动修改，不再自动覆盖
-
     const entries = Object.entries(importedSetCounts).sort(([,a], [,b]) => b - a);
     if (entries.length === 0) return;
     
     // 用 count 签名判断是否同一批数据已处理过
     const sig = entries.map(([k, v]) => `${k}:${v}`).join('|');
     if (sig === lastAutoSigRef.current) return;
+    // 新数据 → 重置手动标记，允许自动检测
+    userTouchedRef.current = false;
     lastAutoSigRef.current = sig;
 
     const [mainName, mainCount] = entries[0];

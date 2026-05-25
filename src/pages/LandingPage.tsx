@@ -1,15 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Container from '@mui/material/Container';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { keyframes } from '@mui/system';
 import { useWizardStore } from '../store/slices/wizardSlice';
+import SaveManager from '../components/layout/SaveManager';
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
+`;
+
+const fadeOut = keyframes`
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-16px); }
 `;
 
 const pulse = keyframes`
@@ -17,8 +25,17 @@ const pulse = keyframes`
   50% { box-shadow: 0 0 0 16px rgba(212, 168, 67, 0); }
 `;
 
+const EXIT_MS = 350;
+
 function LandingPage(): React.ReactElement {
   const enterWizard = useWizardStore((s) => s.enterWizard);
+  const [exiting, setExiting] = useState(false);
+  const [saveManagerOpen, setSaveManagerOpen] = useState(false);
+
+  const handleEnter = () => {
+    setExiting(true);
+    setTimeout(() => enterWizard(), EXIT_MS);
+  };
 
   return (
     <Box
@@ -31,8 +48,19 @@ function LandingPage(): React.ReactElement {
         bgcolor: 'background.default',
         position: 'relative',
         overflow: 'hidden',
+        animation: exiting ? `${fadeOut} ${EXIT_MS}ms cubic-bezier(0.16,1,0.3,1) both` : 'none',
+        '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
       }}
     >
+      {/* 文件按钮 - 右上角 */}
+      <IconButton
+        onClick={() => setSaveManagerOpen(true)}
+        title="存档管理"
+        sx={{ position: 'fixed', top: 16, right: 16, zIndex: 20, color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
+      >
+        <FolderOpenIcon />
+      </IconButton>
+
       <Box
         sx={{
           position: 'absolute',
@@ -69,7 +97,7 @@ function LandingPage(): React.ReactElement {
         <Box sx={{ animation: `${fadeIn} 0.8s 0.4s cubic-bezier(0.16,1,0.3,1) both` }}>
           <Button
             variant="contained" size="large" startIcon={<AutoAwesomeIcon />}
-            onClick={enterWizard}
+            onClick={handleEnter}
             sx={{ px: 6, py: 2, fontSize: '1.1rem', borderRadius: 3, animation: `${pulse} 3s infinite` }}
           >
             开始配置
@@ -78,9 +106,11 @@ function LandingPage(): React.ReactElement {
 
         <Typography variant="caption" sx={{ color: 'text.disabled', mt: 4, display: 'block',
           animation: `${fadeIn} 0.8s 0.6s cubic-bezier(0.16,1,0.3,1) both` }}>
-          作者：袔苾 · v2.0
+          作者：袔苾 · v3.0
         </Typography>
       </Container>
+
+      <SaveManager open={saveManagerOpen} onClose={() => setSaveManagerOpen(false)} />
     </Box>
   );
 }

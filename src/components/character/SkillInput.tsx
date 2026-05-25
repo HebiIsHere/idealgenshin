@@ -58,7 +58,7 @@ function SkillInput({ showReaction = true }: SkillInputProps): React.ReactElemen
         <TextField
           label="技能倍率 (%)"
           type="number"
-          value={(skillMultiplier * 100).toFixed(1)}
+          value={(skillMultiplier * 100).toFixed(4)}
           onChange={(e) => {
             const val = parseFloat(e.target.value);
             if (!isNaN(val)) setSkillMultiplier(val / 100);

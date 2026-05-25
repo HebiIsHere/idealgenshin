@@ -7,7 +7,6 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
 import Divider from '@mui/material/Divider';
-import ScenarioSelect from './ScenarioSelect';
 import TeamBuffPanel, { TeamBuffConfig, defaultTeamBuffConfig, computeTeamBuffBonuses } from './TeamBuffPanel';
 import CharacterStatPanel from '../character/CharacterStatPanel';
 import { useCharacterStore } from '../../store/slices/characterSlice';
@@ -15,7 +14,6 @@ import { useArtifactStore } from '../../store/slices/artifactSlice';
 import { StatCalculator } from '../../engine/stats';
 import { DamageFormula } from '../../engine/formula';
 import { DEFAULT_WEAPON } from '../../data/weapons/index';
-import { getScenariosByCharacterId } from '../../data/scenarios';
 import { formatDamage, formatNumber } from '../../utils/format';
 import { mergeExtraBonuses } from '../../utils/mergeExtraBonuses';
 import { DamagePath } from '../../types';
@@ -91,8 +89,8 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
       const b = d.bonusDebug;
       if (!b) return null;
       const steps = [
-        `增伤 = ${(b.dmgBonus * 100).toFixed(1)}%`,
-        `1 + 增伤 = 1 + ${(b.dmgBonus * 100).toFixed(1)}% = ${formatNumber(b.result, 6)}`,
+        `增伤 = ${(b.dmgBonus * 100).toFixed(4)}%`,
+        `1 + 增伤 = 1 + ${(b.dmgBonus * 100).toFixed(4)}% = ${formatNumber(b.result, 6)}`,
       ];
       return { zoneLabel: zoneName ?? key, value: value as number, displayValue: `×${formatNumber(value as number, 6)}`, steps };
     }
@@ -100,10 +98,10 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
       const b = d.critDebug;
       if (!b) return null;
       const steps = [
-        `暴击率 = ${(b.critRate * 100).toFixed(1)}%`,
-        `暴击伤害 = ${(b.critDmg * 100).toFixed(1)}%`,
-        `有效暴击率 = ${(b.effectiveCritRate * 100).toFixed(1)}%`,
-        `1 + 有效暴击率 × 暴击伤害 = 1 + ${(b.effectiveCritRate * 100).toFixed(1)}% × ${(b.critDmg * 100).toFixed(1)}% = ${formatNumber(b.result, 6)}`,
+        `暴击率 = ${(b.critRate * 100).toFixed(4)}%`,
+        `暴击伤害 = ${(b.critDmg * 100).toFixed(4)}%`,
+        `有效暴击率 = ${(b.effectiveCritRate * 100).toFixed(4)}%`,
+        `1 + 有效暴击率 × 暴击伤害 = 1 + ${(b.effectiveCritRate * 100).toFixed(4)}% × ${(b.critDmg * 100).toFixed(4)}% = ${formatNumber(b.result, 6)}`,
       ];
       return { zoneLabel: zoneName ?? key, value: value as number, displayValue: `×${formatNumber(value as number, 6)}`, steps };
     }
@@ -112,14 +110,14 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
       if (!b) return null;
       const r = b.effectiveRes;
       const formulaDesc = r < 0
-        ? `1 − ${r.toFixed(2)}/2`
+        ? `1 − ${r.toFixed(4)}/2`
         : r < 0.75
-          ? `1 − ${r.toFixed(2)}`
-          : `1/(1+4×${r.toFixed(2)})`;
+          ? `1 − ${r.toFixed(4)}`
+          : `1/(1+4×${r.toFixed(4)})`;
       const steps = [
-        `敌方基础抗性 = ${(b.enemyResistance * 100).toFixed(1)}%`,
-        `减抗总和 = ${(b.resistReduction * 100).toFixed(1)}%`,
-        `有效抗性 = ${(b.enemyResistance * 100).toFixed(1)}% − ${(b.resistReduction * 100).toFixed(1)}% = ${(r * 100).toFixed(1)}%`,
+        `敌方基础抗性 = ${(b.enemyResistance * 100).toFixed(4)}%`,
+        `减抗总和 = ${(b.resistReduction * 100).toFixed(4)}%`,
+        `有效抗性 = ${(b.enemyResistance * 100).toFixed(4)}% − ${(b.resistReduction * 100).toFixed(4)}% = ${(r * 100).toFixed(4)}%`,
         `抗性乘数 = ${formulaDesc} = ${formatNumber(b.result, 6)}`,
       ];
       return { zoneLabel: zoneName ?? key, value: value as number, displayValue: `×${formatNumber(value as number, 6)}`, steps };
@@ -145,9 +143,9 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
         const steps = [
           `反应基础系数 = ${amp.baseMultiplier}`,
           `元素精通 = ${amp.em}`,
-          `EM增幅 = ${(amp.emBonus * 100).toFixed(1)}%`,
-          ...(amp.ampReactionBonus ? [`反应伤害加成 = ${(amp.ampReactionBonus * 100).toFixed(1)}%`] : []),
-          `反应乘数 = ${amp.baseMultiplier} × (1 + ${(amp.emBonus * 100).toFixed(1)}%${amp.ampReactionBonus ? ' + ' + (amp.ampReactionBonus * 100).toFixed(1) + '%' : ''}) = ${formatNumber(amp.result, 6)}`,
+          `EM增幅 = ${(amp.emBonus * 100).toFixed(4)}%`,
+          ...(amp.ampReactionBonus ? [`反应伤害加成 = ${(amp.ampReactionBonus * 100).toFixed(4)}%`] : []),
+          `反应乘数 = ${amp.baseMultiplier} × (1 + ${(amp.emBonus * 100).toFixed(4)}%${amp.ampReactionBonus ? ' + ' + (amp.ampReactionBonus * 100).toFixed(4) + '%' : ''}) = ${formatNumber(amp.result, 6)}`,
         ];
         return { zoneLabel: zoneName ?? key, value: value as number, displayValue: `×${formatNumber(value as number, 6)}`, steps };
       }
@@ -157,9 +155,9 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
           `反应系数 = ${trans.rate}`,
           `等级乘数 = ${formatNumber(trans.levelMultiplier)}`,
           `元素精通 = ${trans.em}`,
-          `EM增幅 = ${(trans.emBonus * 100).toFixed(1)}%`,
-          ...(tBonus ? [`剧变反应加成 = ${(tBonus * 100).toFixed(1)}%`] : []),
-          `反应乘数 = ${trans.rate} × ${formatNumber(trans.levelMultiplier)} × (1 + ${(trans.emBonus * 100).toFixed(1)}%${tBonus ? ' + ' + (tBonus * 100).toFixed(1) + '%' : ''}) = ${formatNumber(trans.result)}`,
+          `EM增幅 = ${(trans.emBonus * 100).toFixed(4)}%`,
+          ...(tBonus ? [`剧变反应加成 = ${(tBonus * 100).toFixed(4)}%`] : []),
+          `反应乘数 = ${trans.rate} × ${formatNumber(trans.levelMultiplier)} × (1 + ${(trans.emBonus * 100).toFixed(4)}%${tBonus ? ' + ' + (tBonus * 100).toFixed(4) + '%' : ''}) = ${formatNumber(trans.result)}`,
         ];
         return { zoneLabel: zoneName ?? key, value: value as number, displayValue: `×${formatNumber(value as number)}`, steps };
       }
@@ -168,9 +166,9 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
         const steps = [
           `月反应倍率 = ${moon.moonRate}`,
           `元素精通 = ${moon.em}`,
-          `EM增幅 = ${(moon.emBonus * 100).toFixed(1)}%`,
-          ...(mBonus ? [`月反应加成 = ${(mBonus * 100).toFixed(1)}%`] : []),
-          `反应乘数 = ${moon.moonRate} × (1 + ${(moon.emBonus * 100).toFixed(1)}%${mBonus ? ' + ' + (mBonus * 100).toFixed(1) + '%' : ''}) = ${formatNumber(moon.result)}`,
+          `EM增幅 = ${(moon.emBonus * 100).toFixed(4)}%`,
+          ...(mBonus ? [`月反应加成 = ${(mBonus * 100).toFixed(4)}%`] : []),
+          `反应乘数 = ${moon.moonRate} × (1 + ${(moon.emBonus * 100).toFixed(4)}%${mBonus ? ' + ' + (mBonus * 100).toFixed(4) + '%' : ''}) = ${formatNumber(moon.result)}`,
         ];
         return { zoneLabel: zoneName ?? key, value: value as number, displayValue: `×${formatNumber(value as number)}`, steps };
       }
@@ -183,8 +181,8 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
         `基础倍率 = ${b.baseRate}`,
         `等级乘数 = ${formatNumber(b.levelMultiplier)}`,
         `元素精通 = ${b.em}`,
-        `EM增幅 = ${(b.emBonus * 100).toFixed(1)}%`,
-        `激化加成 = ${b.baseRate} × ${formatNumber(b.levelMultiplier)} × (1 + ${(b.emBonus * 100).toFixed(1)}%) = ${formatNumber(b.result)}`,
+        `EM增幅 = ${(b.emBonus * 100).toFixed(4)}%`,
+        `激化加成 = ${b.baseRate} × ${formatNumber(b.levelMultiplier)} × (1 + ${(b.emBonus * 100).toFixed(4)}%) = ${formatNumber(b.result)}`,
       ];
       return { zoneLabel: zoneName ?? key, value: value as number, displayValue: formatNumber(value as number), steps };
     }
@@ -192,8 +190,8 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
       const b = d.elevDebug;
       if (!b) return null;
       const steps = [
-        `擢升加成 = ${(b.elevationBonus * 100).toFixed(0)}%`,
-        `擢升乘数 = 1 + ${(b.elevationBonus * 100).toFixed(1)}% = ${formatNumber(b.result, 6)}`,
+        `擢升加成 = ${(b.elevationBonus * 100).toFixed(4)}%`,
+        `擢升乘数 = 1 + ${(b.elevationBonus * 100).toFixed(4)}% = ${formatNumber(b.result, 6)}`,
       ];
       return { zoneLabel: zoneName ?? key, value: value as number, displayValue: `×${formatNumber(value as number, 6)}`, steps };
     }
@@ -201,9 +199,9 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
       const b = d.indepDebug;
       if (!b) return null;
       const steps = [
-        `天赋加成 = ${(b.talentBonus * 100).toFixed(0)}%`,
-        `上下文加成 = ${(b.ctxBonus * 100).toFixed(0)}%`,
-        `独立乘数 = 1 + ${(b.talentBonus * 100).toFixed(1)}% + ${(b.ctxBonus * 100).toFixed(1)}% = ${formatNumber(b.result, 6)}`,
+        `天赋加成 = ${(b.talentBonus * 100).toFixed(4)}%`,
+        `上下文加成 = ${(b.ctxBonus * 100).toFixed(4)}%`,
+        `独立乘数 = 1 + ${(b.talentBonus * 100).toFixed(4)}% + ${(b.ctxBonus * 100).toFixed(4)}% = ${formatNumber(b.result, 6)}`,
       ];
       return { zoneLabel: zoneName ?? key, value: value as number, displayValue: `×${formatNumber(value as number, 6)}`, steps };
     }
@@ -236,15 +234,15 @@ function getZoneDetail(key: string, zoneName: string | undefined, value: number 
   const masteryD = d.masteryDebug;
   if (masteryD && masteryD.result > 1) {
     const tLabel = masteryD.type === 'amplifying' ? '增幅' : masteryD.type === 'transformative' ? '剧变' : '月反应';
-    const msteps = [`EM = ${masteryD.em}`, `EM加成 = ${(masteryD.emBonus * 100).toFixed(1)}% (${tLabel})`];
+    const msteps = [`EM = ${masteryD.em}`, `EM加成 = ${(masteryD.emBonus * 100).toFixed(4)}% (${tLabel})`];
     const bonus = (masteryD as any).ampBonus ?? (masteryD as any).transBonus ?? (masteryD as any).moonBonus ?? 0;
-    if (bonus > 0) msteps.push(`反应增伤 = ${(bonus * 100).toFixed(1)}%`);
-    msteps.push(`1 + ${(masteryD.emBonus * 100).toFixed(1)}%${bonus > 0 ? ' + ' + (bonus * 100).toFixed(1) + '%' : ''} = ${formatNumber(masteryD.result, 6)}`);
+    if (bonus > 0) msteps.push(`反应增伤 = ${(bonus * 100).toFixed(4)}%`);
+    msteps.push(`1 + ${(masteryD.emBonus * 100).toFixed(4)}%${bonus > 0 ? ' + ' + (bonus * 100).toFixed(4) + '%' : ''} = ${formatNumber(masteryD.result, 6)}`);
     return { zoneLabel: '精通区', value: masteryD.result, displayValue: `×${formatNumber(masteryD.result, 6)}`, steps: msteps };
   }
   const moonSignD = d.moonSignDebug;
   if (moonSignD && moonSignD.result > 1) {
-    return { zoneLabel: '月兆区', value: moonSignD.result, displayValue: `×${formatNumber(moonSignD.result, 4)}`, steps: [`月兆加成 = ${(moonSignD.moonBonus * 100).toFixed(0)}%`, `1 + ${(moonSignD.moonBonus * 100).toFixed(0)}% = ${formatNumber(moonSignD.result, 4)}`] };
+    return { zoneLabel: '月兆区', value: moonSignD.result, displayValue: `×${formatNumber(moonSignD.result, 4)}`, steps: [`月兆加成 = ${(moonSignD.moonBonus * 100).toFixed(4)}%`, `1 + ${(moonSignD.moonBonus * 100).toFixed(4)}% = ${formatNumber(moonSignD.result, 4)}`] };
   }
 }
 
@@ -269,7 +267,6 @@ function DamageCalcTab(): React.ReactElement {
     setBonus,
     statConversions,
     setConversions,
-    selectedScenarioId,
     isResultExpired,
   } = useCharacterStore();
 
@@ -310,12 +307,6 @@ function DamageCalcTab(): React.ReactElement {
     if (opt.amplifyingMultiplier !== undefined) setAmplifyingMultiplier(opt.amplifyingMultiplier);
   }, [reactionOptions, setReactionType, setAmplifyingMultiplier]);
   // ---- end 倍率区+反应区 ----
-
-  // 获取选中场景（仅用于敌人等级/抗性）
-  const scenarios = selectedCharacter
-    ? getScenariosByCharacterId(selectedCharacter.id)?.scenarios ?? []
-    : [];
-  const selectedScenario = scenarios.find((s) => s.id === selectedScenarioId) ?? null;
 
   // 构建 CharacterBuild（含队伍 Buff）
   const currentBuild = useMemo<CharacterBuild | null>(() => {
@@ -364,8 +355,8 @@ function DamageCalcTab(): React.ReactElement {
       skillMultiplier: currentBuild.skillMultiplier,
       statScaling: currentBuild.statScaling ?? currentBuild.character.defaultStatScaling,
       reactionType: currentBuild.reactionType,
-      enemyLevel: selectedScenario?.enemyLevel ?? 100,
-      enemyResistance: selectedScenario?.enemyResistance ?? 0.10,
+      enemyLevel: 100,
+      enemyResistance: 0.10,
       amplifyingMultiplier: currentBuild.amplifyingMultiplier ?? 0,
       characterLevel: currentBuild.characterLevel,
       defReductions: (currentBuild as any).defReductions ?? [],
@@ -377,7 +368,7 @@ function DamageCalcTab(): React.ReactElement {
 
     const result = DamageFormula.calculate(ctx);
     setDamageResult(result);
-  }, [currentBuild, selectedScenario]);
+  }, [currentBuild]);
 
   if (!selectedCharacter) {
     return (
@@ -429,7 +420,7 @@ function DamageCalcTab(): React.ReactElement {
             sx={{ width: 160 }}
           />
           <Typography variant="body2" color="text.secondary">
-            × 100 = {(skillMultiplier * 100).toFixed(0)}%
+            × 100 = {(skillMultiplier * 100).toFixed(4)}%
           </Typography>
         </Box>
 
@@ -451,7 +442,7 @@ function DamageCalcTab(): React.ReactElement {
       </Paper>
 
       {/* 典型场景选择（仅用于敌人等级/抗性预设） */}
-      <ScenarioSelect />
+
 
       {/* 队伍 Buff 面板 */}
       <TeamBuffPanel config={teamBuffConfig} onChange={setTeamBuffConfig} />
@@ -473,7 +464,7 @@ function DamageCalcTab(): React.ReactElement {
           {/* 总伤害 */}
           <Paper sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-              {selectedScenario ? `场景: ${selectedScenario.name}` : '当前配置伤害'}
+              当前配置伤害
             </Typography>
             <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 700 }}>
               {formatDamage(damageResult.totalDamage)}

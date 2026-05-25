@@ -16,7 +16,8 @@ function getCache(): Map<string, WeaponData> {
         const refData = refinementsMap[w.id];
         const merged: WeaponData = {
           ...(w as WeaponData),
-          refinements: refData?.refinements,
+          // prefer embedded refinements (from individual JSON), fallback to refinements.json
+          refinements: (w as WeaponData).refinements ?? refData?.refinements,
         };
         weaponCache.set(w.id, merged);
       }

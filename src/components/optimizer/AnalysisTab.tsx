@@ -21,7 +21,6 @@ import { useCharacterStore } from '../../store/slices/characterSlice';
 import { useArtifactStore } from '../../store/slices/artifactSlice';
 import { useOptimizerStore } from '../../store/slices/optimizerSlice';
 import { DEFAULT_WEAPON } from '../../data/weapons';
-import { getScenariosByCharacterId } from '../../data/scenarios';
 import { SUBSTAT_MID_VALUES, MAX_TOTAL_ROLLS, STAT_DISPLAY_NAMES } from '../../data/constants';
 import { StatCalculator } from '../../engine/stats';
 import { computeStatsFromAllocation } from '../../utils/buildStats';
@@ -46,7 +45,6 @@ function AnalysisTab(): React.ReactElement {
     constellationConfig,
     talentConfig,
     setBonus,
-    selectedScenarioId,
     isResultExpired,
   } = useCharacterStore();
 
@@ -68,12 +66,8 @@ function AnalysisTab(): React.ReactElement {
   const [searchMainStats, setSearchMainStats] = React.useState(false);
   const [idealRollCount, setIdealRollCount] = React.useState(25);
 
-  // 获取选中场景名称
-  const scenarios = selectedCharacter
-    ? getScenariosByCharacterId(selectedCharacter.id)?.scenarios ?? []
-    : [];
-  const selectedScenario = scenarios.find((s) => s.id === selectedScenarioId) ?? null;
-  const scenarioName = selectedScenario?.name ?? '默认场景';
+  // 获取优化场景名
+  const scenarioName = '默认场景';
 
   // 构建 CharacterBuild
   const currentBuild = useMemo<CharacterBuild | null>(() => {

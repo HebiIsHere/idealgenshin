@@ -26,5 +26,4 @@ function aggregate(dir, outputFile) {
 console.log('=== Generating aggregate data files ===');
 aggregate(path.join(DATA_DIR, 'characters'), '_all.json');
 aggregate(path.join(DATA_DIR, 'weapons'), '_all.json');
-aggregate(path.join(DATA_DIR, 'scenarios'), '_all.json');
 console.log('Done.');

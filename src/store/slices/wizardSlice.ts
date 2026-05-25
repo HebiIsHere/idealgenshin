@@ -7,8 +7,8 @@ export const WIZARD_SECTIONS = [
   'weapon',      // 武器配置
   'artifacts',   // 圣遗物
   'talents',     // 天赋与命座
+  'scenario',    // 倍率与反应
   'teambuffs',   // 队伍 Buff
-  'scenario',    // 场景与倍率
 ] as const;
 
 export type WizardSection = (typeof WIZARD_SECTIONS)[number] | `result_${number}`;

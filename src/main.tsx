@@ -9,7 +9,7 @@ import './index.css';
 // 启动计时 — 追踪各阶段耗时
 const T0 = performance.now();
 const logStage = (name: string) => {
-  const ms = (performance.now() - T0).toFixed(0);
+  const ms = (performance.now() - T0).toFixed(4);
   console.log(`[boot] ${name}: +${ms}ms`);
 };
 logStage('main.tsx evaluated');

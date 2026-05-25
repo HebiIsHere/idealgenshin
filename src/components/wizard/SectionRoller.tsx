@@ -7,27 +7,95 @@ interface SectionRollerProps {
   renderSection: (section: WizardSection) => React.ReactNode;
 }
 
+const ANIM_MS = 320;
+
+const STYLE = `
+.section-old-left  { animation: slideOutL ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1) forwards; pointer-events: none; }
+.section-new-left  { animation: slideInL  ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1) forwards; }
+.section-old-right { animation: slideOutR ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1) forwards; pointer-events: none; }
+.section-new-right { animation: slideInR  ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1) forwards; }
+@keyframes slideOutR { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-100%); opacity: 0.15; } }
+@keyframes slideInR  { from { transform: translateX(100%); opacity: 0.15; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideOutL { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0.15; } }
+@keyframes slideInL  { from { transform: translateX(-100%); opacity: 0.15; } to { transform: translateX(0); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .section-old-left, .section-new-left, .section-old-right, .section-new-right { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
+`;
+
 function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElement {
   const currentIndex = useWizardStore((s) => s.currentIndex);
   const sections = useWizardStore((s) => s.sections);
-  const [displayed, setDisplayed] = useState(currentIndex);
+
   const [animating, setAnimating] = useState(false);
-  const prevIndex = useRef(currentIndex);
+  const [slideDir, setSlideDir] = useState<'left' | 'right'>('right');
+  const [activeIdx, setActiveIdx] = useState(currentIndex);
+  const [incomingIdx, setIncomingIdx] = useState<number | null>(null);
+  const prevKey = useRef(sections[currentIndex] ?? '');
+
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (currentIndex !== prevIndex.current) {
-      setAnimating(true);
-      const timer = setTimeout(() => {
-        setDisplayed(currentIndex);
-        setAnimating(false);
-      }, 160);
-      prevIndex.current = currentIndex;
-      return () => clearTimeout(timer);
-    }
-  }, [currentIndex]);
+    const thisKey = sections[currentIndex] ?? '';
+    if (thisKey === prevKey.current) return;
+    const prevIdx = sections.indexOf(prevKey.current);
+    setSlideDir(currentIndex >= prevIdx ? 'right' : 'left');
+    // 保存滚动位置
+    const scrollTop = scrollRef.current?.scrollTop ?? 0;
+    setIncomingIdx(currentIndex);
+    setAnimating(true);
+    // 恢复滚动位置
+    requestAnimationFrame(() => {
+      if (scrollRef.current) scrollRef.current.scrollTop = scrollTop;
+    });
+
+    const timer = setTimeout(() => {
+      setActiveIdx(currentIndex);
+      setIncomingIdx(null);
+      setAnimating(false);
+      prevKey.current = thisKey;
+    }, ANIM_MS);
+    return () => clearTimeout(timer);
+  }, [currentIndex, sections]);
+
+  const dir = slideDir === 'right' ? 'right' : 'left';
+  const oldCls = `section-old-${dir}`;
+  const newCls = `section-new-${dir}`;
+
+  const card = (idx: number, cls: string, abs: boolean) => {
+    const key = sections[idx];
+    if (!key) return null;
+    return (
+      <Box
+        className={cls || undefined}
+        sx={{
+          width: '100%',
+          maxWidth: 600,
+          flexShrink: 0,
+          ...(abs ? { position: 'absolute', inset: 0, display: 'flex', justifyContent: 'center' } : {}),
+        }}
+      >
+        <Paper
+          elevation={0}
+          sx={{
+            width: '100%',
+            p: { xs: 3, md: 5 },
+            borderRadius: 3,
+            border: '1px solid',
+            borderColor: 'rgba(212,168,67,0.1)',
+            bgcolor: 'rgba(22,33,62,0.6)',
+            backdropFilter: 'blur(12px)',
+          }}
+        >
+          {renderSection(key)}
+        </Paper>
+      </Box>
+    );
+  };
 
   return (
     <Box
+      ref={scrollRef}
       sx={{
         width: '100%',
         height: '100vh',
@@ -41,25 +109,11 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
         '&::-webkit-scrollbar-thumb': { background: 'rgba(212,168,67,0.15)', borderRadius: 2 },
       }}
     >
-      <Paper
-        elevation={0}
-        sx={{
-          width: '100%',
-          maxWidth: 600,
-          p: { xs: 3, md: 5 },
-          borderRadius: 3,
-          border: '1px solid',
-          borderColor: 'rgba(212,168,67,0.1)',
-          bgcolor: 'rgba(22,33,62,0.6)',
-          backdropFilter: 'blur(12px)',
-          opacity: animating ? 0 : 1,
-          transform: animating ? 'translateY(16px)' : 'translateY(0)',
-          transition: 'opacity 160ms cubic-bezier(0.16,1,0.3,1), transform 160ms cubic-bezier(0.16,1,0.3,1)',
-          my: 'auto',
-        }}
-      >
-        {renderSection(sections[displayed] ?? sections[currentIndex])}
-      </Paper>
+      <style>{STYLE}</style>
+      <Box sx={{ position: 'relative', width: '100%', maxWidth: 600, my: 'auto' }}>
+        {(incomingIdx != null ? card(incomingIdx, newCls, false) : card(activeIdx, '', false))}
+        {animating && incomingIdx != null && card(activeIdx, oldCls, true)}
+      </Box>
     </Box>
   );
 }

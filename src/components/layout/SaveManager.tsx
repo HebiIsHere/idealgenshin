@@ -96,7 +96,9 @@ function SaveManager({ open, onClose }: SaveManagerProps): React.ReactElement {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `genshin-optimizer-saves-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = saveIds.length === 1
+      ? `${saves[0].name}-idealgenshin-${new Date().toISOString().slice(0, 10)}.json`
+      : `idealgenshin-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };

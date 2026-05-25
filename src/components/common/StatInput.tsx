@@ -41,7 +41,7 @@ function StatInput({
     onChange(Math.max(min, max !== undefined ? Math.min(internalValue, max) : internalValue));
   };
 
-  const displayValue = isPercent ? (value * 100).toFixed(1) : value.toFixed(0);
+  const displayValue = isPercent ? (value * 100).toFixed(4) : value.toFixed(4);
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

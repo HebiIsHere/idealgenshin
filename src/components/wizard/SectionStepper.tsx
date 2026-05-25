@@ -1,24 +1,21 @@
 import React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import CircleIcon from '@mui/icons-material/Circle';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import { useWizardStore, WIZARD_SECTIONS, type WizardSection } from '../../store/slices/wizardSlice';
-import { useCharacterStore } from '../../store/slices/characterSlice';
+import { useWizardStore, type WizardSection } from '../../store/slices/wizardSlice';
 
-const SECTION_LABELS: Record<string, string> = {
-  import: 'Enka 导入',
-  character: '角色选择',
-  weapon: '武器配置',
-  artifacts: '圣遗物',
-  talents: '天赋与命座',
-  teambuffs: '队伍 Buff',
-  scenario: '场景与倍率',
+const SECTION_LABELS: Record<string, { label: string; num: string }> = {
+  import:     { label: 'Enka 导入',  num: '①' },
+  character:  { label: '角色选择',   num: '②' },
+  weapon:     { label: '武器配置',   num: '③' },
+  artifacts:  { label: '圣遗物',     num: '④' },
+  talents:    { label: '天赋与命座', num: '⑤' },
+  scenario:   { label: '倍率与反应', num: '⑥' },
+  teambuffs:  { label: '队伍 Buff',  num: '⑦' },
 };
 
+const ANIM_MS = 280;
+
 interface SectionStepperProps {
-  /** Extra result section labels */
   resultLabels?: Record<string, string>;
 }
 
@@ -26,15 +23,22 @@ function SectionStepper({ resultLabels = {} }: SectionStepperProps): React.React
   const currentIndex = useWizardStore((s) => s.currentIndex);
   const sections = useWizardStore((s) => s.sections);
   const goToSection = useWizardStore((s) => s.goToSection);
-  const selectedCharacter = useCharacterStore((s) => s.selectedCharacter);
+
+  const isResult = (key: WizardSection): boolean => String(key).startsWith('result_');
+  const isCurrentResult = isResult(sections[currentIndex] ?? '' as WizardSection);
+  const allSections = sections;
 
   const getLabel = (key: WizardSection): string => {
     const s = String(key);
     if (s.startsWith('result_')) return resultLabels[s] ?? '计算结果';
-    return SECTION_LABELS[s] ?? s;
+    return SECTION_LABELS[s]?.label ?? s;
   };
 
-  const isResult = (key: WizardSection): boolean => String(key).startsWith('result_');
+  const getNum = (key: WizardSection): string => {
+    const s = String(key);
+    if (s.startsWith('result_')) return '★';
+    return SECTION_LABELS[s]?.num ?? '·';
+  };
 
   return (
     <Box
@@ -47,70 +51,73 @@ function SectionStepper({ resultLabels = {} }: SectionStepperProps): React.React
         display: 'flex',
         flexDirection: 'column',
         gap: 0,
-        alignItems: 'center',
+        alignItems: 'flex-start',
       }}
     >
-      {sections.filter(s => !isResult(s)).map((key, idx) => {
+      {allSections.map((key, idx) => {
         const originalIdx = sections.indexOf(key);
         const isCurrent = originalIdx === currentIndex;
         const isPast = originalIdx < currentIndex;
-        const disabled = !selectedCharacter && originalIdx > 0;
+        const isFuture = originalIdx > currentIndex;
+        const resultItem = isResult(key);
+        const hidden = resultItem && !isCurrentResult;
 
         return (
           <Box
             key={String(key)}
-            onClick={() => { if (!disabled) goToSection(originalIdx); }}
+            onClick={() => { if (!hidden) goToSection(originalIdx); }}
             sx={{
               display: 'flex',
               alignItems: 'center',
               gap: 1,
-              cursor: disabled ? 'default' : 'pointer',
-              opacity: disabled ? 0.3 : 1,
-              py: 0.75,
-              transition: 'opacity 200ms ease',
-              '&:hover': { opacity: disabled ? 0.3 : 1 },
+              cursor: hidden ? 'default' : 'pointer',
+              py: hidden ? 0 : 0.5,
+              px: 1,
+              borderRadius: 1,
+              maxHeight: hidden ? 0 : 32,
+              opacity: hidden ? 0 : 1,
+              overflow: 'hidden',
+              pointerEvents: hidden ? 'none' : 'auto',
+              transform: hidden ? 'translateX(-12px)' : 'translateX(0)',
+              transition: `all ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1)`,
+              bgcolor: isCurrent ? 'rgba(212,168,67,0.12)' : 'transparent',
+              '&:hover': hidden ? {} : { bgcolor: isCurrent ? 'rgba(212,168,67,0.15)' : 'rgba(255,255,255,0.04)' },
             }}
           >
-            {/* 圆点指示器 */}
-            <Box sx={{ position: 'relative', width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {isPast ? (
-                <CheckCircleIcon sx={{ fontSize: 14, color: 'primary.main' }} />
-              ) : isCurrent ? (
-                <CircleIcon sx={{ fontSize: 10, color: 'primary.main' }} />
-              ) : (
-                <RadioButtonUncheckedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
-              )}
-            </Box>
+            {/* 步骤编号 */}
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: '0.55rem',
+                width: 14,
+                textAlign: 'center',
+                color: isCurrent ? 'primary.main'
+                  : isPast ? 'rgba(255,255,255,0.5)'
+                  : 'rgba(255,255,255,0.2)',
+                fontWeight: isCurrent ? 700 : 400,
+                transition: `color ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1)`,
+              }}
+            >
+              {getNum(key)}
+            </Typography>
 
             {/* 标签 */}
             <Typography
               variant="caption"
               sx={{
-                color: isCurrent ? 'primary.main' : isPast ? 'text.primary' : 'text.secondary',
-                fontWeight: isCurrent ? 600 : 400,
-                fontSize: '0.65rem',
+                fontSize: '0.62rem',
                 lineHeight: 1,
                 whiteSpace: 'nowrap',
-                transition: 'color 200ms ease',
+                fontWeight: isCurrent ? 600 : isPast ? 400 : 300,
+                color: isCurrent ? 'primary.main'
+                  : isPast ? 'rgba(255,255,255,0.6)'
+                  : 'rgba(255,255,255,0.3)',
+                transition: `color ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1)`,
+                opacity: 1,
               }}
             >
               {getLabel(key)}
             </Typography>
-
-            {/* 连线 */}
-            {idx < sections.filter(s => !isResult(s)).length - 1 && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  left: 7.5,
-                  top: 22,
-                  width: 1,
-                  height: 8,
-                  bgcolor: originalIdx < currentIndex ? 'primary.main' : 'divider',
-                  transition: 'background-color 200ms ease',
-                }}
-              />
-            )}
           </Box>
         );
       })}

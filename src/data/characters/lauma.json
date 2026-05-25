@@ -10,7 +10,7 @@
     "def": 669,
     "critRate": 0.05,
     "critDmg": 0.5,
-    "em": 0,
+    "em": 200,
     "er": 1
   },
   "ascensionStat": {

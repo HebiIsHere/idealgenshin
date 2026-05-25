@@ -71,19 +71,19 @@ function getZoneDetail(key: string, _zoneName: string | undefined, value: number
     case 'bonusMultiplier': {
       const b = d.bonusDebug;
       if (!b) return null;
-      return { steps: [`增伤 = ${(b.dmgBonus * 100).toFixed(1)}%`, `1 + ${(b.dmgBonus * 100).toFixed(1)}% = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
+      return { steps: [`增伤 = ${(b.dmgBonus * 100).toFixed(4)}%`, `1 + ${(b.dmgBonus * 100).toFixed(4)}% = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
     }
     case 'critMultiplier': {
       const b = d.critDebug;
       if (!b) return null;
-      return { steps: [`暴击率 = ${(b.critRate * 100).toFixed(1)}%`, `暴击伤害 = ${(b.critDmg * 100).toFixed(1)}%`, `有效暴击率 = ${(b.effectiveCritRate * 100).toFixed(1)}%`, `1 + ${(b.effectiveCritRate * 100).toFixed(1)}% × ${(b.critDmg * 100).toFixed(1)}% = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
+      return { steps: [`暴击率 = ${(b.critRate * 100).toFixed(4)}%`, `暴击伤害 = ${(b.critDmg * 100).toFixed(4)}%`, `有效暴击率 = ${(b.effectiveCritRate * 100).toFixed(4)}%`, `1 + ${(b.effectiveCritRate * 100).toFixed(4)}% × ${(b.critDmg * 100).toFixed(4)}% = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
     }
     case 'resistanceMultiplier': {
       const b = d.resistDebug;
       if (!b) return null;
       const r = b.effectiveRes;
-      const formulaDesc = r < 0 ? `1 − ${r.toFixed(2)}/2` : r < 0.75 ? `1 − ${r.toFixed(2)}` : `1/(1+4×${r.toFixed(2)})`;
-      return { steps: [`敌方抗性 = ${(b.enemyResistance * 100).toFixed(1)}%`, `减抗 = ${(b.resistReduction * 100).toFixed(1)}%`, `有效抗性 = ${(r * 100).toFixed(1)}%`, `${formulaDesc} = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
+      const formulaDesc = r < 0 ? `1 − ${r.toFixed(4)}/2` : r < 0.75 ? `1 − ${r.toFixed(4)}` : `1/(1+4×${r.toFixed(4)})`;
+      return { steps: [`敌方抗性 = ${(b.enemyResistance * 100).toFixed(4)}%`, `减抗 = ${(b.resistReduction * 100).toFixed(4)}%`, `有效抗性 = ${(r * 100).toFixed(4)}%`, `${formulaDesc} = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
     }
     case 'defenseMultiplier': {
       const b = d.defenseDebug;
@@ -95,20 +95,20 @@ function getZoneDetail(key: string, _zoneName: string | undefined, value: number
       const trans = d.transDebug;
       const moon = d.moonDebug;
       if (amp) {
-        const steps = [`反应系数 = ${amp.baseMultiplier}`, `EM增幅 = ${(amp.emBonus * 100).toFixed(1)}%`];
-        if (amp.ampReactionBonus) steps.push(`反应加成 = ${(amp.ampReactionBonus * 100).toFixed(1)}%`);
+        const steps = [`反应系数 = ${amp.baseMultiplier}`, `EM增幅 = ${(amp.emBonus * 100).toFixed(4)}%`];
+        if (amp.ampReactionBonus) steps.push(`反应加成 = ${(amp.ampReactionBonus * 100).toFixed(4)}%`);
         steps.push(`= ${formatNumber(amp.result, 6)}`);
         return { steps, displayValue: `×${formatNumber(value as number, 6)}` };
       }
       if (trans) {
-        const steps = [`系数 ${trans.rate} × 等级 ${formatNumber(trans.levelMultiplier)}`, `EM增幅 = ${(trans.emBonus * 100).toFixed(1)}%`];
-        if (trans.transformReactionBonus) steps.push(`剧变加成 = ${(trans.transformReactionBonus * 100).toFixed(1)}%`);
+        const steps = [`系数 ${trans.rate} × 等级 ${formatNumber(trans.levelMultiplier)}`, `EM增幅 = ${(trans.emBonus * 100).toFixed(4)}%`];
+        if (trans.transformReactionBonus) steps.push(`剧变加成 = ${(trans.transformReactionBonus * 100).toFixed(4)}%`);
         steps.push(`= ${formatNumber(trans.result)}`);
         return { steps, displayValue: `×${formatNumber(value as number, 4)}` };
       }
       if (moon) {
-        const steps = [`月反应倍率 = ${moon.moonRate}`, `EM增幅 = ${(moon.emBonus * 100).toFixed(1)}%`];
-        if (moon.moonReactionBonus) steps.push(`月反应加成 = ${(moon.moonReactionBonus * 100).toFixed(1)}%`);
+        const steps = [`月反应倍率 = ${moon.moonRate}`, `EM增幅 = ${(moon.emBonus * 100).toFixed(4)}%`];
+        if (moon.moonReactionBonus) steps.push(`月反应加成 = ${(moon.moonReactionBonus * 100).toFixed(4)}%`);
         steps.push(`= ${formatNumber(moon.result)}`);
         return { steps, displayValue: `×${formatNumber(value as number, 4)}` };
       }
@@ -117,17 +117,17 @@ function getZoneDetail(key: string, _zoneName: string | undefined, value: number
     case 'aggravationBonus': {
       const b = d.cataDebug;
       if (!b) return null;
-      return { steps: [`基础 ${b.baseRate} × 等级 ${formatNumber(b.levelMultiplier)}`, `EM增幅 = ${(b.emBonus * 100).toFixed(1)}%`, `= ${formatNumber(b.result)}`], displayValue: formatNumber(value as number) };
+      return { steps: [`基础 ${b.baseRate} × 等级 ${formatNumber(b.levelMultiplier)}`, `EM增幅 = ${(b.emBonus * 100).toFixed(4)}%`, `= ${formatNumber(b.result)}`], displayValue: formatNumber(value as number) };
     }
     case 'elevationMultiplier': {
       const b = d.elevDebug;
       if (!b) return null;
-      return { steps: [`擢升加成 = ${(b.elevationBonus * 100).toFixed(0)}%`, `1 + ${(b.elevationBonus * 100).toFixed(1)}% = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
+      return { steps: [`擢升加成 = ${(b.elevationBonus * 100).toFixed(4)}%`, `1 + ${(b.elevationBonus * 100).toFixed(4)}% = ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
     }
     case 'independentMultiplier': {
       const b = d.indepDebug;
       if (!b) return null;
-      return { steps: [`天赋加成 = ${(b.talentBonus * 100).toFixed(0)}%`, `上下文加成 = ${(b.ctxBonus * 100).toFixed(0)}%`, `= ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
+      return { steps: [`天赋加成 = ${(b.talentBonus * 100).toFixed(4)}%`, `上下文加成 = ${(b.ctxBonus * 100).toFixed(4)}%`, `= ${formatNumber(b.result, 6)}`], displayValue: `×${formatNumber(value as number, 6)}` };
     }
     case 'damagePath': {
       return { steps: [], displayValue: DAMAGE_PATH_LABELS[value as DamagePath] ?? String(value) };
@@ -151,11 +151,11 @@ function getZoneDetail(key: string, _zoneName: string | undefined, value: number
   }
   const masteryD = d.masteryDebug;
   if (masteryD && masteryD.result > 1) {
-    return { steps: [`EM = ${masteryD.em}`, `EM加成 = ${(masteryD.emBonus * 100).toFixed(1)}%`, `= ${formatNumber(masteryD.result, 6)}`], displayValue: `×${formatNumber(masteryD.result, 6)}` };
+    return { steps: [`EM = ${masteryD.em}`, `EM加成 = ${(masteryD.emBonus * 100).toFixed(4)}%`, `= ${formatNumber(masteryD.result, 6)}`], displayValue: `×${formatNumber(masteryD.result, 6)}` };
   }
   const moonSignD = d.moonSignDebug;
   if (moonSignD && moonSignD.result > 1) {
-    return { steps: [`月兆加成 = ${(moonSignD.moonBonus * 100).toFixed(1)}%`, `= ${formatNumber(moonSignD.result, 4)}`], displayValue: `×${formatNumber(moonSignD.result, 4)}` };
+    return { steps: [`月兆加成 = ${(moonSignD.moonBonus * 100).toFixed(4)}%`, `= ${formatNumber(moonSignD.result, 4)}`], displayValue: `×${formatNumber(moonSignD.result, 4)}` };
   }
 
   return null;
@@ -328,7 +328,7 @@ function OptimizationResult({
   }
 
   // 格式化词条数（保留1位小数）
-  const fmtRolls = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
+  const fmtRolls = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(4));
 
   // Collect all stat types that appear in either allocation
   const allTypes = new Set<SubstatType>([

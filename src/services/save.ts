@@ -11,7 +11,7 @@ import { loadAllCharacters } from '../data/characters';
 const SAVE_KEY_PREFIX = 'gao_save_';
 
 /** Current app version for export/import compatibility. */
-const APP_VERSION = '2.0.0';
+const APP_VERSION = '3.0.0';
 
 /** App identifier for export files. */
 const APP_IDENTIFIER = 'genshin-artifact-optimizer-v2';

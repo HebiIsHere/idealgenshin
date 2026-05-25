@@ -84,9 +84,6 @@ export const useSaveStore = create<SaveState & SaveActions>((set, get) => ({
       characterStore.setTalentConfig(save.talentConfig.bonus);
     }
 
-    // 恢复场景选择
-    characterStore.setSelectedScenario(save.selectedScenarioId ?? null);
-
     // 恢复 Tab2 倍率/反应
     if (save.skillMultiplier !== undefined && save.skillMultiplier !== null) {
       characterStore.setSkillMultiplier(save.skillMultiplier);
@@ -177,7 +174,6 @@ export const useSaveStore = create<SaveState & SaveActions>((set, get) => ({
           constellationConfig: characterStore.constellationConfig,
           talentConfig: characterStore.talentConfig,
           artifacts,
-          selectedScenarioId: characterStore.selectedScenarioId ?? '',
           fromEnka: false,
         };
         SaveService.saveCharacter(updated);
@@ -193,7 +189,6 @@ export const useSaveStore = create<SaveState & SaveActions>((set, get) => ({
         constellationConfig: characterStore.constellationConfig,
         talentConfig: characterStore.talentConfig,
         artifacts,
-        selectedScenarioId: characterStore.selectedScenarioId ?? '',
         fromEnka: false,
       });
       SaveService.saveCharacter(newSave);
@@ -203,6 +198,7 @@ export const useSaveStore = create<SaveState & SaveActions>((set, get) => ({
     // 刷新存档列表
     const saves = SaveService.listSaves();
     set({ saves });
+    setTimeout(() => alert(`已保存：${selectedCharacter.nameZh}`), 100);
   },
 
   updateCurrent: () => {
@@ -252,7 +248,6 @@ export const useSaveStore = create<SaveState & SaveActions>((set, get) => ({
         constellationConfig: characterStore.constellationConfig,
         talentConfig: characterStore.talentConfig,
         artifacts,
-        selectedScenarioId: characterStore.selectedScenarioId ?? '',
       };
       SaveService.saveCharacter(updated);
     }

@@ -21,7 +21,7 @@ interface ZoneAnalysisTableProps {
  */
 function ZoneAnalysisTable({ analysis }: ZoneAnalysisTableProps): React.ReactElement {
   // 格式化词条数（保留1位小数）
-  const fmtRolls = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
+  const fmtRolls = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(4));
 
   return (
     <Paper sx={{ p: 2 }}>

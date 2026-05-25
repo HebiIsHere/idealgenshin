@@ -45,8 +45,14 @@ export class RedistributeOptimizer {
     // Calculate total rolls
     const totalRolls = currentAllocations.reduce((sum, a) => sum + a.rolls, 0);
 
-    // 获取相关词条
-    const relevantTypes = build.character.relevantSubstats;
+    // 获取相关词条，并根据当前倍率配置动态扩展
+    const relSet = new Set(build.character.relevantSubstats);
+    const sc = build.statScaling ?? build.character.defaultStatScaling;
+    if ((sc.hpRatio ?? 0) > 0) { relSet.add('HP_PERCENT' as any); relSet.add('HP_FLAT' as any); }
+    if ((sc.defRatio ?? 0) > 0) { relSet.add('DEF_PERCENT' as any); relSet.add('DEF_FLAT' as any); }
+    if ((sc.atkRatio ?? 0) > 0) { relSet.add('ATK_PERCENT' as any); relSet.add('ATK_FLAT' as any); }
+    if ((sc.emRatio ?? 0) > 0) { relSet.add('ELEMENTAL_MASTERY' as any); }
+    const relevantTypes = Array.from(relSet) as any[];
 
     if (totalRolls === 0) {
       return {
@@ -54,8 +60,11 @@ export class RedistributeOptimizer {
         optimizedDamage: currentDamage,
         improvementPercent: 0,
         optimizedAllocations: currentAllocations,
+        currentAllocations,
         originalBreakdown,
         optimizedBreakdown: originalBreakdown,
+        originalStats: currentStats,
+        optimizedStats: currentStats,
       };
     }
 
@@ -86,8 +95,11 @@ export class RedistributeOptimizer {
       optimizedDamage: bestDamage,
       improvementPercent,
       optimizedAllocations: bestAllocation,
+      currentAllocations,
       originalBreakdown,
       optimizedBreakdown,
+      originalStats: currentStats,
+      optimizedStats,
     };
   }
 }
@@ -157,7 +169,7 @@ function evaluateDamage(build: CharacterBuild, stats: ComputedStats): number {
     defIgnore: extraBonuses.defIgnore ?? 0,
     elevationBonus: extraBonuses.elevationBonus ?? 0,
     extraBonuses,
-    independentBonus: extraBonuses.independentBonus ?? 0,
+    independentBonus: 0,
   };
 
   const result = DamageFormula.calculate(ctx);
@@ -189,7 +201,7 @@ function evaluateDamageWithBreakdown(build: CharacterBuild, stats: ComputedStats
     defIgnore: extraBonuses.defIgnore ?? 0,
     elevationBonus: extraBonuses.elevationBonus ?? 0,
     extraBonuses,
-    independentBonus: extraBonuses.independentBonus ?? 0,
+    independentBonus: 0,
   };
 
   return DamageFormula.calculate(ctx);

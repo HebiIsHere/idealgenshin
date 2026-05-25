@@ -175,7 +175,7 @@ function CharacterSetupTab(): React.ReactElement {
                   {SUBSTAT_LABEL[weaponConfig.weaponData.substatType] || weaponConfig.weaponData.substatType}:{' '}
                   {weaponConfig.weaponData.substatType === 'ELEMENTAL_MASTERY'
                     ? Math.round(weaponConfig.weaponData.substatValue)
-                    : `${(weaponConfig.weaponData.substatValue * 100).toFixed(1)}%`}
+                    : `${(weaponConfig.weaponData.substatValue * 100).toFixed(4)}%`}
                 </Typography>
               )}
               <Typography variant="caption" color="text.secondary">等级: {weaponConfig.weaponLevel}</Typography>

@@ -36,8 +36,6 @@ interface CharacterState {
   statConversions: StatConversion[];
   /** 圣遗物套装产生的动态转模（如绝缘之旗印 ER→dmgBonus）。 */
   setConversions: StatConversion[];
-  /** 选中的典型场景ID。 */
-  selectedScenarioId: string | null;
   /** Tab2/3 的结果是否已过期（Tab1 数据变更时标记）。 */
   isResultExpired: boolean;
 }
@@ -83,8 +81,6 @@ interface CharacterActions {
   removeStatConversion: (index: number) => void;
   /** 替换所有属性转模规则。 */
   setStatConversions: (list: StatConversion[]) => void;
-  /** 设置选中的典型场景ID。 */
-  setSelectedScenario: (scenarioId: string | null) => void;
   /** 标记 Tab2/3 结果为已过期。 */
   markResultExpired: () => void;
   /** 重置所有角色状态。 */
@@ -94,7 +90,7 @@ interface CharacterActions {
 const initialState: CharacterState = {
   selectedCharacter: null,
   characterLevel: 90,
-  skillMultiplier: 3.0,
+  skillMultiplier: 1.0,
   reactionType: 'NONE' as ReactionType,
   teamBuffs: [],
   amplifyingMultiplier: 0,
@@ -111,7 +107,6 @@ const initialState: CharacterState = {
   setBonus: {},
   statConversions: [],
   setConversions: [],
-  selectedScenarioId: null,
   isResultExpired: false,
 };
 
@@ -141,7 +136,6 @@ export const useCharacterStore = create<CharacterState & CharacterActions>((set)
       setBonus: {},
       statConversions: [],
       setConversions: [],
-      selectedScenarioId: null,
       isResultExpired: true,
     });
   },
@@ -231,9 +225,6 @@ export const useCharacterStore = create<CharacterState & CharacterActions>((set)
       statConversions: list,
       isResultExpired: true,
     }),
-
-  setSelectedScenario: (scenarioId) =>
-    set({ selectedScenarioId: scenarioId, isResultExpired: true }),
 
   markResultExpired: () => set({ isResultExpired: true }),
 

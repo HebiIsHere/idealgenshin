@@ -137,6 +137,16 @@ for (const wName of allWeapons) {
     const passiveName = wepZh.effectName || '';
     const passiveDesc = (wepZh.r1?.description || '').replace(/<[^>]+>/g, '').trim();
 
+    // extract R1–R5 refinement data from genshin-db
+    const refinements = [];
+    for (let i = 1; i <= 5; i++) {
+      const ref = wepZh[`r${i}`];
+      refinements.push({
+        description: (ref?.description || '').replace(/<[^>]+>/g, '').trim(),
+        values: ref?.values || [],
+      });
+    }
+
     const data = {
       id: wid,
       name: wep.name,
@@ -147,7 +157,8 @@ for (const wName of allWeapons) {
       substatType,
       substatValue: Math.round(stats90.specialized * 1000) / 1000,
       passiveName,
-      passiveDesc
+      passiveDesc,
+      refinements: refinements.some(r => r.description) ? refinements : undefined,
     };
 
     // Skip if file already exists with the same data (idempotent)

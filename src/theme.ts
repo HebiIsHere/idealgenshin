@@ -44,7 +44,7 @@ export const genshinTheme = createTheme({
     divider: 'rgba(212, 168, 67, 0.12)',
   },
   typography: {
-    fontFamily: '"Microsoft YaHei", "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", sans-serif',
+    fontFamily: '"PingFang SC", "Noto Sans SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
     h4: {
       fontWeight: 700,
       letterSpacing: '0.02em',
@@ -70,6 +70,10 @@ export const genshinTheme = createTheme({
           fontWeight: 600,
           borderRadius: 8,
           padding: '8px 24px',
+          '&:focus-visible': {
+            outline: '2px solid #D4A843',
+            outlineOffset: 2,
+          },
         },
         containedPrimary: {
           background: 'linear-gradient(135deg, #D4A843 0%, #A07830 100%)',
@@ -103,10 +107,26 @@ export const genshinTheme = createTheme({
         variant: 'outlined',
         size: 'small',
       },
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root:focus-visible': {
+            outline: '2px solid #D4A843',
+            outlineOffset: 0,
+          },
+        },
+      },
     },
     MuiSelect: {
       defaultProps: {
         size: 'small',
+      },
+      styleOverrides: {
+        root: {
+          '&:focus-visible': {
+            outline: '2px solid #D4A843',
+            outlineOffset: 1,
+          },
+        },
       },
     },
     MuiTooltip: {

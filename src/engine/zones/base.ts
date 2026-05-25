@@ -37,7 +37,7 @@ export class BaseDamageZone implements DamageZone {
     const totalBaseFlat = extraBaseFlat + conversionBaseFlat;
     const result = skillMultiplier * baseDmgMultiplier * rawBase + totalBaseFlat;
 
-    (ctx as any).__baseDebug = { totalAtk: stats.totalAtk, skillMultiplier, baseDmgMultiplier, rawBase, baseDamageFlat: totalBaseFlat, result };
+    (ctx as any).__baseDebug = { totalAtk: stats.totalAtk, totalHp: stats.totalHp, totalDef: stats.totalDef, em: stats.em, atkRatio: statScaling.atkRatio, hpRatio: statScaling.hpRatio, defRatio: statScaling.defRatio, emRatio: statScaling.emRatio, skillMultiplier, baseDmgMultiplier, rawBase, baseDamageFlat: totalBaseFlat, result };
     return result;
   }
 

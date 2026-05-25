@@ -364,10 +364,15 @@ export interface RedistributeResult {
   optimizedDamage: number;
   improvementPercent: number;
   optimizedAllocations: SubstatAllocation[];
+  currentAllocations: SubstatAllocation[];
   /** Detailed per-zone breakdown of the original damage calculation. */
   originalBreakdown?: DamageResult;
   /** Detailed per-zone breakdown of the optimized damage calculation. */
   optimizedBreakdown?: DamageResult;
+  /** Optimized character stats. */
+  optimizedStats?: ComputedStats;
+  /** Original character stats. */
+  originalStats?: ComputedStats;
 }
 
 /** Request for the ideal template optimizer. */
@@ -392,6 +397,8 @@ export interface IdealResult {
   idealAllocations: SubstatAllocation[];
   /** Detailed per-zone breakdown of the ideal damage calculation. */
   breakdown?: DamageResult;
+  /** Optimized character stats. */
+  idealStats?: ComputedStats;
   /** 主词条组合（仅在 searchMainStats=true 时有值）。 */
   mainStatCombo?: {
     sands: SubstatType;
@@ -551,37 +558,6 @@ export interface TalentConfig {
 // ===== V2: Typical Scenario =====
 
 /** A preset typical damage scenario. */
-export interface TypicalScenario {
-  /** Unique scenario ID. */
-  id: string;
-  /** Display name (e.g. "蒸发重击"). */
-  name: string;
-  /** Skill multiplier for this scenario. */
-  skillMultiplier: number;
-  /** Damage calculation path. */
-  damagePath: DamagePath;
-  /** Reaction type. */
-  reactionType: ReactionType;
-  /** Amplifying reaction multiplier (1.5 or 2.0, only for AMPLIFYING path). */
-  amplifyingMultiplier: number;
-  /** Enemy level. */
-  enemyLevel: number;
-  /** Enemy resistance (decimal). */
-  enemyResistance: number;
-  /** Optional defense reductions for this scenario. */
-  defReductions?: number[];
-  /** Scenario description (tooltip). */
-  description: string;
-}
-
-/** Character scenarios configuration file. */
-export interface CharacterScenarios {
-  /** Character ID. */
-  characterId: string;
-  /** Preset scenario list. */
-  scenarios: TypicalScenario[];
-}
-
 // ===== V2: Damage Comparison =====
 
 /** Damage comparison result (before vs after optimization). */
@@ -652,8 +628,6 @@ export interface CharacterSave {
   talentConfig: TalentConfig;
   /** Artifacts (5 pieces). */
   artifacts: ArtifactInstance[];
-  /** Selected typical scenario ID. */
-  selectedScenarioId: string;
   /** Whether imported from Enka. */
   fromEnka: boolean;
   /** Enka UID (optional, only for Enka imports). */

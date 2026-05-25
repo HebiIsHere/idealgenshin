@@ -117,6 +117,7 @@ export class IdealTemplateOptimizer {
       theoreticalDamage: globalBestDamage,
       idealAllocations: globalBestAllocation,
       breakdown: globalBestBreakdown,
+      idealStats: finalStats,
       mainStatCombo: globalBestCombo,
       _debug: {
         artifacts: refBuild.artifacts?.length ?? 0,
@@ -169,6 +170,7 @@ function runSingleSearch(
     theoreticalDamage: bestDamage,
     idealAllocations: roundedAllocation,
     breakdown,
+    idealStats: bestStats,
     _debug: {
       artifacts: baseBuild.artifacts?.length ?? 0,
       weapon: baseBuild.weaponConfig?.weaponData?.nameZh || 'unknown',
@@ -323,7 +325,7 @@ function evaluateDamage(build: CharacterBuild, stats: ComputedStats): number {
     defIgnore: extraBonuses.defIgnore ?? 0,
     elevationBonus: extraBonuses.elevationBonus ?? 0,
     extraBonuses,
-    independentBonus: extraBonuses.independentBonus ?? 0,
+    independentBonus: 0,
   };
   const dmg = DamageFormula.calculate(ctx).totalDamage;
   return isFinite(dmg) ? dmg : 0;
@@ -346,7 +348,7 @@ function evaluateDamageWithBreakdown(build: CharacterBuild, stats: ComputedStats
     defIgnore: extraBonuses.defIgnore ?? 0,
     elevationBonus: extraBonuses.elevationBonus ?? 0,
     extraBonuses,
-    independentBonus: extraBonuses.independentBonus ?? 0,
+    independentBonus: 0,
   });
 }
 
