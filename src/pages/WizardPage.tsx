@@ -71,7 +71,7 @@ function WizardPage(): React.ReactElement {
   const [saveManagerOpen, setSaveManagerOpen] = useState(false);
 
   const {
-    selectedCharacter, characterLevel, skillMultiplier, amplifyingMultiplier,
+    selectedCharacter, characterLevel, skillMultiplier, reactionType, amplifyingMultiplier,
     setSkillMultiplier, setReactionType, setAmplifyingMultiplier, setCharacterLevel,
     teamBuffs, weaponConfig, constellationConfig, talentConfig, setBonus,
     statConversions, setConversions, setWeaponConfig, setTalentConfig, setConstellationBonus,

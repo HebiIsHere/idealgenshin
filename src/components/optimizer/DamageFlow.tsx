@@ -93,10 +93,10 @@ function DamageFlow({ result, computedStats }: DamageFlowProps): React.ReactElem
               {(() => {
                 const parts: string[] = [];
                 const b = result.baseDebug;
-                if ((b.atkRatio ?? 0) > 0) parts.push(`${fmt(b.totalAtk)} × ${fmt(b.atkRatio)}`);
-                if ((b.hpRatio ?? 0) > 0) parts.push(`${fmt(b.totalHp ?? 0)} × ${fmt(b.hpRatio)}`);
-                if ((b.defRatio ?? 0) > 0) parts.push(`${fmt(b.totalDef ?? 0)} × ${fmt(b.defRatio)}`);
-                if ((b.emRatio ?? 0) > 0) parts.push(`${fmt(b.em ?? 0)} × ${fmt(b.emRatio)}`);
+                if ((b.atkRatio ?? 0) > 0) parts.push(`${fmt(b.totalAtk)} × ${fmt(b.atkRatio!)}`);
+                if ((b.hpRatio ?? 0) > 0) parts.push(`${fmt(b.totalHp ?? 0)} × ${fmt(b.hpRatio!)}`);
+                if ((b.defRatio ?? 0) > 0) parts.push(`${fmt(b.totalDef ?? 0)} × ${fmt(b.defRatio!)}`);
+                if ((b.emRatio ?? 0) > 0) parts.push(`${fmt(b.em ?? 0)} × ${fmt(b.emRatio!)}`);
                 const formula = parts.length > 0 ? parts.join(' + ') : `${fmt(b.totalAtk)} × ${fmt(b.atkRatio ?? 0)}`;
                 return <FlowRow label="基础伤害区" value={fmt(result.baseDamage)} sub={`${formula}`} />;
               })()}
