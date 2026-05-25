@@ -1,4 +1,6 @@
 import React, { useMemo, useCallback, useState } from 'react';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -554,18 +556,24 @@ function WizardPage(): React.ReactElement {
         <Button variant="outlined" size="small" onClick={saveCurrent} sx={{ fontSize: '0.75rem', px: 2 }}>保存配置</Button>
         <Button variant="outlined" size="small" onClick={() => setSaveManagerOpen(true)} sx={{ fontSize: '0.75rem', px: 2 }}>添加配置</Button>
       </Box>
-      <SectionStepper resultLabels={resultLabels} />
-      <Box sx={{ position: 'absolute', left: 64, top: 0, right: 280, bottom: 0 }}><SectionRoller renderSection={renderSection} /></Box>
+      {!isMobile && <SectionStepper resultLabels={resultLabels} />}
+      <Box sx={isMobile ? { position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 } : { position: 'absolute', left: 64, top: 0, right: 280, bottom: 0 }}><SectionRoller renderSection={renderSection} /></Box>
       <Box sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 20, display: 'flex', gap: 1.5 }}>
         <Button variant="outlined" disabled={currentIndex === 0} onClick={() => goToSection(currentIndex - 1)} sx={{ px: 3, py: 1, fontSize: '0.9rem' }}>上一步</Button>
         {currentIndex < sections.length - 1 && <Button variant="contained" onClick={nextSectionFn} sx={{ px: 3, py: 1, fontSize: '0.9rem' }}>下一步</Button>}
       </Box>
-      <Box sx={{ position: 'fixed', top: 56, right: 16, width: 248, zIndex: 5, maxHeight: 'calc(100vh - 80px)', overflowY: 'auto', '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { background: 'rgba(212,168,67,0.2)', borderRadius: 2 } }}>
+      {isMobile ? (<Box sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 15, p: 1.5, bgcolor: 'rgba(22,33,62,0.95)', backdropFilter: 'blur(12px)', borderTop: '1px solid rgba(212,168,67,0.1)' }}>
+        <CharacterStatPanel stats={computedStats} compact showActions onCalcDamage={handleCalcDamage} onRedistribute={handleRedistribute} onIdealTemplate={handleIdealTemplate} />
+      </Box>) : (<Box sx={{ position: 'fixed', top: 56, right: 16, width: 248, zIndex: 5, maxHeight: 'calc(100vh - 80px)', overflowY: 'auto', '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { background: 'rgba(212,168,67,0.2)', borderRadius: 2 } }}>
         <CharacterStatPanel stats={computedStats} showActions onCalcDamage={handleCalcDamage} onRedistribute={handleRedistribute} onIdealTemplate={handleIdealTemplate} />
-      </Box>
+      </Box>)}
       <SaveManager open={saveManagerOpen} onClose={() => setSaveManagerOpen(false)} />
     </Box>
   );
 }
 
 export default WizardPage;
+
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
