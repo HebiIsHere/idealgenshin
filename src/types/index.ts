@@ -356,6 +356,8 @@ export interface DamageResult {
 export interface RedistributeRequest {
   build: CharacterBuild;
   currentAllocations: SubstatAllocation[];
+  /** 锚定的词条类型 — 这些类型的词条保持当前值不变，不参与重分配。 */
+  anchoredTypes?: SubstatType[];
 }
 
 /** Result from the redistribute optimizer. */
@@ -389,6 +391,8 @@ export interface IdealRequest {
   build?: CharacterBuild;
   /** 是否搜索主词条组合（420 种）。默认 false，保持向后兼容。 */
   searchMainStats?: boolean;
+  /** 锚定的词条分配 — 这些词条保持当前值不变，从目标总词条数中扣除。 */
+  anchoredAllocations?: SubstatAllocation[];
 }
 
 /** Result from the ideal template optimizer. */

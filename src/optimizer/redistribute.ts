@@ -35,31 +35,40 @@ export class RedistributeOptimizer {
     req: RedistributeRequest,
     onProgress?: (progress: number) => void,
   ): RedistributeResult {
-    const { build, currentAllocations } = req;
+    const { build, currentAllocations, anchoredTypes } = req;
 
     // Calculate current damage
     const currentStats = StatCalculator.compute(build);
     const currentDamage = evaluateDamage(build, currentStats);
     const originalBreakdown = evaluateDamageWithBreakdown(build, currentStats);
 
-    // Calculate total rolls
-    const totalRolls = currentAllocations.reduce((sum, a) => sum + a.rolls, 0);
+    // 拆分锚定词条与自由词条
+    const anchoredSet = new Set(anchoredTypes ?? []);
+    const anchoredAllocations = currentAllocations.filter((a) => anchoredSet.has(a.type));
+    const freeAllocations = currentAllocations.filter((a) => !anchoredSet.has(a.type));
 
-    // 获取相关词条，并根据当前倍率配置动态扩展
+    // Calculate total rolls from free allocations only
+    const totalRolls = freeAllocations.reduce((sum, a) => sum + a.rolls, 0);
+
+    // 获取相关词条（排除锚定类型），并根据当前倍率配置动态扩展
     const relSet = new Set(build.character.relevantSubstats);
     const sc = build.statScaling ?? build.character.defaultStatScaling;
     if ((sc.hpRatio ?? 0) > 0) { relSet.add('HP_PERCENT' as any); relSet.add('HP_FLAT' as any); }
     if ((sc.defRatio ?? 0) > 0) { relSet.add('DEF_PERCENT' as any); relSet.add('DEF_FLAT' as any); }
     if ((sc.atkRatio ?? 0) > 0) { relSet.add('ATK_PERCENT' as any); relSet.add('ATK_FLAT' as any); }
     if ((sc.emRatio ?? 0) > 0) { relSet.add('ELEMENTAL_MASTERY' as any); }
+    // 排除锚定的词条类型
+    for (const t of anchoredSet) { relSet.delete(t as any); }
     const relevantTypes = Array.from(relSet) as any[];
 
-    if (totalRolls === 0) {
+    if (totalRolls === 0 || relevantTypes.length === 0) {
+      // 无可优化词条：结果 = 当前分配
+      const fullAllocation = [...freeAllocations, ...anchoredAllocations];
       return {
         originalDamage: currentDamage,
         optimizedDamage: currentDamage,
         improvementPercent: 0,
-        optimizedAllocations: currentAllocations,
+        optimizedAllocations: fullAllocation,
         currentAllocations,
         originalBreakdown,
         optimizedBreakdown: originalBreakdown,
@@ -68,33 +77,39 @@ export class RedistributeOptimizer {
       };
     }
 
-    // Use hill-climbing optimization (local = global for convex diminishing-returns damage)
+    // Use hill-climbing optimization on free types only.
+    // 评估时始终合并锚定词条，确保 bestDamage 代表完整伤害。
     const { bestAllocation, bestDamage } = SearchSpaceExplorer.hillClimb(
       totalRolls,
       relevantTypes,
       (allocation: SubstatAllocation[]): number => {
-        const virtualBuild = buildWithAllocation(build, allocation);
+        const fullAllocation = [...allocation, ...anchoredAllocations];
+        const virtualBuild = buildWithAllocation(build, fullAllocation);
         const virtualStats = StatCalculator.compute(virtualBuild);
         return evaluateDamage(virtualBuild, virtualStats);
       },
-      currentAllocations,  // use current allocation as initial guess
+      freeAllocations,  // use free allocation as initial guess
       onProgress,
     );
 
-    const improvementPercent = currentDamage > 0
-      ? (bestDamage - currentDamage) / currentDamage
-      : 0;
+    // 合并结果：自由词条优化分配 + 锚定词条不变
+    const mergedAllocations = [...bestAllocation, ...anchoredAllocations];
 
-    // Compute breakdown for the optimized build
-    const optimizedBuild = buildWithAllocation(build, bestAllocation);
+    // 用完整分配重新计算伤害和 breakdown，确保一致性
+    const optimizedBuild = buildWithAllocation(build, mergedAllocations);
     const optimizedStats = StatCalculator.compute(optimizedBuild);
+    const optimizedDamage = evaluateDamage(optimizedBuild, optimizedStats);
     const optimizedBreakdown = evaluateDamageWithBreakdown(optimizedBuild, optimizedStats);
+
+    const improvementPercent = currentDamage > 0
+      ? (optimizedDamage - currentDamage) / currentDamage
+      : 0;
 
     return {
       originalDamage: currentDamage,
-      optimizedDamage: bestDamage,
+      optimizedDamage,
       improvementPercent,
-      optimizedAllocations: bestAllocation,
+      optimizedAllocations: mergedAllocations,
       currentAllocations,
       originalBreakdown,
       optimizedBreakdown,

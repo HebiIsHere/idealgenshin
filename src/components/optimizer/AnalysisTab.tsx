@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Alert from '@mui/material/Alert';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -17,6 +18,8 @@ import OptimizationResult from './OptimizationResult';
 import ComparisonChart from './ComparisonChart';
 import LoadingOverlay from '../common/LoadingOverlay';
 import CharacterStatPanel from '../character/CharacterStatPanel';
+import PushPinIcon from '@mui/icons-material/PushPin';
+import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
 import { useCharacterStore } from '../../store/slices/characterSlice';
 import { useArtifactStore } from '../../store/slices/artifactSlice';
 import { useOptimizerStore } from '../../store/slices/optimizerSlice';
@@ -59,12 +62,56 @@ function AnalysisTab(): React.ReactElement {
     zoneAnalysis,
     runOptimizationWithComparison,
     runIdealTemplate,
+    clearResults,
   } = useOptimizerStore();
 
   // 优化模式
   const [optimizeMode, setOptimizeMode] = React.useState<OptimizeMode>('redistribute');
   const [searchMainStats, setSearchMainStats] = React.useState(false);
   const [idealRollCount, setIdealRollCount] = React.useState(25);
+  const [anchoredTypes, setAnchoredTypes] = React.useState<Set<SubstatType>>(new Set());
+
+  /** 切换锚定状态。 */
+  const toggleAnchor = useCallback((type: SubstatType) => {
+    setAnchoredTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(type)) { next.delete(type); } else { next.add(type); }
+      return next;
+    });
+  }, []);
+
+  // 角色切换时重置锚定
+  React.useEffect(() => {
+    setAnchoredTypes(new Set());
+    setIdealAnchors(new Map());
+    setIdealInputs(new Map());
+  }, [selectedCharacter]);
+
+  // 理想模板锚定（手动输入模式）
+  const idealAvailableTypes = useMemo(() => {
+    if (!selectedCharacter) return [] as SubstatType[];
+    return selectedCharacter.relevantSubstats;
+  }, [selectedCharacter]);
+  const [idealAnchors, setIdealAnchors] = React.useState<Map<SubstatType, number>>(new Map());
+  const [idealInputs, setIdealInputs] = React.useState<Map<SubstatType, string>>(new Map());
+
+  const handleIdealPinToggle = useCallback((type: SubstatType) => {
+    if (idealAnchors.has(type)) {
+      setIdealAnchors((prev) => { const n = new Map(prev); n.delete(type); return n; });
+      setIdealInputs((prev) => { const n = new Map(prev); n.delete(type); return n; });
+    } else {
+      const raw = idealInputs.get(type) ?? '';
+      const val = parseFloat(raw);
+      if (isNaN(val) || val <= 0) return;
+      const currentSum = Array.from(idealAnchors.values()).reduce((s, v) => s + v, 0);
+      if (currentSum + val > idealRollCount) return;
+      setIdealAnchors((prev) => new Map(prev).set(type, val));
+    }
+  }, [idealAnchors, idealInputs, idealRollCount]);
+
+  const handleIdealInputChange = useCallback((type: SubstatType, value: string) => {
+    setIdealInputs((prev) => { const n = new Map(prev); n.set(type, value); return n; });
+  }, []);
 
   // 获取优化场景名
   const scenarioName = '默认场景';
@@ -164,11 +211,16 @@ function AnalysisTab(): React.ReactElement {
   const handleOptimize = useCallback(() => {
     if (!currentBuild) return;
 
+    const anchoredArr = anchoredTypes.size > 0 ? Array.from(anchoredTypes) : undefined;
+
     if (optimizeMode === 'redistribute') {
       if (currentAllocations.length === 0) return;
-      runOptimizationWithComparison(currentBuild, currentAllocations, scenarioName);
+      runOptimizationWithComparison(currentBuild, currentAllocations, scenarioName, anchoredArr);
     } else {
       // 理想模板模式
+      const anchoredAllocs = idealAnchors.size > 0
+        ? Array.from(idealAnchors.entries()).map(([type, rolls]) => ({ type, rolls }))
+        : undefined;
       runIdealTemplate(
         currentBuild.character,
         idealRollCount,
@@ -176,12 +228,15 @@ function AnalysisTab(): React.ReactElement {
         currentBuild.reactionType,
         currentBuild,
         searchMainStats,
+        anchoredAllocs,
       );
     }
-  }, [currentBuild, currentAllocations, optimizeMode, scenarioName, runOptimizationWithComparison, runIdealTemplate, idealRollCount, searchMainStats]);
+  }, [currentBuild, currentAllocations, optimizeMode, scenarioName, anchoredTypes, idealAnchors, idealRollCount, searchMainStats, runOptimizationWithComparison, runIdealTemplate]);
 
   const canOptimize = selectedCharacter !== null && (
-    optimizeMode === 'redistribute' ? currentAllocations.length > 0 : true
+    optimizeMode === 'redistribute'
+      ? currentAllocations.length > 0 && currentAllocations.some((a) => !anchoredTypes.has(a.type))
+      : true
   );
 
   if (!selectedCharacter) {
@@ -260,6 +315,92 @@ function AnalysisTab(): React.ReactElement {
           </>
         )}
 
+        {/* 锚定区域 */}
+        {optimizeMode === 'redistribute' && currentAllocations.length > 0 && (() => {
+          const anchoredRollSum = currentAllocations
+            .filter((a) => anchoredTypes.has(a.type))
+            .reduce((s, a) => s + a.rolls, 0);
+          const freeRollSum = currentAllocations
+            .filter((a) => !anchoredTypes.has(a.type))
+            .reduce((s, a) => s + a.rolls, 0);
+
+          return (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1, color: 'primary.main', fontSize: '0.8rem' }}>
+                优化前词条分布
+              </Typography>
+              <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden' }}>
+                {currentAllocations.map((alloc, idx) => {
+                  const isAnchored = anchoredTypes.has(alloc.type);
+                  return (
+                    <Box key={alloc.type} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.75, bgcolor: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent', opacity: isAnchored ? 1 : 0.85 }}>
+                      <IconButton size="small" onClick={() => toggleAnchor(alloc.type)} sx={{ p: 1, color: isAnchored ? 'primary.main' : 'rgba(255,255,255,0.25)', '&:hover': { color: 'primary.main' } }}>
+                        {isAnchored ? <PushPinIcon sx={{ fontSize: 18 }} /> : <PushPinOutlinedIcon sx={{ fontSize: 18 }} />}
+                      </IconButton>
+                      <Typography variant="body2" sx={{ flex: 1, fontSize: '0.8rem', color: isAnchored ? 'text.primary' : 'text.secondary' }}>{STAT_DISPLAY_NAMES[alloc.type] ?? alloc.type}</Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem', fontWeight: 600, color: isAnchored ? 'primary.main' : 'text.primary', fontFamily: 'monospace' }}>{alloc.rolls.toFixed(1)} 条</Typography>
+                    </Box>
+                  );
+                })}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 1.5, py: 0.75, bgcolor: 'rgba(212,168,67,0.06)', borderTop: '1px solid', borderColor: 'divider', flexWrap: 'wrap', gap: 0.5 }}>
+                  <Typography variant="caption" sx={{ color: 'primary.main', fontSize: '0.65rem' }}>📌 已锚定 {anchoredTypes.size} 项</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>可优化 {freeRollSum.toFixed(1)} 词条</Typography>
+                </Box>
+              </Box>
+            </Box>
+          );
+        })()}
+
+        {optimizeMode === 'ideal' && (() => {
+          const anchoredSum = Array.from(idealAnchors.values()).reduce((s, v) => s + v, 0);
+          const remainingBudget = idealRollCount - anchoredSum;
+          const canRunIdeal = remainingBudget > 0;
+          return (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1, color: 'primary.main', fontSize: '0.8rem' }}>📐 词条锚定</Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                输入期望的词条数并点击 📌 锚定，系统将固定该词条数量生成理想模板
+              </Typography>
+              <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden' }}>
+                {idealAvailableTypes.length === 0 ? (
+                  <Box sx={{ px: 1.5, py: 2, textAlign: 'center' }}><Typography variant="caption" color="text.secondary">暂无可用词条类型</Typography></Box>
+                ) : (
+                  <>
+                    {idealAvailableTypes.map((type, idx) => {
+                      const isAnchored = idealAnchors.has(type);
+                      const anchoredVal = idealAnchors.get(type);
+                      const inputVal = isAnchored ? String(anchoredVal) : (idealInputs.get(type) ?? '');
+                      return (
+                        <Box key={type} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.75, bgcolor: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
+                          <TextField
+                            size="small"
+                            type="number"
+                            value={inputVal}
+                            disabled={isAnchored}
+                            onChange={(e) => handleIdealInputChange(type, e.target.value)}
+                            slotProps={{ htmlInput: { min: 0.1, step: 0.1, style: { fontSize: '0.75rem', padding: '4px 6px' } } }}
+                            sx={{ width: 64, '& .MuiOutlinedInput-root': { bgcolor: isAnchored ? 'rgba(212,168,67,0.08)' : 'transparent' } }}
+                            placeholder="—"
+                          />
+                          <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>条</Typography>
+                          <IconButton size="small" onClick={() => handleIdealPinToggle(type)} sx={{ p: 1, color: isAnchored ? 'primary.main' : 'rgba(255,255,255,0.25)', '&:hover': { color: 'primary.main' } }}>
+                            {isAnchored ? <PushPinIcon sx={{ fontSize: 18 }} /> : <PushPinOutlinedIcon sx={{ fontSize: 18 }} />}
+                          </IconButton>
+                          <Typography variant="body2" sx={{ flex: 1, fontSize: '0.8rem', color: isAnchored ? 'text.primary' : 'text.secondary' }}>{STAT_DISPLAY_NAMES[type] ?? type}</Typography>
+                        </Box>
+                      );
+                    })}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 1.5, py: 0.75, bgcolor: 'rgba(212,168,67,0.06)', borderTop: '1px solid', borderColor: 'divider', flexWrap: 'wrap', gap: 0.5 }}>
+                      <Typography variant="caption" sx={{ color: 'primary.main', fontSize: '0.65rem' }}>📌 已锚定 {idealAnchors.size} 项</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>剩余预算 {remainingBudget.toFixed(1)} / {idealRollCount} 词条</Typography>
+                    </Box>
+                  </>
+                )}
+              </Box>
+            </Box>
+          );
+        })()}
+
         <Button
           variant="contained"
           size="large"
@@ -268,7 +409,7 @@ function AnalysisTab(): React.ReactElement {
           fullWidth
           sx={{ mt: 2 }}
         >
-          {isCalculating ? '计算中…' : '开始优化'}
+          {isCalculating ? '计算中…' : optimizeMode === 'ideal' ? '开始生成理想模板' : '开始优化'}
         </Button>
       </Paper>
 
@@ -282,6 +423,9 @@ function AnalysisTab(): React.ReactElement {
       {/* 重分配优化结果 */}
       {optimizeMode === 'redistribute' && redistributeResult && (
         <>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: -1 }}>
+            <Button size="small" variant="outlined" onClick={clearResults}>重新优化</Button>
+          </Box>
           {/* 优化后角色面板 */}
           {redistributeStats && (
             <Paper sx={{ p: 2 }}>
@@ -320,6 +464,9 @@ function AnalysisTab(): React.ReactElement {
       {/* 理想模板结果 */}
       {optimizeMode === 'ideal' && idealResult && (
         <>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: -1 }}>
+            <Button size="small" variant="outlined" onClick={clearResults}>重新优化</Button>
+          </Box>
           {/* 理想后面板 */}
           {idealStats && (
             <Paper sx={{ p: 2 }}>

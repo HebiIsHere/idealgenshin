@@ -11,6 +11,8 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PushPinIcon from '@mui/icons-material/PushPin';
+import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
 
 import { useWizardStore, type WizardSection } from '../store/slices/wizardSlice';
 import { useCharacterStore } from '../store/slices/characterSlice';
@@ -80,7 +82,7 @@ function WizardPage(): React.ReactElement {
 
   const { artifacts, showcaseCharacters, selectedShowcaseIdx } = useArtifactStore();
   const { isCalculating, progress, redistributeResult, idealResult, damageComparison, zoneAnalysis,
-    runOptimizationWithComparison, runIdealTemplate } = useOptimizerStore();
+    runOptimizationWithComparison, runIdealTemplate, clearResults } = useOptimizerStore();
 
   const [teamBuffConfig, setTeamBuffConfig] = useState<TeamBuffConfig>(defaultTeamBuffConfig());
   const teamBuffBonuses = useMemo(() => computeTeamBuffBonuses(teamBuffConfig), [teamBuffConfig]);
@@ -116,6 +118,69 @@ function WizardPage(): React.ReactElement {
     return counts;
   }, [artifacts]);
   const importedSetNames = Object.keys(importedSetCounts);
+
+  // 当前词条分配（同词条重优化用）
+  const currentAllocations = useMemo(() => {
+    const vm = new Map<SubstatType, number>();
+    for (const s of Object.values(ArtifactSlotType)) {
+      const a = artifacts[s]; if (!a) continue;
+      for (const sub of a.subStats) vm.set(sub.type, (vm.get(sub.type) ?? 0) + sub.value);
+    }
+    const bAtk = (selectedCharacter?.baseStats.atk ?? 0) + (weaponConfig?.weaponData?.baseAtk ?? 0);
+    const fold = (ft: SubstatType, pt: SubstatType, b: number) => {
+      if (b > 0 && vm.has(ft)) { vm.set(pt, (vm.get(pt) ?? 0) + vm.get(ft)! / b); vm.delete(ft); }
+    };
+    fold(SubstatType.ATK_FLAT, SubstatType.ATK_PERCENT, bAtk);
+    fold(SubstatType.HP_FLAT, SubstatType.HP_PERCENT, selectedCharacter?.baseStats.hp ?? 0);
+    fold(SubstatType.DEF_FLAT, SubstatType.DEF_PERCENT, selectedCharacter?.baseStats.def ?? 0);
+    const rm = new Map<SubstatType, number>();
+    for (const [t, v] of vm) { const mv = SUBSTAT_MID_VALUES[t] ?? 1; if (mv > 0) rm.set(t, v / mv); }
+    const allocs = Array.from(rm.entries()).map(([t, r]) => ({ type: t, rolls: r }));
+    const rel = new Set(selectedCharacter?.relevantSubstats ?? []);
+    if ((customScaling.hpRatio ?? 0) > 0) { rel.add(SubstatType.HP_PERCENT); rel.add(SubstatType.HP_FLAT); }
+    if ((customScaling.defRatio ?? 0) > 0) { rel.add(SubstatType.DEF_PERCENT); rel.add(SubstatType.DEF_FLAT); }
+    if ((customScaling.atkRatio ?? 0) > 0) { rel.add(SubstatType.ATK_PERCENT); rel.add(SubstatType.ATK_FLAT); }
+    if ((customScaling.emRatio ?? 0) > 0) { rel.add(SubstatType.ELEMENTAL_MASTERY); }
+    return allocs.filter(a => rel.has(a.type));
+  }, [artifacts, selectedCharacter, weaponConfig, customScaling]);
+
+  // 锚定状态
+  const [anchoredTypes, setAnchoredTypes] = useState<Set<SubstatType>>(new Set());
+  const toggleAnchor = useCallback((type: SubstatType) => {
+    setAnchoredTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(type)) { next.delete(type); } else { next.add(type); }
+      return next;
+    });
+  }, []);
+
+  // 理想模板锚定（手动输入模式）
+  const idealAvailableTypes = useMemo(() => {
+    if (!selectedCharacter) return [] as SubstatType[];
+    return selectedCharacter.relevantSubstats;
+  }, [selectedCharacter]);
+  const [idealAnchors, setIdealAnchors] = useState<Map<SubstatType, number>>(new Map());
+  const [idealInputs, setIdealInputs] = useState<Map<SubstatType, string>>(new Map());
+
+  const handleIdealPinToggle = useCallback((type: SubstatType) => {
+    if (idealAnchors.has(type)) {
+      setIdealAnchors((prev) => { const n = new Map(prev); n.delete(type); return n; });
+      setIdealInputs((prev) => { const n = new Map(prev); n.delete(type); return n; });
+    } else {
+      const raw = idealInputs.get(type) ?? '';
+      const val = parseFloat(raw);
+      if (isNaN(val) || val <= 0) return;
+      const currentSum = Array.from(idealAnchors.values()).reduce((s, v) => s + v, 0);
+      if (currentSum + val > idealRollCount) return;
+      setIdealAnchors((prev) => new Map(prev).set(type, val));
+    }
+  }, [idealAnchors, idealInputs, idealRollCount]);
+
+  const handleIdealInputChange = useCallback((type: SubstatType, value: string) => {
+    setIdealInputs((prev) => { const n = new Map(prev); n.set(type, value); return n; });
+  }, []);
+
+  React.useEffect(() => { setAnchoredTypes(new Set()); setIdealAnchors(new Map()); setIdealInputs(new Map()); }, [selectedCharacter]);
 
   // Talent entries for reference display
   const talentEntries = useMemo(() => {
@@ -245,34 +310,33 @@ function WizardPage(): React.ReactElement {
 
   const handleRedistribute = useCallback(() => {
     if (!currentBuild) return;
-    const vm = new Map<SubstatType, number>();
-    for (const s of Object.values(ArtifactSlotType)) { const a = artifacts[s]; if (!a) continue; for (const sub of a.subStats) vm.set(sub.type, (vm.get(sub.type) ?? 0) + sub.value); }
-    const bAtk = (selectedCharacter?.baseStats.atk ?? 0) + (weaponConfig?.weaponData?.baseAtk ?? 0);
-    const fold = (ft: SubstatType, pt: SubstatType, b: number) => { if (b > 0 && vm.has(ft)) { vm.set(pt, (vm.get(pt) ?? 0) + vm.get(ft)! / b); vm.delete(ft); } };
-    fold(SubstatType.ATK_FLAT, SubstatType.ATK_PERCENT, bAtk); fold(SubstatType.HP_FLAT, SubstatType.HP_PERCENT, selectedCharacter?.baseStats.hp ?? 0); fold(SubstatType.DEF_FLAT, SubstatType.DEF_PERCENT, selectedCharacter?.baseStats.def ?? 0);
-    const rm = new Map<SubstatType, number>(); for (const [t, v] of vm) { const mv = SUBSTAT_MID_VALUES[t] ?? 1; if (mv > 0) rm.set(t, v / mv); }
-    const allocs = Array.from(rm.entries()).map(([t, r]) => ({ type: t, rolls: r }));
-    const rel = new Set(selectedCharacter?.relevantSubstats ?? []);
-    // 根据当前倍率配置动态扩展相关词条
-    if ((customScaling.hpRatio ?? 0) > 0) { rel.add(SubstatType.HP_PERCENT); rel.add(SubstatType.HP_FLAT); }
-    if ((customScaling.defRatio ?? 0) > 0) { rel.add(SubstatType.DEF_PERCENT); rel.add(SubstatType.DEF_FLAT); }
-    if ((customScaling.atkRatio ?? 0) > 0) { rel.add(SubstatType.ATK_PERCENT); rel.add(SubstatType.ATK_FLAT); }
-    if ((customScaling.emRatio ?? 0) > 0) { rel.add(SubstatType.ELEMENTAL_MASTERY); }
-    const f = allocs.filter(a => rel.has(a.type));
-    if (f.length === 0) return;
-    runOptimizationWithComparison(currentBuild, f, '默认场景');
     removeResultSections();
     const idx = insertResultSection('重优化结果');
     setResultLabels((prev) => ({ ...prev, [`result_${idx}`]: '重优化结果' }));
-  }, [currentBuild, artifacts, selectedCharacter, weaponConfig, runOptimizationWithComparison, insertResultSection, removeResultSections]);
+  }, [currentBuild, insertResultSection, removeResultSections]);
+
+  const handleRunRedistribute = useCallback(() => {
+    if (!currentBuild || currentAllocations.length === 0) return;
+    const freeAllocs = currentAllocations.filter((a) => !anchoredTypes.has(a.type));
+    if (freeAllocs.length === 0) return;
+    const anchoredArr = anchoredTypes.size > 0 ? Array.from(anchoredTypes) : undefined;
+    runOptimizationWithComparison(currentBuild, currentAllocations, '默认场景', anchoredArr);
+  }, [currentBuild, currentAllocations, anchoredTypes, runOptimizationWithComparison]);
 
   const handleIdealTemplate = useCallback(() => {
     if (!currentBuild) return;
-    runIdealTemplate(currentBuild.character, idealRollCount, currentBuild.skillMultiplier, currentBuild.reactionType, currentBuild, searchMainStats);
     removeResultSections();
     const idx = insertResultSection('理想模板');
     setResultLabels((prev) => ({ ...prev, [`result_${idx}`]: '理想模板' }));
-  }, [currentBuild, idealRollCount, searchMainStats, runIdealTemplate, insertResultSection, removeResultSections]);
+  }, [currentBuild, insertResultSection, removeResultSections]);
+
+  const handleRunIdeal = useCallback(() => {
+    if (!currentBuild) return;
+    const anchoredAllocs = idealAnchors.size > 0
+      ? Array.from(idealAnchors.entries()).map(([type, rolls]) => ({ type, rolls }))
+      : undefined;
+    runIdealTemplate(currentBuild.character, idealRollCount, currentBuild.skillMultiplier, currentBuild.reactionType, currentBuild, searchMainStats, anchoredAllocs);
+  }, [currentBuild, idealRollCount, searchMainStats, idealAnchors, runIdealTemplate]);
 
   // ---- Render sections ----
   const tb = talentConfig?.bonus ?? {};
@@ -304,9 +368,11 @@ function WizardPage(): React.ReactElement {
             <TextField size="small" type="number" value={idealRollCount} sx={{ width: 80 }}
               slotProps={{ htmlInput: { step: 0.1, min: 0.1, max: 50 } }}
               onChange={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= 0.1 && v <= 50) setIdealRollCount(v); }} />
-            <Button size="small" variant="outlined" onClick={handleIdealTemplate}>刷新</Button>
           </Box>
           {idealResult ? <>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+              <Button size="small" variant="outlined" onClick={clearResults}>重新优化</Button>
+            </Box>
             <Box sx={{ textAlign: 'center', mb: 2 }}>
               <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 700 }}>{Math.round(idealResult.theoreticalDamage).toLocaleString('en-US')}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>理论伤害（{idealRollCount} 词条）</Typography>
@@ -346,13 +412,67 @@ function WizardPage(): React.ReactElement {
               </Box>
             )}
             {idealResult.breakdown && <DamageFlow result={idealResult.breakdown} computedStats={idealResult.idealStats ?? computedStats} />}
-          </> : <Typography color="text.secondary">计算中…</Typography>}
+          </> : (() => {
+            const anchoredSum = Array.from(idealAnchors.values()).reduce((s, v) => s + v, 0);
+            const remainingBudget = idealRollCount - anchoredSum;
+            const canRun = remainingBudget > 0;
+            return (
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1, color: 'primary.main', fontSize: '0.8rem' }}>📐 词条锚定</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                  输入期望的词条数并点击 📌 锚定，系统将固定该词条数量生成理想模板
+                </Typography>
+                <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden', mb: 2 }}>
+                  {idealAvailableTypes.length === 0 ? (
+                    <Box sx={{ px: 1.5, py: 2, textAlign: 'center' }}><Typography variant="caption" color="text.secondary">暂无可用词条类型</Typography></Box>
+                  ) : (
+                    <>
+                      {idealAvailableTypes.map((type, idx) => {
+                        const isAnchored = idealAnchors.has(type);
+                        const anchoredVal = idealAnchors.get(type);
+                        const inputVal = isAnchored ? String(anchoredVal) : (idealInputs.get(type) ?? '');
+                        return (
+                          <Box key={type} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.75, bgcolor: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
+                            <TextField
+                              size="small"
+                              type="number"
+                              value={inputVal}
+                              disabled={isAnchored}
+                              onChange={(e) => handleIdealInputChange(type, e.target.value)}
+                              slotProps={{ htmlInput: { min: 0.1, step: 0.1, style: { fontSize: '0.75rem', padding: '4px 6px' } } }}
+                              sx={{ width: 64, '& .MuiOutlinedInput-root': { bgcolor: isAnchored ? 'rgba(212,168,67,0.08)' : 'transparent' } }}
+                              placeholder="—"
+                            />
+                            <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>条</Typography>
+                            <IconButton size="small" onClick={() => handleIdealPinToggle(type)} sx={{ p: 1, color: isAnchored ? 'primary.main' : 'rgba(255,255,255,0.25)', '&:hover': { color: 'primary.main' } }}>
+                              {isAnchored ? <PushPinIcon sx={{ fontSize: 18 }} /> : <PushPinOutlinedIcon sx={{ fontSize: 18 }} />}
+                            </IconButton>
+                            <Typography variant="body2" sx={{ flex: 1, fontSize: '0.8rem', color: isAnchored ? 'text.primary' : 'text.secondary' }}>{STAT_DISPLAY_NAMES[type] ?? type}</Typography>
+                          </Box>
+                        );
+                      })}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 1.5, py: 0.75, bgcolor: 'rgba(212,168,67,0.06)', borderTop: '1px solid', borderColor: 'divider', flexWrap: 'wrap', gap: 0.5 }}>
+                        <Typography variant="caption" sx={{ color: 'primary.main', fontSize: '0.65rem' }}>📌 已锚定 {idealAnchors.size} 项</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>剩余预算 {remainingBudget.toFixed(1)} / {idealRollCount} 词条</Typography>
+                      </Box>
+                    </>
+                  )}
+                </Box>
+                <Button variant="contained" fullWidth onClick={handleRunIdeal} disabled={!canRun || isCalculating}>
+                  {isCalculating ? '计算中…' : '开始生成理想模板'}
+                </Button>
+              </Box>
+            );
+          })()}
         </Box>);
       }
       if (resultLabels[s]?.includes('重优化')) {
         return (<Box>
           <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>同词条重优化</Typography>
           {redistributeResult ? <>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+              <Button size="small" variant="outlined" onClick={clearResults}>重新优化</Button>
+            </Box>
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, mb: 2 }}>
               <Box sx={{ textAlign: 'center' }}><Typography variant="caption" color="text.secondary">优化前</Typography><Typography variant="h6">{formatDamage(redistributeResult.originalDamage)}</Typography></Box>
               <Box sx={{ textAlign: 'center' }}><Typography variant="caption" color="text.secondary">优化后</Typography><Typography variant="h6" sx={{ color: 'success.light' }}>{formatDamage(redistributeResult.optimizedDamage)}</Typography></Box>
@@ -409,7 +529,43 @@ function WizardPage(): React.ReactElement {
             {zoneAnalysis && <ZoneAnalysisTable analysis={zoneAnalysis} />}
 
             <ErrorBoundary><DamageFlow result={redistributeResult.optimizedBreakdown ?? damageResult!} computedStats={redistributeResult.optimizedStats ?? computedStats} /></ErrorBoundary>
-          </> : <Typography color="text.secondary">计算中…</Typography>}
+          </> : (() => {
+            const freeRollSum = currentAllocations.filter((a) => !anchoredTypes.has(a.type)).reduce((s, a) => s + a.rolls, 0);
+            const freeCount = currentAllocations.filter((a) => !anchoredTypes.has(a.type)).length;
+            const canRun = freeCount > 0 && freeRollSum > 0;
+            return (
+              <Box>
+                <Typography variant="subtitle2" sx={{ mb: 1, color: 'primary.main', fontSize: '0.8rem' }}>优化前词条分布</Typography>
+                <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden', mb: 2 }}>
+                  {currentAllocations.length === 0 ? (
+                    <Box sx={{ px: 1.5, py: 2, textAlign: 'center' }}><Typography variant="caption" color="text.secondary">暂无词条数据，请先在圣遗物配置中填入副词条</Typography></Box>
+                  ) : (
+                    <>
+                      {currentAllocations.map((alloc, idx) => {
+                        const isAnchored = anchoredTypes.has(alloc.type);
+                        return (
+                          <Box key={alloc.type} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.75, bgcolor: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent', opacity: isAnchored ? 1 : 0.85 }}>
+                            <IconButton size="small" onClick={() => toggleAnchor(alloc.type)} sx={{ p: 1, color: isAnchored ? 'primary.main' : 'rgba(255,255,255,0.25)', '&:hover': { color: 'primary.main' } }}>
+                              {isAnchored ? <PushPinIcon sx={{ fontSize: 18 }} /> : <PushPinOutlinedIcon sx={{ fontSize: 18 }} />}
+                            </IconButton>
+                            <Typography variant="body2" sx={{ flex: 1, fontSize: '0.8rem', color: isAnchored ? 'text.primary' : 'text.secondary' }}>{STAT_DISPLAY_NAMES[alloc.type] ?? alloc.type}</Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.8rem', fontWeight: 600, color: isAnchored ? 'primary.main' : 'text.primary', fontFamily: 'monospace' }}>{alloc.rolls.toFixed(1)} 条</Typography>
+                          </Box>
+                        );
+                      })}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 1.5, py: 0.75, bgcolor: 'rgba(212,168,67,0.06)', borderTop: '1px solid', borderColor: 'divider', flexWrap: 'wrap', gap: 0.5 }}>
+                        <Typography variant="caption" sx={{ color: 'primary.main', fontSize: '0.65rem' }}>📌 已锚定 {anchoredTypes.size} 项</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem' }}>可优化 {freeRollSum.toFixed(1)} 词条</Typography>
+                      </Box>
+                    </>
+                  )}
+                </Box>
+                <Button variant="contained" fullWidth onClick={handleRunRedistribute} disabled={!canRun || isCalculating}>
+                  {isCalculating ? '计算中…' : '开始优化'}
+                </Button>
+              </Box>
+            );
+          })()}
         </Box>);
       }
       return (<Box><Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>伤害计算结果</Typography>{damageResult ? <><Box sx={{ textAlign: 'center', mb: 2 }}><Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 700 }}>{formatDamage(damageResult.totalDamage)}</Typography><Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>当前配置伤害</Typography></Box><DamageFlow result={damageResult} computedStats={computedStats} /></> : <Typography color="text.secondary">尚未计算</Typography>}</Box>);
@@ -546,7 +702,7 @@ function WizardPage(): React.ReactElement {
       default:
         return <Typography color="text.secondary">未知板块</Typography>;
     }
-  }, [selectedCharacter, characterLevel, skillMultiplier, amplifyingMultiplier, weaponConfig, talentConfig, teamBuffConfig, reactionOptions, reactIdx, handleReactionChange, damageResult, redistributeResult, idealResult, damageComparison, idealRollCount, resultLabels, customScaling, laumaCons, laumaEM, talentExpand, constExpand, setSkillMultiplier, setCharacterLevel, setTalentConfig, setWeaponConfig, setConstellationBonus, constellationConfig, talentConfig]);
+  }, [selectedCharacter, characterLevel, skillMultiplier, amplifyingMultiplier, weaponConfig, talentConfig, teamBuffConfig, reactionOptions, reactIdx, handleReactionChange, damageResult, redistributeResult, idealResult, damageComparison, idealRollCount, resultLabels, customScaling, laumaCons, laumaEM, talentExpand, constExpand, setSkillMultiplier, setCharacterLevel, setTalentConfig, setWeaponConfig, setConstellationBonus, constellationConfig, talentConfig, currentAllocations, anchoredTypes, toggleAnchor, handleRunRedistribute, handleRunIdeal, isCalculating, idealAvailableTypes, idealAnchors, idealInputs, handleIdealPinToggle, handleIdealInputChange]);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));

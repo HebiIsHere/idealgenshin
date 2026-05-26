@@ -44,16 +44,26 @@ export class IdealTemplateOptimizer {
     req: IdealRequest,
     onProgress?: (progress: number) => void,
   ): IdealResult {
-    const { character, totalRolls, skillMultiplier, reactionType, amplifyingMultiplier, baseDmgMultiplier, build, searchMainStats } = req;
+    const { character, totalRolls, skillMultiplier, reactionType, amplifyingMultiplier, baseDmgMultiplier, build, searchMainStats, anchoredAllocations } = req;
 
-    if (totalRolls <= 0) {
-      return { theoreticalDamage: 0, idealAllocations: [], _debug: { artifacts: 0, weapon: 'n/a', totalAtk: 0, skillMultiplier: 0, reactionType: 'n/a', firstDamage: 0 } };
+    // 扣除锚定词条预算
+    const anchoredRollSum = anchoredAllocations?.reduce((s, a) => s + a.rolls, 0) ?? 0;
+    const remainingRolls = totalRolls - anchoredRollSum;
+    const anchoredTypeSet = new Set((anchoredAllocations ?? []).map((a) => a.type));
+
+    if (remainingRolls <= 0 && anchoredRollSum > 0) {
+      // 全部锚定：返回锚定分配本身
+      const refBuild = (build ?? createDefaultBuild(character, skillMultiplier, reactionType, amplifyingMultiplier, baseDmgMultiplier));
+      const finalBuild = applyAllocation(ensureArtifacts(refBuild, character), anchoredAllocations ?? []);
+      const finalStats = StatCalculator.compute(finalBuild);
+      const dmg = evaluateDamage(finalBuild, finalStats);
+      return { theoreticalDamage: dmg, idealAllocations: anchoredAllocations ?? [], breakdown: evaluateDamageWithBreakdown(finalBuild, finalStats), idealStats: finalStats, _debug: { artifacts: refBuild.artifacts?.length ?? 0, weapon: refBuild.weaponConfig?.weaponData?.nameZh || 'unknown', totalAtk: finalStats.totalAtk, skillMultiplier: refBuild.skillMultiplier, reactionType: refBuild.reactionType, firstDamage: dmg } };
     }
 
-    const relevantTypes = character.relevantSubstats;
+    const relevantTypes = character.relevantSubstats.filter((t) => !anchoredTypeSet.has(t));
 
     // 词条数不能超过可分配上限（理论最大 45 条，5 个圣遗物各 9 个词条槽）
-    const effectiveRolls = Math.min(totalRolls, MAX_TOTAL_ROLLS);
+    const effectiveRolls = Math.min(remainingRolls, MAX_TOTAL_ROLLS);
 
     // 使用传入的 build 或创建默认参考构建
     const baseBuild = build ?? createDefaultBuild(character, skillMultiplier, reactionType, amplifyingMultiplier, baseDmgMultiplier);
@@ -64,8 +74,18 @@ export class IdealTemplateOptimizer {
     if (!searchMainStats) {
       // 基础模式：固定主词条
       const result = runSingleSearch(refBuild, effectiveRolls, relevantTypes, onProgress);
-      result.mainStatCombo = getCurrentMainStats(refBuild);
-      return result;
+      // 合并锚定分配
+      const mergedAllocations = [...result.idealAllocations, ...(anchoredAllocations ?? [])];
+      const finalBuildForStats = applyAllocation(refBuild, mergedAllocations);
+      const mergedStats = StatCalculator.compute(finalBuildForStats);
+      const mergedBreakdown = evaluateDamageWithBreakdown(finalBuildForStats, mergedStats);
+      return {
+        ...result,
+        idealAllocations: mergedAllocations,
+        breakdown: mergedBreakdown,
+        idealStats: mergedStats,
+        mainStatCombo: getCurrentMainStats(refBuild),
+      };
     }
 
     // 主词条搜索模式：枚举所有合法组合
@@ -109,13 +129,14 @@ export class IdealTemplateOptimizer {
       onProgress?.((i + 1) / totalCombos);
     }
 
-    const finalBuild = applyAllocation(applyMainStats(refBuild, globalBestCombo), globalBestAllocation);
+    const mergedAllocations = [...globalBestAllocation, ...(anchoredAllocations ?? [])];
+    const finalBuild = applyAllocation(applyMainStats(refBuild, globalBestCombo), mergedAllocations);
     const finalStats = StatCalculator.compute(finalBuild);
     globalBestBreakdown = evaluateDamageWithBreakdown(finalBuild, finalStats);
 
     return {
       theoreticalDamage: globalBestDamage,
-      idealAllocations: globalBestAllocation,
+      idealAllocations: mergedAllocations,
       breakdown: globalBestBreakdown,
       idealStats: finalStats,
       mainStatCombo: globalBestCombo,
