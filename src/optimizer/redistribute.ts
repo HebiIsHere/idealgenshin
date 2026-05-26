@@ -79,7 +79,7 @@ export class RedistributeOptimizer {
 
     // Use hill-climbing optimization on free types only.
     // 评估时始终合并锚定词条，确保 bestDamage 代表完整伤害。
-    const { bestAllocation, bestDamage } = SearchSpaceExplorer.hillClimb(
+    const { bestAllocation } = SearchSpaceExplorer.hillClimb(
       totalRolls,
       relevantTypes,
       (allocation: SubstatAllocation[]): number => {

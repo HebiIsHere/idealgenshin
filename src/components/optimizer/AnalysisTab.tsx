@@ -236,7 +236,7 @@ function AnalysisTab(): React.ReactElement {
   const canOptimize = selectedCharacter !== null && (
     optimizeMode === 'redistribute'
       ? currentAllocations.length > 0 && currentAllocations.some((a) => !anchoredTypes.has(a.type))
-      : true
+      : idealRollCount - Array.from(idealAnchors.values()).reduce((s, v) => s + v, 0) > 0
   );
 
   if (!selectedCharacter) {
@@ -317,9 +317,6 @@ function AnalysisTab(): React.ReactElement {
 
         {/* 锚定区域 */}
         {optimizeMode === 'redistribute' && currentAllocations.length > 0 && (() => {
-          const anchoredRollSum = currentAllocations
-            .filter((a) => anchoredTypes.has(a.type))
-            .reduce((s, a) => s + a.rolls, 0);
           const freeRollSum = currentAllocations
             .filter((a) => !anchoredTypes.has(a.type))
             .reduce((s, a) => s + a.rolls, 0);
@@ -354,7 +351,6 @@ function AnalysisTab(): React.ReactElement {
         {optimizeMode === 'ideal' && (() => {
           const anchoredSum = Array.from(idealAnchors.values()).reduce((s, v) => s + v, 0);
           const remainingBudget = idealRollCount - anchoredSum;
-          const canRunIdeal = remainingBudget > 0;
           return (
             <Box sx={{ mt: 2 }}>
               <Typography variant="subtitle2" sx={{ mb: 1, color: 'primary.main', fontSize: '0.8rem' }}>📐 词条锚定</Typography>
