@@ -278,11 +278,17 @@ function TeamBuffPanel({ config, onChange }: TeamBuffPanelProps): React.ReactEle
                     type="number"
                     fullWidth
                     label={f.label}
-                    value={((config.customBuffs[f.key] as number) ?? 0) * (f.key === 'elementalMastery' || f.key === 'atkFlat' ? 1 : 100)}
+                    value={config.customBuffs[f.key] !== undefined ? ((config.customBuffs[f.key] as number) * (f.key === 'elementalMastery' || f.key === 'atkFlat' ? 1 : 100)) : ''}
                     onChange={(e) => {
-                      const raw = Number(e.target.value);
+                      const raw = e.target.value;
+                      if (raw === '' || raw === '-') {
+                        update({ customBuffs: { ...config.customBuffs, [f.key]: undefined } });
+                        return;
+                      }
+                      const num = Number(raw);
+                      if (isNaN(num)) return;
                       const scale = (f.key === 'elementalMastery' || f.key === 'atkFlat') ? 1 : 100;
-                      update({ customBuffs: { ...config.customBuffs, [f.key]: isNaN(raw) ? undefined : raw / scale } });
+                      update({ customBuffs: { ...config.customBuffs, [f.key]: num / scale } });
                     }}
                     inputProps={{ step: f.step }}
                   />

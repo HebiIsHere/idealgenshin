@@ -8,6 +8,7 @@ import type {
   DamageComparison,
   ZoneAnalysis,
   ZoneAnalysisEntry,
+  ComputedStats,
 } from '../../types';
 import { SubstatType } from '../../types';
 import type { OptimizerWorkerAPI } from '../../optimizer/worker';
@@ -157,67 +158,69 @@ function computeZoneAnalysis(
     });
   }
 
-  // 计算每个乘区的词条变化和伤害贡献
+  // 构造虚拟 build 的辅助函数
+  const makeBuild = (allocations: SubstatAllocation[]): CharacterBuild => {
+    const artifacts = build.artifacts.map((artifact, idx) => {
+      if (idx === 0) {
+        const subStats = allocations
+          .filter((a) => a.rolls > 0)
+          .map((a) => ({ type: a.type, value: a.rolls * (SUBSTAT_MID_VALUES[a.type] ?? 0) }));
+        return { ...artifact, subStats };
+      }
+      return { ...artifact, subStats: [] };
+    });
+    return { ...build, artifacts };
+  };
+
+  const makeCtx = (b: CharacterBuild, stats: ComputedStats): Parameters<typeof DamageFormula.calculate>[0] => {
+    const eb = mergeExtraBonuses(b);
+    return {
+      stats,
+      skillMultiplier: b.skillMultiplier,
+      statScaling: b.statScaling ?? b.character.defaultStatScaling,
+      reactionType: b.reactionType,
+      enemyLevel: 100,
+      enemyResistance: 0.10,
+      amplifyingMultiplier: b.amplifyingMultiplier ?? 0,
+      characterLevel: b.characterLevel,
+      defReductions: [...(eb.defReductions ?? [])],
+      defIgnore: eb.defIgnore ?? 0,
+      elevationBonus: eb.elevationBonus ?? 0,
+      independentBonus: 0,
+      extraBonuses: eb,
+    };
+  };
+
+  // 基准伤害：全部使用当前分配的 mid-value 近似
+  const baselineBuild = makeBuild(currentAllocations);
+  const baselineStats = StatCalculator.compute(baselineBuild);
+  const baselineDamage = DamageFormula.calculate(makeCtx(baselineBuild, baselineStats)).totalDamage;
+
+  // 计算每个乘区的词条变化和伤害贡献（相对基准线差分）
   for (const [zoneName, changes] of zoneGroups) {
     const currentRolls = changes.reduce((s, c) => s + (currentMap.get(c.type) ?? 0), 0);
     const optimizedRolls = changes.reduce((s, c) => s + (optimizedMap.get(c.type) ?? 0), 0);
     const rollChange = optimizedRolls - currentRolls;
 
-    // 差分法：冻结其他乘区，单独调整该乘区词条计算伤害贡献
     let contribution = 0;
-    if (rollChange !== 0 && currentDamage > 0) {
-      // 创建一个中间态 build，仅该乘区词条使用优化值，其他使用当前值
+    if (rollChange !== 0 && baselineDamage > 0) {
+      // 中间态：该乘区用优化值，其余用当前值
       const midAllocations = currentAllocations.map((a) => {
-        const isInZone = changes.some((c) => c.type === a.type);
-        if (isInZone) {
+        if (changes.some((c) => c.type === a.type)) {
           return { type: a.type, rolls: optimizedMap.get(a.type) ?? 0 };
         }
         return a;
       });
-      // 添加优化中有但当前没有的词条类型
       for (const change of changes) {
         if (!currentAllocations.some((a) => a.type === change.type)) {
           midAllocations.push({ type: change.type, rolls: optimizedMap.get(change.type) ?? 0 });
         }
       }
 
-      // 用中间态计算伤害
-      const midArtifacts = build.artifacts.map((artifact, idx) => {
-        if (idx === 0) {
-          const subStats = midAllocations
-            .filter((a) => a.rolls > 0)
-            .map((a) => ({
-              type: a.type,
-              value: a.rolls * (SUBSTAT_MID_VALUES[a.type] ?? 0),
-            }));
-          return { ...artifact, subStats };
-        }
-        return { ...artifact, subStats: [] };
-      });
-
-      const midBuild = { ...build, artifacts: midArtifacts };
+      const midBuild = makeBuild(midAllocations);
       const midStats = StatCalculator.compute(midBuild);
-
-      // 合并 extraBonuses
-      const extraBonuses = mergeExtraBonuses(midBuild);
-
-      const midCtx = {
-        stats: midStats,
-        skillMultiplier: midBuild.skillMultiplier,
-        statScaling: midBuild.statScaling ?? midBuild.character.defaultStatScaling,
-        reactionType: midBuild.reactionType,
-        enemyLevel: 100,
-        enemyResistance: 0.10,
-        amplifyingMultiplier: 0,
-        characterLevel: midBuild.characterLevel,
-        defReductions: [],
-        defIgnore: 0,
-        elevationBonus: 0,
-        independentBonus: 0,
-        extraBonuses,
-      };
-      const midDamage = DamageFormula.calculate(midCtx).totalDamage;
-      contribution = currentDamage > 0 ? (midDamage - currentDamage) / currentDamage : 0;
+      const midDamage = DamageFormula.calculate(makeCtx(midBuild, midStats)).totalDamage;
+      contribution = baselineDamage > 0 ? (midDamage - baselineDamage) / baselineDamage : 0;
     }
 
     entries.push({

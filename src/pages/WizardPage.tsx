@@ -88,6 +88,7 @@ function WizardPage(): React.ReactElement {
   const teamBuffBonuses = useMemo(() => computeTeamBuffBonuses(teamBuffConfig), [teamBuffConfig]);
   const [damageResult, setDamageResult] = useState<DamageResult | null>(null);
   const [idealRollCount, setIdealRollCount] = useState(25);
+  const [idealRollText, setIdealRollText] = useState('25');
   const [searchMainStats] = useState(false);
   const [resultLabels, setResultLabels] = useState<Record<string, string>>({});
 
@@ -365,9 +366,18 @@ function WizardPage(): React.ReactElement {
         return (<Box><Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>理想模板</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             <Typography variant="body2" color="text.secondary">词条数</Typography>
-            <TextField size="small" type="number" value={idealRollCount} sx={{ width: 80 }}
+            <TextField size="small" type="number" value={idealRollText} sx={{ width: 100 }}
               slotProps={{ htmlInput: { step: 0.1, min: 0.1, max: 50 } }}
-              onChange={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= 0.1 && v <= 50) setIdealRollCount(v); }} />
+              onChange={(e) => {
+                const raw = e.target.value;
+                setIdealRollText(raw);
+                const v = parseFloat(raw);
+                if (!isNaN(v) && v >= 0.1 && v <= 50) setIdealRollCount(v);
+              }}
+              onBlur={() => {
+                const v = parseFloat(idealRollText);
+                if (isNaN(v) || v < 0.1) setIdealRollText(String(idealRollCount));
+              }} />
           </Box>
           {idealResult ? <>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
@@ -418,11 +428,11 @@ function WizardPage(): React.ReactElement {
             const canRun = remainingBudget > 0;
             return (
               <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1, color: 'primary.main', fontSize: '0.8rem' }}>📐 词条锚定</Typography>
+                <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'primary.main', fontSize: '0.8rem' }}>📐 词条锚定</Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
                   输入期望的词条数并点击 📌 锚定，系统将固定该词条数量生成理想模板
                 </Typography>
-                <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden', mb: 2 }}>
+                <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'visible', mb: 2 }}>
                   {idealAvailableTypes.length === 0 ? (
                     <Box sx={{ px: 1.5, py: 2, textAlign: 'center' }}><Typography variant="caption" color="text.secondary">暂无可用词条类型</Typography></Box>
                   ) : (
@@ -432,18 +442,18 @@ function WizardPage(): React.ReactElement {
                         const anchoredVal = idealAnchors.get(type);
                         const inputVal = isAnchored ? String(anchoredVal) : (idealInputs.get(type) ?? '');
                         return (
-                          <Box key={type} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.75, bgcolor: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
+                          <Box key={type} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.5, bgcolor: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
                             <TextField
+                              label={STAT_DISPLAY_NAMES[type] ?? type}
                               size="small"
                               type="number"
                               value={inputVal}
                               disabled={isAnchored}
                               onChange={(e) => handleIdealInputChange(type, e.target.value)}
-                              slotProps={{ htmlInput: { min: 0.1, step: 0.1, style: { fontSize: '0.75rem', padding: '4px 6px' } } }}
-                              sx={{ width: 64, '& .MuiOutlinedInput-root': { bgcolor: isAnchored ? 'rgba(212,168,67,0.08)' : 'transparent' } }}
+                              slotProps={{ htmlInput: { min: 0.1, step: 0.1, style: { fontSize: '0.75rem' } } }}
+                              sx={{ width: 100, '& .MuiOutlinedInput-root': { bgcolor: isAnchored ? 'rgba(212,168,67,0.08)' : 'transparent' } }}
                               placeholder="—"
                             />
-                            <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>条</Typography>
                             <IconButton size="small" onClick={() => handleIdealPinToggle(type)} sx={{ p: 1, color: isAnchored ? 'primary.main' : 'rgba(255,255,255,0.25)', '&:hover': { color: 'primary.main' } }}>
                               {isAnchored ? <PushPinIcon sx={{ fontSize: 18 }} /> : <PushPinOutlinedIcon sx={{ fontSize: 18 }} />}
                             </IconButton>
@@ -535,8 +545,8 @@ function WizardPage(): React.ReactElement {
             const canRun = freeCount > 0 && freeRollSum > 0;
             return (
               <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1, color: 'primary.main', fontSize: '0.8rem' }}>优化前词条分布</Typography>
-                <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden', mb: 2 }}>
+                <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'primary.main', fontSize: '0.8rem' }}>优化前词条分布</Typography>
+                <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'visible', mb: 2 }}>
                   {currentAllocations.length === 0 ? (
                     <Box sx={{ px: 1.5, py: 2, textAlign: 'center' }}><Typography variant="caption" color="text.secondary">暂无词条数据，请先在圣遗物配置中填入副词条</Typography></Box>
                   ) : (
@@ -544,7 +554,7 @@ function WizardPage(): React.ReactElement {
                       {currentAllocations.map((alloc, idx) => {
                         const isAnchored = anchoredTypes.has(alloc.type);
                         return (
-                          <Box key={alloc.type} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.75, bgcolor: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent', opacity: isAnchored ? 1 : 0.85 }}>
+                          <Box key={alloc.type} sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 0.5, bgcolor: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent', opacity: isAnchored ? 1 : 0.85 }}>
                             <IconButton size="small" onClick={() => toggleAnchor(alloc.type)} sx={{ p: 1, color: isAnchored ? 'primary.main' : 'rgba(255,255,255,0.25)', '&:hover': { color: 'primary.main' } }}>
                               {isAnchored ? <PushPinIcon sx={{ fontSize: 18 }} /> : <PushPinOutlinedIcon sx={{ fontSize: 18 }} />}
                             </IconButton>
@@ -573,29 +583,30 @@ function WizardPage(): React.ReactElement {
 
     switch (s) {
       case 'import':
-        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>Enka 导入</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>输入 UID 自动导入角色展柜数据，省去手动填写</Typography><ArtifactImport /></Box>);
+        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>Enka 导入</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>输入 UID 自动导入角色展柜数据，省去手动填写</Typography><ArtifactImport /></Box>);
 
       case 'character':
-        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>选择角色</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择一位需要分析的角色</Typography><CharacterSelect /><Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}><TextField label="角色等级" type="number" size="small" value={characterLevel} onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1 && v <= 90) setCharacterLevel(v); }} slotProps={{ htmlInput: { min: 1, max: 90 } }} sx={{ width: 120 }} /></Box></Box>);
+        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>选择角色</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择一位需要分析的角色</Typography><CharacterSelect /><Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}><TextField label="角色等级" type="number" size="small" value={characterLevel} onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1 && v <= 90) setCharacterLevel(v); }} slotProps={{ htmlInput: { min: 1, max: 90 } }} sx={{ width: 120 }} /></Box></Box>);
 
       case 'weapon':
-        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>武器配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择武器并查看被动效果</Typography>
+        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>武器配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择武器并查看被动效果</Typography>
           <WeaponSelect />
           {weaponConfig && (<><Box sx={{ mt: 1, mb: 1, p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2 }}><Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600 }}>{weaponConfig.weaponData.nameZh}</Typography><Typography variant="body2" color="text.secondary">基础攻击力: {weaponConfig.weaponData.baseAtk}</Typography>{weaponConfig.weaponData.substatType && weaponConfig.weaponData.substatValue > 0 && <Typography variant="body2" color="text.secondary">{({ ATK_PERCENT: '攻击力%', DEF_PERCENT: '防御力%', HP_PERCENT: '生命值%', CRIT_RATE: '暴击率%', CRIT_DMG: '暴击伤害%', ELEMENTAL_MASTERY: '元素精通', ENERGY_RECHARGE: '充能效率', PHYSICAL_DMG_BONUS: '物理伤害%' } as Record<string,string>)[weaponConfig.weaponData.substatType] || weaponConfig.weaponData.substatType}: {weaponConfig.weaponData.substatType === 'ELEMENTAL_MASTERY' ? Math.round(weaponConfig.weaponData.substatValue) : `${(weaponConfig.weaponData.substatValue*100).toFixed(4)}%`}</Typography>}<Typography variant="body2" color="text.secondary">等级: {weaponConfig.weaponLevel}</Typography>
             <Box sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}><Typography variant="body2" color="text.secondary">精炼:</Typography>{[1,2,3,4,5].map((r) => (<Chip key={r} label={`R${r}`} size="small" color={weaponConfig.refinement === r ? 'primary' : 'default'} variant={weaponConfig.refinement === r ? 'filled' : 'outlined'} onClick={() => setWeaponRefinement(r)} sx={{ cursor: 'pointer', minWidth: 36 }} />))}</Box></Box>
+            <Box className="diamond-divider">◆</Box>
             <WeaponPassiveInput /></>)}</Box>);
 
       case 'artifacts':
-        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>圣遗物配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>逐部位填入圣遗物主/副词条属性</Typography><ArtifactEditor /><Box sx={{ mt: 2 }}><ArtifactSetSelect importedSetNames={importedSetNames} importedSetCounts={importedSetCounts} /></Box></Box>);
+        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>圣遗物配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>逐部位填入圣遗物主/副词条属性</Typography><ArtifactEditor /><Box sx={{ mt: 2 }}><ArtifactSetSelect importedSetNames={importedSetNames} importedSetCounts={importedSetCounts} /></Box></Box>);
 
       case 'talents':
         return (<Box>
-          <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>天赋与命座</Typography>
+          <Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>天赋与命座</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>手动填入天赋和命座对应的实际加成数值</Typography>
-          <Box sx={{ mb: 2, p: 2, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, borderLeft: '3px solid', borderColor: 'primary.main' }}>
-            <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'primary.main' }}>天赋模拟</Typography>
-            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', display: 'block', mb: 1 }}>固有天赋等角色自身机制提供的乘区加成</Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 0.5 }}>
+          <Box sx={{ mb: 2, p: 1.25, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, borderLeft: '2px solid', borderColor: 'primary.main' }}>
+            <Typography variant="subtitle2" sx={{ mb: 0.25, color: 'primary.main' }}>天赋模拟</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', display: 'block', mb: 0.5 }}>固有天赋等角色自身机制提供的乘区加成</Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 0.5 }}>
               <BonusRow label="大权区" value={showPct(tb, 'authorityMultiplier')} onChange={setPct(setTb, tb, 'authorityMultiplier')} hint="%" />
               <BonusRow label="月兆区" value={showPct(tb, 'moonSignBonus')} onChange={setPct(setTb, tb, 'moonSignBonus')} hint="%" />
               <BonusRow label="增伤区" value={showPct(tb, 'dmgBonus')} onChange={setPct(setTb, tb, 'dmgBonus')} hint="%" />
@@ -608,15 +619,16 @@ function WizardPage(): React.ReactElement {
               <BonusRow label="生命值" value={showNum(tb, 'hpFlat')} onChange={setFlat(setTb, tb, 'hpFlat')} hint="固定值" />
               <BonusRow label="羽毛附伤" value={showNum(tb, 'featherFlat')} onChange={setFlat(setTb, tb, 'featherFlat')} hint="固定值" />
             </Box>
-            <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 0.5 }}>
+            <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 0.25 }}>
               ⚠ 百分比类数值无需输入 % 号，直接填数字即可（如 61.7 表示 61.7%）
             </Typography>
             <RefAccordion open={talentExpand} onToggle={() => setTalentExpand(!talentExpand)} entries={talentEntries} buttonLabel="查看天赋详情" emptyHint={selectedCharacter ? '暂无天赋数据' : '请先选择角色'} />
           </Box>
-          <Box sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, borderLeft: '3px solid', borderColor: 'secondary.main' }}>
-            <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'secondary.main' }}>命座模拟</Typography>
-            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', display: 'block', mb: 1 }}>命之座效果提供的乘区加成</Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 0.5 }}>
+          <Box className="diamond-divider">◆</Box>
+          <Box sx={{ p: 1.25, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, borderLeft: '2px solid', borderColor: 'secondary.main' }}>
+            <Typography variant="subtitle2" sx={{ mb: 0.25, color: 'secondary.main' }}>命座模拟</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', display: 'block', mb: 0.5 }}>命之座效果提供的乘区加成</Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 0.5 }}>
               <BonusRow label="暴击率" value={showPct(cb, 'critRate')} onChange={setPct(setCb, cb, 'critRate')} hint="%" />
               <BonusRow label="暴击伤害" value={showPct(cb, 'critDmg')} onChange={setPct(setCb, cb, 'critDmg')} hint="%" />
               <BonusRow label="擢升区" value={showPct(cb, 'elevationBonus')} onChange={setPct(setCb, cb, 'elevationBonus')} hint="%" />
@@ -629,7 +641,7 @@ function WizardPage(): React.ReactElement {
               <BonusRow label="防御力" value={showNum(cb, 'defFlat')} onChange={setFlat(setCb, cb, 'defFlat')} hint="固定值" />
               <BonusRow label="生命值" value={showNum(cb, 'hpFlat')} onChange={setFlat(setCb, cb, 'hpFlat')} hint="固定值" />
             </Box>
-            <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 0.5 }}>
+            <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 0.25 }}>
               ⚠ 百分比类数值无需输入 % 号，直接填数字即可（如 61.7 表示 61.7%）
             </Typography>
             <RefAccordion open={constExpand} onToggle={() => setConstExpand(!constExpand)} entries={constEntries} buttonLabel="查看命座详情" emptyHint={selectedCharacter ? '暂无命座数据' : '请先选择角色'} />
@@ -637,14 +649,14 @@ function WizardPage(): React.ReactElement {
 
       case 'teambuffs': {
         const isMB = reactionType === ('MOON_BLOOM' as any);
-        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>队伍 Buff</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>添加辅助角色、圣遗物套装、元素共鸣等增益（自由输入已整合至⑤）</Typography><TeamBuffPanel config={teamBuffConfig} onChange={setTeamBuffConfig} />
-          {isMB && (<Box sx={{ mt: 2, p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2 }}><Typography variant="body2" sx={{ mb: 1, color: 'primary.main' }}>祷歌型附伤（菈乌玛·月绽放专用）</Typography><Box sx={{ display: 'flex', gap: 1, mb: 1 }}><FormControl size="small" sx={{ width: 120 }}><Select value={laumaCons} onChange={(e) => setLaumaCons(e.target.value)}><MenuItem value="c0">0 命</MenuItem><MenuItem value="c2">2 命</MenuItem><MenuItem value="c3">3 命</MenuItem></Select></FormControl><TextField label="菈乌玛精通" type="number" size="small" value={laumaEM || ''} placeholder="0" sx={{ width: 120 }} slotProps={{ htmlInput: { step: 1 } }} onChange={(e) => { const raw = e.target.value; if (raw === '' || raw === '-') { setLaumaEM(0); return; } const v = parseInt(raw); if (!isNaN(v)) setLaumaEM(v); }} /></Box><Typography variant="caption" color="text.secondary">= {laumaEM || 0} × {laumaCons === 'c0' ? '4.0' : laumaCons === 'c2' ? '8.0' : '8.723'} = {Math.round(calcLaumaPrayer(laumaEM, laumaCons)).toLocaleString()}</Typography></Box>)}
+        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>队伍 Buff</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>添加辅助角色、圣遗物套装、元素共鸣等增益（自由输入已整合至⑤）</Typography><TeamBuffPanel config={teamBuffConfig} onChange={setTeamBuffConfig} />
+          {isMB && (<Box sx={{ mt: 2, p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2 }}><Typography variant="body2" sx={{ mb: 0.5, color: 'primary.main' }}>祷歌型附伤（菈乌玛·月绽放专用）</Typography><Box sx={{ display: 'flex', gap: 1, mb: 1 }}><FormControl size="small" sx={{ width: 120 }}><Select value={laumaCons} onChange={(e) => setLaumaCons(e.target.value)}><MenuItem value="c0">0 命</MenuItem><MenuItem value="c2">2 命</MenuItem><MenuItem value="c3">3 命</MenuItem></Select></FormControl><TextField label="菈乌玛精通" type="number" size="small" value={laumaEM || ''} placeholder="0" sx={{ width: 120 }} slotProps={{ htmlInput: { step: 1 } }} onChange={(e) => { const raw = e.target.value; if (raw === '' || raw === '-') { setLaumaEM(0); return; } const v = parseInt(raw); if (!isNaN(v)) setLaumaEM(v); }} /></Box><Typography variant="caption" color="text.secondary">= {laumaEM || 0} × {laumaCons === 'c0' ? '4.0' : laumaCons === 'c2' ? '8.0' : '8.723'} = {Math.round(calcLaumaPrayer(laumaEM, laumaCons)).toLocaleString()}</Typography></Box>)}
         </Box>);
       }
 
       case 'scenario':
-        return (<Box><Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>倍率与反应</Typography>
-          <Box sx={{ mb: 2, p: 2, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, borderLeft: '3px solid', borderColor: 'primary.main' }}>
+        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>倍率与反应</Typography>
+          <Box sx={{ mb: 2, p: 1.25, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, borderLeft: '2px solid', borderColor: 'primary.main' }}>
             <Typography variant="subtitle2" sx={{ mb: 0.5, color: 'primary.main' }}>倍率</Typography>
             <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', display: 'block', mb: 1 }}>至多两种属性混合，直接输入百分比数值（如 230.7 表示 230.7%）</Typography>
             {scalingEntries.map((entry) => (
@@ -717,12 +729,12 @@ function WizardPage(): React.ReactElement {
       </Box>
       {!isMobile && <SectionStepper resultLabels={resultLabels} />}
       <Box sx={{ position: 'absolute', left: { xs: 0, md: 64 }, top: 0, right: { xs: 0, md: 280 }, bottom: 0 }}><SectionRoller renderSection={renderSection} /></Box>
-      <Box sx={{ position: 'fixed', bottom: { xs: 72, md: 24 }, right: 24, zIndex: 20, display: 'flex', gap: 1.5 }}>
+      <Box sx={{ position: 'fixed', bottom: { xs: 72, md: 24 }, right: 24, zIndex: 20, display: 'flex', gap: 1.5, bgcolor: 'rgba(15,22,41,0.75)', backdropFilter: 'blur(8px) saturate(120%)', WebkitBackdropFilter: 'blur(8px) saturate(120%)', borderRadius: 2, p: 1, border: '1px solid rgba(212,168,67,0.1)' }}>
         <Button variant="outlined" disabled={currentIndex === 0} onClick={() => goToSection(currentIndex - 1)} sx={{ px: 3, py: 1, fontSize: '0.9rem' }}>上一步</Button>
         {currentIndex < sections.length - 1 && <Button variant="contained" onClick={nextSectionFn} sx={{ px: 3, py: 1, fontSize: '0.9rem' }}>下一步</Button>}
       </Box>
       {isMobile ? (
-        <Box sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 15, p: 1.5, bgcolor: 'rgba(22,33,62,0.95)', backdropFilter: 'blur(12px)', borderTop: '1px solid rgba(212,168,67,0.1)' }}>
+        <Box sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 15, p: 1.5, bgcolor: 'rgba(15,22,41,0.92)', backdropFilter: 'blur(16px) saturate(120%)', WebkitBackdropFilter: 'blur(16px) saturate(120%)', borderTop: '1px solid rgba(212,168,67,0.15)' }}>
           <CharacterStatPanel stats={computedStats} showActions onCalcDamage={handleCalcDamage} onRedistribute={handleRedistribute} onIdealTemplate={handleIdealTemplate} compact />
         </Box>
       ) : (

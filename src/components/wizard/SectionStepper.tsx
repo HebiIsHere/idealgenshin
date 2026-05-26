@@ -52,6 +52,12 @@ function SectionStepper({ resultLabels = {} }: SectionStepperProps): React.React
         flexDirection: 'column',
         gap: 0,
         alignItems: 'flex-start',
+        bgcolor: 'rgba(15,22,41,0.7)',
+        backdropFilter: 'blur(10px) saturate(120%)',
+        WebkitBackdropFilter: 'blur(10px) saturate(120%)',
+        borderRadius: 2,
+        p: 1,
+        border: '1px solid rgba(212,168,67,0.08)',
       }}
     >
       {allSections.map((key) => {

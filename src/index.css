@@ -6,11 +6,22 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', 'Hiragino Sans GB', sans-serif;
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #1A1A2E;
-  color: #E0D8CC;
+  background-color: #0F1629;
+  color: #E6DCC8;
+}
+
+/* 星尘噪点纹理覆盖层 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* Smooth transitions for interactive elements */
@@ -50,4 +61,70 @@ a, button, .MuiButton-root, .MuiChip-root, .MuiTab-root {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* 星座加载动画 */
+@keyframes star-glow {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+.constellation-star {
+  animation: star-glow 1.4s ease-in-out infinite;
+}
+.constellation-star:nth-of-type(1) { animation-delay: 0s; }
+.constellation-star:nth-of-type(2) { animation-delay: 0.16s; }
+.constellation-star:nth-of-type(3) { animation-delay: 0.32s; }
+.constellation-star:nth-of-type(4) { animation-delay: 0.48s; }
+.constellation-star:nth-of-type(5) { animation-delay: 0.64s; }
+.constellation-star:nth-of-type(6) { animation-delay: 0.8s; }
+.constellation-done .constellation-star {
+  animation: none;
+  opacity: 1;
+}
+
+/* 菱形分隔符 */
+.diamond-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0;
+  color: rgba(212, 168, 67, 0.35);
+  font-size: 8px;
+  letter-spacing: 0;
+  user-select: none;
+}
+.diamond-divider::before,
+.diamond-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,168,67,0.2), transparent);
+}
+
+/* 卡片金色角标 */
+.card-accent {
+  position: relative;
+}
+/* 四角 L 形金色花纹 */
+.card-accent::before,
+.card-accent::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+  z-index: 0;
+}
+.card-accent::before {
+  top: -12px;
+  left: -12px;
+  border-top: 1.5px solid rgba(212,168,67,0.3);
+  border-left: 1.5px solid rgba(212,168,67,0.3);
+}
+.card-accent::after {
+  bottom: -12px;
+  right: -12px;
+  border-bottom: 1.5px solid rgba(212,168,67,0.3);
+  border-right: 1.5px solid rgba(212,168,67,0.3);
 }

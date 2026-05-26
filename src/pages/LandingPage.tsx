@@ -106,7 +106,7 @@ function LandingPage(): React.ReactElement {
 
         <Typography variant="caption" sx={{ color: 'text.disabled', mt: 4, display: 'block',
           animation: `${fadeIn} 0.8s 0.6s cubic-bezier(0.16,1,0.3,1) both` }}>
-          作者：袔苾 · v3.1
+          作者：袔苾 · v3.2
         </Typography>
       </Container>
 

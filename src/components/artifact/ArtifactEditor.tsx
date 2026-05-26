@@ -166,11 +166,15 @@ function ArtifactSlotEditor({
           </FormControl>
           <TextField
             type="number"
-            value={sub.value}
-            onChange={(e) => handleSubStatChange(index, 'value', parseFloat(e.target.value) || 0)}
-            size="small"
-            sx={{ width: 80 }}
-            inputProps={{ min: 0, step: 0.1 }}
+            value={sub.value || ''}
+            onChange={(e) => {
+              const raw = e.target.value;
+              if (raw === '' || raw === '-') { handleSubStatChange(index, 'value', 0); return; }
+              const v = parseFloat(raw);
+              if (!isNaN(v)) handleSubStatChange(index, 'value', v);
+            }}
+            sx={{ width: 100 }}
+            slotProps={{ htmlInput: { min: 0, step: 0.1 } }}
           />
           <IconButton size="small" onClick={() => handleRemoveSubStat(index)} color="error">
             <DeleteIcon fontSize="small" />

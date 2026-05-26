@@ -21,26 +21,34 @@ function BonusRow({
   onChange: (v: number) => void;
   hint?: string;
 }): React.ReactElement {
+  const [text, setText] = React.useState(value !== undefined ? String(value) : '');
+
+  React.useEffect(() => {
+    if (value !== undefined) setText(String(value));
+  }, [value]);
+
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-      <Typography variant="caption" sx={{ minWidth: 80, color: 'text.secondary' }}>
-        {label}
-      </Typography>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
       <TextField
+        label={label}
         size="small"
         type="number"
-        value={value ?? ''}
+        value={text}
         placeholder="0"
-        sx={{ width: 80 }}
+        sx={{ width: 100 }}
         slotProps={{ htmlInput: { step: 0.01 } }}
         onChange={(e) => {
           const raw = e.target.value;
+          setText(raw);
           if (raw === '' || raw === '-') {
             onChange(0);
             return;
           }
           const v = parseFloat(raw);
           if (!isNaN(v)) onChange(v);
+        }}
+        onBlur={() => {
+          if (value !== undefined) setText(String(value));
         }}
       />
       {hint && (

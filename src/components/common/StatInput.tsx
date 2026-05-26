@@ -1,25 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
 import type { SubstatType } from '../../types';
 import { PERCENTAGE_STAT_TYPES, STAT_DISPLAY_NAMES } from '../../data/constants';
 
 interface StatInputProps {
-  /** Stat type. */
   type: SubstatType;
-  /** Current value. */
   value: number;
-  /** Change handler. */
   onChange: (value: number) => void;
-  /** Whether the input is disabled. */
   disabled?: boolean;
-  /** Minimum value. */
   min?: number;
-  /** Maximum value. */
   max?: number;
-  /** Label override. */
   label?: string;
 }
 
-/** Reusable stat input component with type-aware formatting. */
 function StatInput({
   type,
   value,
@@ -33,41 +28,51 @@ function StatInput({
   const displayLabel = label ?? STAT_DISPLAY_NAMES[type] ?? type;
   const step = isPercent ? 0.1 : 1;
 
+  const toDisplay = (v: number) => {
+    if (v === 0) return '';
+    return isPercent ? (v * 100).toFixed(4) : v.toFixed(4);
+  };
+  const [text, setText] = useState(toDisplay(value));
+
+  useEffect(() => {
+    setText(toDisplay(value));
+  }, [value]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = parseFloat(e.target.value);
-    if (isNaN(rawValue)) return;
-    // Convert percentage display to decimal for storage
-    const internalValue = isPercent ? rawValue / 100 : rawValue;
-    onChange(Math.max(min, max !== undefined ? Math.min(internalValue, max) : internalValue));
+    const raw = e.target.value;
+    setText(raw);
+    if (raw === '' || raw === '-') {
+      onChange(0);
+      return;
+    }
+    const num = parseFloat(raw);
+    if (isNaN(num)) return;
+    const internal = isPercent ? num / 100 : num;
+    const clamped = Math.max(min, max !== undefined ? Math.min(internal, max) : internal);
+    onChange(clamped);
   };
 
-  const displayValue = isPercent ? (value * 100).toFixed(4) : value.toFixed(4);
+  const handleBlur = () => {
+    setText(toDisplay(value));
+  };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{ minWidth: 80, fontSize: '0.875rem', color: '#A0A0B0' }}>
-        {displayLabel}
-      </span>
-      <input
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <TextField
+        label={displayLabel}
+        size="small"
         type="number"
-        value={displayValue}
-        onChange={handleChange}
+        value={text}
         disabled={disabled}
-        step={step}
-        min={isPercent ? min * 100 : min}
-        max={max !== undefined ? (isPercent ? max * 100 : max) : undefined}
-        style={{
-          width: 80,
-          padding: '4px 8px',
-          borderRadius: 4,
-          border: '1px solid rgba(212, 168, 67, 0.3)',
-          backgroundColor: '#16213E',
-          color: '#E0E0E0',
-          fontSize: '0.875rem',
+        onChange={handleChange}
+        onBlur={handleBlur}
+        slotProps={{
+          htmlInput: { step, min: isPercent ? min * 100 : min, max: max !== undefined ? (isPercent ? max * 100 : max) : undefined },
         }}
+        sx={{ width: 100 }}
       />
-      {isPercent && <span style={{ fontSize: '0.75rem', color: '#A0A0B0' }}>%</span>}
-    </div>
+      {isPercent && <Typography variant="caption" color="text.disabled">%</Typography>}
+    </Box>
   );
 }
 

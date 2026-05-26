@@ -158,7 +158,7 @@ function ZoneBonusInputComp({ value, onChange, disabled = false }: ZoneBonusInpu
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
       {ZONE_ROWS.map((row) => (
         <Box key={row.label}>
           <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600, mb: 0.5, display: 'block' }}>
