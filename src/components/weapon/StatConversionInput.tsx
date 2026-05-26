@@ -165,7 +165,7 @@ function StatConversionInput(): React.ReactElement {
         <Box
           key={rowKeys[i] ?? i}
           sx={{
-            display: 'flex', alignItems: 'center', gap: 1, mb: 1,
+            display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap',
             p: 0.75, borderRadius: 1, bgcolor: 'rgba(255,255,255,0.02)',
           }}
         >

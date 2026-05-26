@@ -151,7 +151,7 @@ function WeaponPassiveInput(): React.ReactElement {
         根据被动描述，手动填入各乘区实际加成数值
       </Typography>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 0.5 }}>
         <BonusRow label="攻击力%" value={showPct('atkPercent')} onChange={setPct('atkPercent')} hint="%" />
         <BonusRow label="防御力%" value={showPct('defPercent')} onChange={setPct('defPercent')} hint="%" />
         <BonusRow label="生命值%" value={showPct('hpPercent')} onChange={setPct('hpPercent')} hint="%" />
