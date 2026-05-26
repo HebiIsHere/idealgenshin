@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Global styles that complement MUI's CssBaseline */
 body {
   margin: 0;
@@ -9,8 +13,8 @@ body {
   font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #0F1629;
-  color: #E6DCC8;
+  background-color: #0B1424;
+  color: #E4ECF4;
 }
 
 /* 星尘噪点纹理覆盖层 */
@@ -26,7 +30,7 @@ body::before {
 
 /* Smooth transitions for interactive elements */
 a, button, .MuiButton-root, .MuiChip-root, .MuiTab-root {
-  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: opacity 200ms cubic-bezier(0.16, 1, 0.3, 1), transform 200ms cubic-bezier(0.16, 1, 0.3, 1), background-color 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 /* Scrollbar styling for dark theme */
@@ -36,21 +40,21 @@ a, button, .MuiButton-root, .MuiChip-root, .MuiTab-root {
 }
 
 ::-webkit-scrollbar-track {
-  background: #16213E;
+  background: #0F1D35;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3A3A5E;
+  background: #2A4A6E;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4A4A6E;
+  background: #3A5A7E;
 }
 
 /* Genshin-style selection color */
 ::selection {
-  background-color: rgba(212, 168, 67, 0.3);
+  background-color: rgba(91, 192, 235, 0.3);
   color: #FFFFFF;
 }
 
@@ -82,6 +86,27 @@ a, button, .MuiButton-root, .MuiChip-root, .MuiTab-root {
   opacity: 1;
 }
 
+/* 卡片呼吸浮沉 */
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
+  25%  { transform: translateY(-7px) translateX(2px) rotate(0.4deg) scale(1.002); }
+  50%  { transform: translateY(-2px) translateX(-1px) rotate(-0.2deg) scale(1.001); }
+  75%  { transform: translateY(-6px) translateX(-2px) rotate(-0.5deg) scale(1.001); }
+}
+
+/* 海面波动 */
+@keyframes waveShift {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-4px) scaleY(1.03); }
+}
+
+/* 气泡上升 */
+@keyframes bubbleRise {
+  0% { transform: translateY(0) scale(0.6); opacity: 0.25; }
+  20% { opacity: 0.5; }
+  100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+}
+
 /* 菱形分隔符 */
 .diamond-divider {
   display: flex;
@@ -89,7 +114,7 @@ a, button, .MuiButton-root, .MuiChip-root, .MuiTab-root {
   justify-content: center;
   gap: 12px;
   padding: 8px 0;
-  color: rgba(212, 168, 67, 0.35);
+  color: rgba(255, 255, 255, 0.25);
   font-size: 8px;
   letter-spacing: 0;
   user-select: none;
@@ -99,7 +124,7 @@ a, button, .MuiButton-root, .MuiChip-root, .MuiTab-root {
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212,168,67,0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
 }
 
 /* 卡片金色角标 */
@@ -119,12 +144,12 @@ a, button, .MuiButton-root, .MuiChip-root, .MuiTab-root {
 .card-accent::before {
   top: -12px;
   left: -12px;
-  border-top: 1.5px solid rgba(212,168,67,0.3);
-  border-left: 1.5px solid rgba(212,168,67,0.3);
+  border-top: 1.5px solid rgba(255,255,255,0.2);
+  border-left: 1.5px solid rgba(255,255,255,0.2);
 }
 .card-accent::after {
   bottom: -12px;
   right: -12px;
-  border-bottom: 1.5px solid rgba(212,168,67,0.3);
-  border-right: 1.5px solid rgba(212,168,67,0.3);
+  border-bottom: 1.5px solid rgba(255,255,255,0.2);
+  border-right: 1.5px solid rgba(255,255,255,0.2);
 }

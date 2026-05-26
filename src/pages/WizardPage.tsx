@@ -33,6 +33,7 @@ import ArtifactSetSelect from '../components/artifact/ArtifactSetSelect';
 import ArtifactImport from '../components/artifact/ArtifactImport';
 import TeamBuffPanel, { TeamBuffConfig, defaultTeamBuffConfig, computeTeamBuffBonuses } from '../components/optimizer/TeamBuffPanel';
 import LoadingOverlay from '../components/common/LoadingOverlay';
+import StickerThrower from '../components/common/StickerThrower';
 import BonusRow from '../components/common/BonusRow';
 import RefAccordion, { type RefEntry } from '../components/common/RefAccordion';
 import ErrorBoundary from '../components/common/ErrorBoundary';
@@ -451,7 +452,7 @@ function WizardPage(): React.ReactElement {
                               disabled={isAnchored}
                               onChange={(e) => handleIdealInputChange(type, e.target.value)}
                               slotProps={{ htmlInput: { min: 0.1, step: 0.1, style: { fontSize: '0.75rem' } } }}
-                              sx={{ width: 100, '& .MuiOutlinedInput-root': { bgcolor: isAnchored ? 'rgba(212,168,67,0.08)' : 'transparent' } }}
+                              sx={{ width: 100, '& .MuiOutlinedInput-root': { bgcolor: isAnchored ? 'rgba(255,255,255,0.06)' : 'transparent' } }}
                               placeholder="—"
                             />
                             <IconButton size="small" onClick={() => handleIdealPinToggle(type)} sx={{ p: 1, color: isAnchored ? 'primary.main' : 'rgba(255,255,255,0.25)', '&:hover': { color: 'primary.main' } }}>
@@ -625,7 +626,7 @@ function WizardPage(): React.ReactElement {
             <RefAccordion open={talentExpand} onToggle={() => setTalentExpand(!talentExpand)} entries={talentEntries} buttonLabel="查看天赋详情" emptyHint={selectedCharacter ? '暂无天赋数据' : '请先选择角色'} />
           </Box>
           <Box className="diamond-divider">◆</Box>
-          <Box sx={{ p: 1.25, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, borderLeft: '2px solid', borderColor: 'secondary.main' }}>
+          <Box sx={{ p: 1.25, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, borderLeft: '2px solid', borderColor: 'primary.main' }}>
             <Typography variant="subtitle2" sx={{ mb: 0.25, color: 'secondary.main' }}>命座模拟</Typography>
             <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', display: 'block', mb: 0.5 }}>命之座效果提供的乘区加成</Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 0.5 }}>
@@ -720,30 +721,71 @@ function WizardPage(): React.ReactElement {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
-    <Box sx={{ position: 'relative', width: '100vw', height: '100vh', bgcolor: 'background.default' }}>
+    <>
+      {/* 海面背景 — 必须在最外层，否则被 bgcolor 遮盖 */}
+      <Box sx={{
+        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+        background: `
+          linear-gradient(180deg,
+            rgba(11,20,36,0) 0%,
+            rgba(30,60,90,0.12) 40%,
+            rgba(45,90,130,0.2) 70%,
+            rgba(60,120,160,0.22) 85%,
+            rgba(80,150,180,0.18) 95%,
+            rgba(100,170,200,0.14) 100%
+          )
+        `,
+      }}>
+        <Box sx={{
+          position: 'absolute', inset: 0,
+          background: `
+            linear-gradient(180deg,
+              rgba(11,20,36,0) 30%,
+              rgba(20,50,80,0.16) 60%,
+              rgba(40,80,120,0.26) 80%,
+              rgba(70,130,170,0.22) 92%,
+              rgba(90,160,190,0.14) 100%
+            )
+          `,
+          animation: 'waveShift 8s ease-in-out 1s infinite reverse',
+        }} />
+        {['10%','22%','35%','48%','58%','68%','78%','88%'].map((left, i) => (
+          <Box key={i} sx={{
+            position: 'absolute', bottom: -20, left, zIndex: 0,
+            width: ([8,6,12,8,10,5,9,6] as number[])[i], height: ([8,6,12,8,10,5,9,6] as number[])[i],
+            borderRadius: '50%', bgcolor: 'transparent',
+            border: '1.5px solid rgba(130,200,230,0.2)',
+            animation: `bubbleRise ${([8,9,7,10,8.5,9.5,7.5,9] as number[])[i]}s ${([0,1.5,0.8,3,2,4,1,2.5] as number[])[i]}s linear infinite`,
+          }} />
+        ))}
+      </Box>
+
+      <Box sx={{ position: 'relative', width: '100vw', height: '100vh', bgcolor: 'transparent' }}>
       <LoadingOverlay visible={isCalculating} progress={progress} message="正在计算…" />
-      <Box sx={{ position: 'fixed', top: 16, left: 16, zIndex: 20, display: 'flex', alignItems: 'center', gap: 1 }}>
+      <StickerThrower characterName={selectedCharacter?.nameZh ?? null} />
+      <Box sx={{ position: 'fixed', top: { xs: 8, md: 16 }, left: { xs: 8, md: 16 }, zIndex: 20, display: 'flex', alignItems: 'center', gap: { xs: 0.5, md: 1 } }}>
         <IconButton onClick={exitWizard} sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}><ArrowBackIcon /></IconButton>
-        <Button variant="outlined" size="small" onClick={saveCurrent} sx={{ fontSize: '0.75rem', px: 2 }}>保存配置</Button>
-        <Button variant="outlined" size="small" onClick={() => setSaveManagerOpen(true)} sx={{ fontSize: '0.75rem', px: 2 }}>添加配置</Button>
+        <Button variant="outlined" size="small" onClick={saveCurrent} sx={{ fontSize: { xs: '0.65rem', md: '0.75rem' }, px: { xs: 1, md: 2 } }}>保存配置</Button>
+        <Button variant="outlined" size="small" onClick={() => setSaveManagerOpen(true)} sx={{ fontSize: { xs: '0.65rem', md: '0.75rem' }, px: { xs: 1, md: 2 } }}>添加配置</Button>
       </Box>
       {!isMobile && <SectionStepper resultLabels={resultLabels} />}
-      <Box sx={{ position: 'absolute', left: { xs: 0, md: 64 }, top: 0, right: { xs: 0, md: 280 }, bottom: 0 }}><SectionRoller renderSection={renderSection} /></Box>
-      <Box sx={{ position: 'fixed', bottom: { xs: 72, md: 24 }, right: 24, zIndex: 20, display: 'flex', gap: 1.5, bgcolor: 'rgba(15,22,41,0.75)', backdropFilter: 'blur(8px) saturate(120%)', WebkitBackdropFilter: 'blur(8px) saturate(120%)', borderRadius: 2, p: 1, border: '1px solid rgba(212,168,67,0.1)' }}>
-        <Button variant="outlined" disabled={currentIndex === 0} onClick={() => goToSection(currentIndex - 1)} sx={{ px: 3, py: 1, fontSize: '0.9rem' }}>上一步</Button>
-        {currentIndex < sections.length - 1 && <Button variant="contained" onClick={nextSectionFn} sx={{ px: 3, py: 1, fontSize: '0.9rem' }}>下一步</Button>}
+      <Box sx={{ position: 'absolute', left: { xs: 0, md: 64 }, top: 0, right: { xs: 0, md: 280 }, bottom: { xs: 130, md: 0 }, animation: 'fadeInUp 400ms 100ms cubic-bezier(0.16,1,0.3,1) both', '@keyframes fadeInUp': { from: { opacity: 0, transform: 'translateY(20px)' }, to: { opacity: 1, transform: 'translateY(0)' } } }}><SectionRoller renderSection={renderSection} /></Box>
+      <Box sx={{ position: 'fixed', bottom: { xs: 72, md: 24 }, right: { xs: 8, sm: 24 }, zIndex: 20, display: 'flex', gap: { xs: 0.5, md: 1.5 }, bgcolor: 'rgba(15,22,41,0.75)', backdropFilter: 'blur(8px) saturate(120%)', WebkitBackdropFilter: 'blur(8px) saturate(120%)', borderRadius: 2, p: { xs: 0.75, md: 1 }, border: '1px solid rgba(255,255,255,0.08)' }}>
+        <Button variant="outlined" disabled={currentIndex === 0} onClick={() => goToSection(currentIndex - 1)} sx={{ px: { xs: 1.5, md: 3 }, py: { xs: 0.5, md: 1 }, fontSize: { xs: '0.8rem', md: '0.9rem' }, minWidth: 0 }}>上一步</Button>
+        {currentIndex < sections.length - 1 && <Button variant="contained" onClick={nextSectionFn} sx={{ px: { xs: 1.5, md: 3 }, py: { xs: 0.5, md: 1 }, fontSize: { xs: '0.8rem', md: '0.9rem' }, minWidth: 0 }}>下一步</Button>}
       </Box>
       {isMobile ? (
-        <Box sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 15, p: 1.5, bgcolor: 'rgba(15,22,41,0.92)', backdropFilter: 'blur(16px) saturate(120%)', WebkitBackdropFilter: 'blur(16px) saturate(120%)', borderTop: '1px solid rgba(212,168,67,0.15)' }}>
+        <Box sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 15, p: 1.5, bgcolor: 'rgba(15,22,41,0.92)', backdropFilter: 'blur(16px) saturate(120%)', WebkitBackdropFilter: 'blur(16px) saturate(120%)', borderTop: '1px solid rgba(255,255,255,0.12)', animation: 'fadeIn 300ms cubic-bezier(0.16,1,0.3,1)', '@keyframes fadeIn': { from: { opacity: 0, transform: 'translateY(16px)' }, to: { opacity: 1, transform: 'translateY(0)' } } }}>
           <CharacterStatPanel stats={computedStats} showActions onCalcDamage={handleCalcDamage} onRedistribute={handleRedistribute} onIdealTemplate={handleIdealTemplate} compact />
         </Box>
       ) : (
-        <Box sx={{ position: 'fixed', top: 56, right: 16, width: 248, zIndex: 5, maxHeight: 'calc(100vh - 80px)', overflowY: 'auto', '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { background: 'rgba(212,168,67,0.2)', borderRadius: 2 } }}>
+        <Box sx={{ position: 'fixed', top: 56, right: 16, width: 248, zIndex: 5, maxHeight: 'calc(100vh - 80px)', overflowY: 'auto', '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.15)', borderRadius: 2 } }}>
           <CharacterStatPanel stats={computedStats} showActions onCalcDamage={handleCalcDamage} onRedistribute={handleRedistribute} onIdealTemplate={handleIdealTemplate} />
         </Box>
       )}
       <SaveManager open={saveManagerOpen} onClose={() => setSaveManagerOpen(false)} />
     </Box>
+    </>
   );
 }
 

@@ -1,44 +1,47 @@
 import { createTheme } from '@mui/material/styles';
 
 /**
- * 原神风格 MUI 主题 v3.1
- * - 深蓝黑底 + 三档金色体系 + 星蓝点缀
+ * 原神主题 v3.2 — 芙宁娜
+ * - 水蓝主色 + 金色点缀 + 深海军蓝背景
  * - Noto Serif SC 衬线体标题 + Noto Sans SC 正文
- * - 金色渐变按钮 + 发光交互
  */
 
-// 金色体系（三档）
-const gold = {
-  light: '#F0D68C',   // 浅金：高亮文字、图标发光
-  mid: '#D4A843',     // 中金：主色
-  deep: '#A67C2E',    // 深金：边框暗面、渐变终点
+// 芙宁娜水蓝体系（主色）
+const hydro = {
+  light: '#8DD5F5',   // 浅水蓝：高亮文字、图标发光
+  mid: '#5BC0EB',     // 中水蓝：主色
+  deep: '#3AA0C8',    // 深水蓝：渐变终点
 };
 
-// 星蓝点缀
-const starBlue = '#5BC0EB';
+// 金色点缀（芙宁娜冠冕/饰品）
+const gold = {
+  light: '#E2C87A',
+  mid: '#C9A84C',
+  deep: '#9A7B2E',
+};
 
 export const genshinTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
+      main: hydro.mid,
+      light: hydro.light,
+      dark: hydro.deep,
+      contrastText: '#0D1B32',
+    },
+    secondary: {
       main: gold.mid,
       light: gold.light,
       dark: gold.deep,
-      contrastText: '#0F1629',
-    },
-    secondary: {
-      main: starBlue,
-      light: '#8DD5F5',
-      dark: '#3AA0C8',
-      contrastText: '#0F1629',
+      contrastText: '#0D1B32',
     },
     background: {
-      default: '#0F1629',
-      paper: '#141E33',
+      default: '#0B1424',
+      paper: '#0F1D35',
     },
     text: {
-      primary: '#E6DCC8',
-      secondary: '#A09880',
+      primary: '#F0F2F6',
+      secondary: '#B0B8C4',
     },
     error: {
       main: '#EF7938',
@@ -50,9 +53,9 @@ export const genshinTheme = createTheme({
       main: '#F0B640',
     },
     info: {
-      main: starBlue,
+      main: hydro.mid,
     },
-    divider: 'rgba(212, 168, 67, 0.14)',
+    divider: 'rgba(255,255,255,0.1)',
   },
   typography: {
     fontFamily: '"Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif',
@@ -78,20 +81,21 @@ export const genshinTheme = createTheme({
           borderRadius: 8,
           padding: '8px 24px',
           '&:focus-visible': {
-            outline: `2px solid ${gold.mid}`,
+            outline: `2px solid ${hydro.mid}`,
             outlineOffset: 2,
           },
         },
         containedPrimary: {
-          background: `linear-gradient(135deg, ${gold.mid} 0%, ${gold.deep} 100%)`,
-          boxShadow: `0 2px 8px rgba(212, 168, 67, 0.25)`,
+          background: `linear-gradient(135deg, ${hydro.mid} 0%, ${hydro.deep} 100%)`,
+          boxShadow: `0 2px 8px rgba(91, 192, 235, 0.25)`,
           transition: 'all 250ms cubic-bezier(0.16,1,0.3,1)',
           '&:hover': {
-            background: `linear-gradient(135deg, ${gold.light} 0%, ${gold.mid} 100%)`,
-            boxShadow: `0 0 20px rgba(212, 168, 67, 0.5), 0 4px 12px rgba(212, 168, 67, 0.3)`,
+            background: `linear-gradient(135deg, ${hydro.light} 0%, ${hydro.mid} 100%)`,
+            boxShadow: `0 0 20px rgba(91, 192, 235, 0.5), 0 4px 12px rgba(91, 192, 235, 0.3)`,
           },
           '&:active': {
-            boxShadow: `0 1px 4px rgba(212, 168, 67, 0.3)`,
+            transform: 'scale(0.97)',
+            boxShadow: `0 1px 4px rgba(91, 192, 235, 0.3)`,
           },
         },
       },
@@ -101,7 +105,7 @@ export const genshinTheme = createTheme({
         root: {
           position: 'relative',
           backgroundImage: 'none',
-          border: `1px solid rgba(212, 168, 67, 0.1)`,
+          border: `1px solid rgba(255,255,255,0.08)`,
           overflow: 'hidden',
           transition: 'box-shadow 200ms cubic-bezier(0.16,1,0.3,1), border-color 200ms cubic-bezier(0.16,1,0.3,1)',
           '&::before': {
@@ -109,12 +113,12 @@ export const genshinTheme = createTheme({
             position: 'absolute',
             top: 0, left: 0, right: 0,
             height: 2,
-            background: `linear-gradient(90deg, transparent 0%, rgba(212,168,67,0.5) 15%, rgba(212,168,67,0.12) 50%, transparent 100%)`,
+            background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 15%, rgba(255,255,255,0.1) 50%, transparent 100%)`,
             pointerEvents: 'none',
           },
           '&:hover': {
-            borderColor: 'rgba(212,168,67,0.3)',
-            boxShadow: '0 4px 24px rgba(212,168,67,0.12)',
+            borderColor: 'rgba(255,255,255,0.2)',
+            boxShadow: '0 4px 24px rgba(91,192,235,0.12)',
           },
         },
       },
@@ -124,7 +128,7 @@ export const genshinTheme = createTheme({
         root: {
           position: 'relative',
           backgroundImage: 'none',
-          border: `1px solid rgba(212, 168, 67, 0.1)`,
+          border: `1px solid rgba(255,255,255,0.08)`,
           boxShadow: '0 2px 12px rgba(0, 0, 0, 0.4)',
           overflow: 'hidden',
           transition: 'box-shadow 200ms cubic-bezier(0.16,1,0.3,1), border-color 200ms cubic-bezier(0.16,1,0.3,1)',
@@ -133,11 +137,11 @@ export const genshinTheme = createTheme({
             position: 'absolute',
             top: 0, left: 0, right: 0,
             height: 2,
-            background: `linear-gradient(90deg, transparent 0%, rgba(212,168,67,0.5) 15%, rgba(212,168,67,0.12) 50%, transparent 100%)`,
+            background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 15%, rgba(255,255,255,0.1) 50%, transparent 100%)`,
             pointerEvents: 'none',
           },
           '&:hover': {
-            borderColor: 'rgba(212,168,67,0.3)',
+            borderColor: 'rgba(255,255,255,0.2)',
             boxShadow: '0 4px 24px rgba(212,168,67,0.14)',
           },
         },
@@ -151,11 +155,11 @@ export const genshinTheme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root:focus-visible': {
-            outline: `2px solid ${gold.mid}`,
+            outline: `2px solid ${hydro.mid}`,
             outlineOffset: 0,
           },
           '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: gold.mid,
+            borderColor: hydro.mid,
             borderWidth: 2,
           },
         },
@@ -166,18 +170,18 @@ export const genshinTheme = createTheme({
         root: {
           transition: 'all 200ms cubic-bezier(0.16,1,0.3,1)',
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'rgba(212,168,67,0.15)',
+            borderColor: 'rgba(255,255,255,0.12)',
             transition: 'border-color 200ms cubic-bezier(0.16,1,0.3,1)',
           },
           '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'rgba(212,168,67,0.35)',
+            borderColor: 'rgba(255,255,255,0.25)',
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: gold.mid,
+            borderColor: hydro.mid,
             borderWidth: 2,
           },
           '&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'rgba(212,168,67,0.06)',
+            borderColor: 'rgba(255,255,255,0.05)',
           },
           '& input[type=number]': {
             textAlign: 'center',
@@ -196,10 +200,18 @@ export const genshinTheme = createTheme({
       },
       styleOverrides: {
         root: {
+          transition: 'all 150ms cubic-bezier(0.16,1,0.3,1)',
           '&:focus-visible': {
-            outline: `2px solid ${gold.mid}`,
+            outline: `2px solid ${hydro.mid}`,
             outlineOffset: 1,
           },
+        },
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          transition: 'opacity 200ms cubic-bezier(0.16,1,0.3,1), transform 200ms cubic-bezier(0.16,1,0.3,1) !important',
         },
       },
     },
@@ -215,7 +227,17 @@ export const genshinTheme = createTheme({
     MuiDivider: {
       styleOverrides: {
         root: {
-          borderColor: 'rgba(212, 168, 67, 0.1)',
+          borderColor: 'rgba(255,255,255,0.08)',
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          transition: 'transform 150ms cubic-bezier(0.16,1,0.3,1), color 150ms cubic-bezier(0.16,1,0.3,1)',
+          '&:active': {
+            transform: 'scale(0.85)',
+          },
         },
       },
     },
@@ -223,6 +245,13 @@ export const genshinTheme = createTheme({
       styleOverrides: {
         root: {
           fontWeight: 500,
+          transition: 'all 150ms cubic-bezier(0.16,1,0.3,1)',
+          '&:hover': {
+            transform: 'scale(1.04)',
+          },
+          '&:active': {
+            transform: 'scale(0.96)',
+          },
         },
       },
     },
@@ -231,7 +260,7 @@ export const genshinTheme = createTheme({
         subtitle2: {
           '&::before': {
             content: '"◆ "',
-            color: '#D4A843',
+            color: '#C8D0D8',
             fontSize: '0.65em',
             marginRight: 2,
             verticalAlign: 'middle',

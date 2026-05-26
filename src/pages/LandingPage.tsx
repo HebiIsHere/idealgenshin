@@ -20,12 +20,37 @@ const fadeOut = keyframes`
   to { opacity: 0; transform: translateY(-16px); }
 `;
 
-const pulse = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 168, 67, 0.4); }
-  50% { box-shadow: 0 0 0 16px rgba(212, 168, 67, 0); }
+// 海面波动
+const waveShift = keyframes`
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-4px) scaleY(1.03); }
+`;
+
+// 气泡上升
+const bubbleRise = keyframes`
+  0% { transform: translateY(0) scale(0.6); opacity: 0.25; }
+  20% { opacity: 0.5; }
+  100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+`;
+
+// 按钮沉浮
+const float = keyframes`
+  0%, 100% { transform: translateY(0); box-shadow: 0 2px 8px rgba(91,192,235,0.25); }
+  50% { transform: translateY(-10px); box-shadow: 0 8px 24px rgba(91,192,235,0.45); }
 `;
 
 const EXIT_MS = 350;
+
+const BUBBLES = [
+  { left: '10%', size: 12, delay: 0, duration: 7 },
+  { left: '22%', size: 8, delay: 1.5, duration: 8 },
+  { left: '35%', size: 16, delay: 0.8, duration: 6.5 },
+  { left: '48%', size: 10, delay: 3, duration: 9 },
+  { left: '58%', size: 14, delay: 2, duration: 7.5 },
+  { left: '68%', size: 6, delay: 4, duration: 8.5 },
+  { left: '78%', size: 12, delay: 1, duration: 6 },
+  { left: '88%', size: 8, delay: 2.5, duration: 7.5 },
+];
 
 function LandingPage(): React.ReactElement {
   const enterWizard = useWizardStore((s) => s.enterWizard);
@@ -45,14 +70,64 @@ function LandingPage(): React.ReactElement {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        bgcolor: 'background.default',
+        bgcolor: '#0B1424',
         position: 'relative',
         overflow: 'hidden',
         animation: exiting ? `${fadeOut} ${EXIT_MS}ms cubic-bezier(0.16,1,0.3,1) both` : 'none',
         '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
       }}
     >
-      {/* 文件按钮 - 右上角 */}
+      {/* ===== 海面渐变层 ===== */}
+      <Box
+        sx={{
+          position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
+          background: `
+            linear-gradient(180deg,
+              rgba(11,20,36,0) 0%,
+              rgba(30,60,90,0.15) 40%,
+              rgba(45,90,130,0.25) 70%,
+              rgba(60,120,160,0.3) 85%,
+              rgba(80,150,180,0.25) 95%,
+              rgba(100,170,200,0.2) 100%
+            )
+          `,
+          animation: `${waveShift} 6s ease-in-out infinite`,
+        }}
+      />
+      {/* 第二层海面：稍偏移制造纵深感 */}
+      <Box
+        sx={{
+          position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
+          background: `
+            linear-gradient(180deg,
+              rgba(11,20,36,0) 30%,
+              rgba(20,50,80,0.2) 60%,
+              rgba(40,80,120,0.35) 80%,
+              rgba(70,130,170,0.3) 92%,
+              rgba(90,160,190,0.2) 100%
+            )
+          `,
+          animation: `${waveShift} 8s ease-in-out 1s infinite reverse`,
+        }}
+      />
+
+      {/* ===== 气泡 ===== */}
+      {BUBBLES.map((b, i) => (
+        <Box
+          key={i}
+          sx={{
+            position: 'absolute', bottom: -20, left: b.left, zIndex: 1,
+            width: b.size, height: b.size,
+            borderRadius: '50%',
+            bgcolor: 'transparent',
+            border: '1.5px solid rgba(130,200,230,0.3)',
+            pointerEvents: 'none',
+            animation: `${bubbleRise} ${b.duration}s ${b.delay}s linear infinite`,
+          }}
+        />
+      ))}
+
+      {/* 存档按钮 */}
       <IconButton
         onClick={() => setSaveManagerOpen(true)}
         title="存档管理"
@@ -61,25 +136,46 @@ function LandingPage(): React.ReactElement {
         <FolderOpenIcon />
       </IconButton>
 
+      {/* 中心光晕 */}
       <Box
         sx={{
           position: 'absolute',
-          top: '30%',
-          left: '50%',
+          top: '30%', left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 600,
-          height: 600,
+          width: 600, height: 600,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(212,168,67,0.06) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(91,192,235,0.06) 0%, transparent 70%)',
           pointerEvents: 'none',
         }}
       />
 
-      <Container maxWidth="sm" sx={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
+      <Container disableGutters sx={{ width: '85vw', maxWidth: 1100, textAlign: 'center', position: 'relative', zIndex: 2 }}>
+        <Box sx={{ animation: `${fadeIn} 0.8s cubic-bezier(0.16,1,0.3,1) both` }}>
+          <Typography
+            sx={{
+              fontFamily: '"Nunito", "Noto Sans SC", sans-serif',
+              fontWeight: 200,
+              fontSize: { xs: '2.6rem', sm: '4.5rem', md: 'min(8vw, 96px)' },
+              color: 'text.primary',
+              letterSpacing: '0.04em',
+              lineHeight: 1.1,
+              mb: 0.5,
+            }}
+          >
+            IDEALGENSHIN
+          </Typography>
+        </Box>
+
         <Typography
-          variant="h2"
-          sx={{ fontWeight: 200, color: 'text.primary', letterSpacing: '0.08em', mb: 1,
-            animation: `${fadeIn} 0.8s cubic-bezier(0.16,1,0.3,1) both` }}
+          variant="body1"
+          sx={{
+            fontWeight: 300,
+            color: 'text.secondary',
+            fontSize: { xs: '0.9rem', md: 'min(2vw, 24px)' },
+            letterSpacing: '0.06em',
+            mb: 4,
+            animation: `${fadeIn} 0.8s 0.15s cubic-bezier(0.16,1,0.3,1) both`,
+          }}
         >
           理想原生
         </Typography>
@@ -87,18 +183,21 @@ function LandingPage(): React.ReactElement {
         <Typography
           variant="body1"
           sx={{ color: 'text.secondary', mb: 6, lineHeight: 1.8,
-            animation: `${fadeIn} 0.8s 0.2s cubic-bezier(0.16,1,0.3,1) both` }}
+            animation: `${fadeIn} 0.8s 0.3s cubic-bezier(0.16,1,0.3,1) both` }}
         >
           基于完整伤害公式的圣遗物词条优化工具
           <br />
           逐区填写 · 问答引导 · 可视化计算
         </Typography>
 
-        <Box sx={{ animation: `${fadeIn} 0.8s 0.4s cubic-bezier(0.16,1,0.3,1) both` }}>
+        <Box sx={{ animation: `${fadeIn} 0.8s 0.45s cubic-bezier(0.16,1,0.3,1) both` }}>
           <Button
             variant="contained" size="large" startIcon={<AutoAwesomeIcon />}
             onClick={handleEnter}
-            sx={{ px: 6, py: 2, fontSize: '1.1rem', borderRadius: 3, animation: `${pulse} 3s infinite` }}
+            sx={{
+              px: 6, py: 2, fontSize: '1.1rem', borderRadius: 3,
+              animation: `${float} 3s ease-in-out infinite`,
+            }}
           >
             开始配置
           </Button>

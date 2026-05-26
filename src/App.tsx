@@ -17,7 +17,7 @@ function App(): React.ReactElement {
   const wizardActive = useWizardStore((s) => s.active);
 
   return (
-    <Box key={wizardActive ? 'wizard' : 'app'}>
+    <Box>
       {wizardActive ? (
         <Box
           sx={{

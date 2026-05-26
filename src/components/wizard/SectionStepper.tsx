@@ -84,7 +84,7 @@ function SectionStepper({ resultLabels = {} }: SectionStepperProps): React.React
               overflow: 'hidden',
               pointerEvents: hidden ? 'none' : 'auto',
               transform: hidden ? 'translateX(-12px)' : 'translateX(0)',
-              transition: `all ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1)`,
+              transition: `opacity ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1), transform ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1), max-height ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1), background-color ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1)`,
               bgcolor: isCurrent ? 'rgba(212,168,67,0.12)' : 'transparent',
               '&:hover': hidden ? {} : { bgcolor: isCurrent ? 'rgba(212,168,67,0.15)' : 'rgba(255,255,255,0.04)' },
             }}
