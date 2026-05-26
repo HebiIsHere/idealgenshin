@@ -1,9 +1,7 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { keyframes } from '@mui/system';
 import Box from '@mui/material/Box';
-import AppLayout from './components/layout/AppLayout';
-import CharacterAnalyzerPage from './components/optimizer/CharacterAnalyzerPage';
 import LandingPage from './pages/LandingPage';
 import WizardPage from './pages/WizardPage';
 import { useWizardStore } from './store/slices/wizardSlice';
@@ -32,10 +30,7 @@ function App(): React.ReactElement {
       ) : (
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route element={<AppLayout />}>
-            <Route path="/analyzer" element={<CharacterAnalyzerPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Route>
+          <Route path="*" element={<LandingPage />} />
         </Routes>
       )}
     </Box>
