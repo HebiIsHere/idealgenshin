@@ -51,19 +51,53 @@ function CharacterStatPanel({
   const [expanded, setExpanded] = React.useState(false);
 
   if (compact && stats) {
+    const compactExtra: { label: string; value: string }[] = [
+      { label: '生命', value: stats.totalHp.toFixed(0) },
+      { label: '防御', value: stats.totalDef.toFixed(0) },
+      { label: '充能', value: (stats.er * 100).toFixed(1) + '%' },
+      { label: '增伤', value: (stats.dmgBonus * 100).toFixed(1) + '%' },
+    ];
+    if (stats.baseDamageFlat !== undefined && stats.baseDamageFlat > 0) {
+      compactExtra.push({ label: '基础伤害', value: stats.baseDamageFlat.toFixed(0) });
+    }
+
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>ATK {stats.totalAtk.toFixed(0)}</Typography>
-        <Typography variant="caption" sx={{ color: 'primary.main', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>CR {(stats.critRate * 100).toFixed(1)}%</Typography>
-        <Typography variant="caption" sx={{ color: 'primary.main', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>CD {(stats.critDmg * 100).toFixed(1)}%</Typography>
-        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>EM {stats.em.toFixed(0)}</Typography>
-        {showActions && (
-          <Box sx={{ display: 'flex', gap: 0.5, ml: 'auto' }}>
-            <Button variant="contained" size="small" onClick={onCalcDamage} sx={{ fontSize: '0.65rem', px: 1, py: 0.25, minWidth: 0 }}>计算</Button>
-            <Button variant="outlined" size="small" onClick={onRedistribute} sx={{ fontSize: '0.65rem', px: 1, py: 0.25, minWidth: 0 }}>重优化</Button>
-            <Button variant="outlined" size="small" onClick={onIdealTemplate} sx={{ fontSize: '0.65rem', px: 1, py: 0.25, minWidth: 0 }}>理想</Button>
+      <Box>
+        <Collapse in={expanded}>
+          <Box sx={{
+            display: 'flex', gap: 1.5, flexWrap: 'wrap', pb: 0.5,
+            justifyContent: 'center',
+          }}>
+            {compactExtra.map((r) => (
+              <Typography key={r.label} variant="caption" sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>
+                {r.label} {r.value}
+              </Typography>
+            ))}
           </Box>
-        )}
+        </Collapse>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>ATK {stats.totalAtk.toFixed(0)}</Typography>
+          <Typography variant="caption" sx={{ color: 'primary.main', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>CR {(stats.critRate * 100).toFixed(1)}%</Typography>
+          <Typography variant="caption" sx={{ color: 'primary.main', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>CD {(stats.critDmg * 100).toFixed(1)}%</Typography>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>EM {stats.em.toFixed(0)}</Typography>
+
+          <Button
+            size="small"
+            onClick={() => setExpanded(!expanded)}
+            sx={{ textTransform: 'none', fontSize: '0.6rem', color: 'rgba(255,255,255,0.35)', minWidth: 0, px: 0.25, py: 0 }}
+          >
+            {expanded ? <ExpandLessIcon sx={{ fontSize: 14 }} /> : <ExpandMoreIcon sx={{ fontSize: 14 }} />}
+          </Button>
+
+          {showActions && (
+            <Box sx={{ display: 'flex', gap: 0.5, ml: 'auto' }}>
+              <Button variant="contained" size="small" onClick={onCalcDamage} sx={{ fontSize: '0.65rem', px: 1, py: 0.25, minWidth: 0 }}>计算</Button>
+              <Button variant="outlined" size="small" onClick={onRedistribute} sx={{ fontSize: '0.65rem', px: 1, py: 0.25, minWidth: 0 }}>重优化</Button>
+              <Button variant="outlined" size="small" onClick={onIdealTemplate} sx={{ fontSize: '0.65rem', px: 1, py: 0.25, minWidth: 0 }}>理想</Button>
+            </Box>
+          )}
+        </Box>
       </Box>
     );
   }

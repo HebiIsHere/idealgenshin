@@ -561,7 +561,7 @@ function WizardPage(): React.ReactElement {
       </Box>
       {!isMobile && <SectionStepper resultLabels={resultLabels} />}
       <Box sx={{ position: 'absolute', left: { xs: 0, md: 64 }, top: 0, right: { xs: 0, md: 280 }, bottom: 0 }}><SectionRoller renderSection={renderSection} /></Box>
-      <Box sx={{ position: 'fixed', bottom: 24, right: 24, zIndex: 20, display: 'flex', gap: 1.5 }}>
+      <Box sx={{ position: 'fixed', bottom: { xs: 72, md: 24 }, right: 24, zIndex: 20, display: 'flex', gap: 1.5 }}>
         <Button variant="outlined" disabled={currentIndex === 0} onClick={() => goToSection(currentIndex - 1)} sx={{ px: 3, py: 1, fontSize: '0.9rem' }}>上一步</Button>
         {currentIndex < sections.length - 1 && <Button variant="contained" onClick={nextSectionFn} sx={{ px: 3, py: 1, fontSize: '0.9rem' }}>下一步</Button>}
       </Box>

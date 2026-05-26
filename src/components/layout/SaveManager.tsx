@@ -167,18 +167,23 @@ function SaveManager({ open, onClose }: SaveManagerProps): React.ReactElement {
                 <ListItemText
                   primary={
                     renamingId === save.saveId ? (
-                      <TextField
-                        value={renameValue}
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleConfirmRename();
-                          if (e.key === 'Escape') setRenamingId(null);
-                        }}
-                        size="small"
-                        autoFocus
-                        onClick={(e) => e.stopPropagation()}
-                        sx={{ width: '100%' }}
-                      />
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <TextField
+                          value={renameValue}
+                          onChange={(e) => setRenameValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleConfirmRename();
+                            if (e.key === 'Escape') setRenamingId(null);
+                          }}
+                          size="small"
+                          autoFocus
+                          onClick={(e) => e.stopPropagation()}
+                          sx={{ flex: 1 }}
+                        />
+                        <Button size="small" onClick={(e) => { e.stopPropagation(); handleConfirmRename(); }}>
+                          确认
+                        </Button>
+                      </Box>
                     ) : (
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
                         {save.name}
@@ -192,22 +197,16 @@ function SaveManager({ open, onClose }: SaveManagerProps): React.ReactElement {
                     </Typography>
                   }
                 />
-                <ListItemSecondaryAction>
-                  {renamingId === save.saveId ? (
-                    <Button size="small" onClick={(e) => { e.stopPropagation(); handleConfirmRename(); }}>
-                      确认
-                    </Button>
-                  ) : (
-                    <>
-                      <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleStartRename(save); }}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleDelete(save.saveId); }} color="error">
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </>
-                  )}
-                </ListItemSecondaryAction>
+                {renamingId !== save.saveId && (
+                  <ListItemSecondaryAction>
+                    <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleStartRename(save); }}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleDelete(save.saveId); }} color="error">
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                )}
               </ListItem>
             ))}
           </List>
