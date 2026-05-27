@@ -26,7 +26,7 @@ function substatDisplay(type: string, value: number): string {
 }
 
 /** Weapon selector with type-based filtering, auto-fill, and substat display. */
-function WeaponSelect(): React.ReactElement {
+function WeaponSelect({ onSelectWeapon }: { onSelectWeapon?: (id: string) => void }): React.ReactElement {
   const { selectedCharacter, weaponConfig, setWeaponConfig } = useCharacterStore();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -41,6 +41,10 @@ function WeaponSelect(): React.ReactElement {
   }, [selectedCharacter, searchQuery]);
 
   const currentWeapon = weaponConfig?.weaponData ?? null;
+  const selectWeapon = onSelectWeapon || ((id: string) => {
+    const wd = getWeaponsByType(selectedCharacter?.weaponType ?? '').find(w => w.id === id);
+    if (wd) setWeaponConfig(wd, 90);
+  });
 
   return (
     <Autocomplete
@@ -49,7 +53,7 @@ function WeaponSelect(): React.ReactElement {
       value={currentWeapon}
       onChange={(_event, newValue) => {
         if (newValue) {
-          setWeaponConfig(newValue, 90);
+          selectWeapon(newValue.id);
           setSearchQuery(newValue.nameZh);
         }
       }}
@@ -92,6 +96,7 @@ function WeaponSelect(): React.ReactElement {
         />
       )}
       isOptionEqualToValue={(option, value) => option.id === value.id}
+      slotProps={{ listbox: { sx: { maxHeight: 320 } } }}
       sx={{ minWidth: 260 }}
     />
   );

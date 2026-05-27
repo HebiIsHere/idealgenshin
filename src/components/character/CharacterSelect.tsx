@@ -18,7 +18,7 @@ const ELEMENT_COLORS: Record<string, string> = {
 };
 
 /** Character selector with search and element filter. */
-function CharacterSelect(): React.ReactElement {
+function CharacterSelect({ onSelectCharacter }: { onSelectCharacter?: (id: string) => void }): React.ReactElement {
   const { selectedCharacter, selectCharacter } = useCharacterStore();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -27,6 +27,8 @@ function CharacterSelect(): React.ReactElement {
     [searchQuery],
   );
 
+  const handleSelect = onSelectCharacter || selectCharacter;
+
   return (
     <Autocomplete
       options={filteredCharacters}
@@ -34,7 +36,7 @@ function CharacterSelect(): React.ReactElement {
       value={selectedCharacter}
       onChange={(_event, newValue) => {
         if (newValue) {
-          selectCharacter(newValue.id);
+          handleSelect(newValue.id);
           setSearchQuery(newValue.nameZh);
         }
       }}
@@ -73,6 +75,7 @@ function CharacterSelect(): React.ReactElement {
         />
       )}
       isOptionEqualToValue={(option, value) => option.id === value.id}
+      slotProps={{ listbox: { sx: { maxHeight: 320 } } }}
       sx={{ minWidth: 260 }}
     />
   );

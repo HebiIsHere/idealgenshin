@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -10,9 +11,6 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PushPinIcon from '@mui/icons-material/PushPin';
@@ -114,6 +112,55 @@ function WizardPage(): React.ReactElement {
   // 天赋/命座详情展开状态
   const [talentExpand, setTalentExpand] = useState(false);
   const [constExpand, setConstExpand] = useState(false);
+
+  // Popover anchors for floating sub-cards
+  const [talentPopOpen, setTalentPopOpen] = useState(false);
+  const [constPopOpen, setConstPopOpen] = useState(false);
+  const [artifactPopOpen, setArtifactPopOpen] = useState(false);
+  const [resultPopOpen, setResultPopOpen] = useState(false);
+  const [teambuffPopOpen, setTeambuffPopOpen] = useState(false);
+  const [weaponPassivePopOpen, setWeaponPassivePopOpen] = useState(false);
+  const [setOverridePopOpen, setSetOverridePopOpen] = useState(false);
+
+  // Exit animation states
+  const [talentExiting, setTalentExiting] = useState(false);
+  const [constExiting, setConstExiting] = useState(false);
+  const [artifactExiting, setArtifactExiting] = useState(false);
+  const [resultExiting, setResultExiting] = useState(false);
+  const [teambuffExiting, setTeambuffExiting] = useState(false);
+  const [weaponPassiveExiting, setWeaponPassiveExiting] = useState(false);
+  const [setOverrideExiting, setSetOverrideExiting] = useState(false);
+
+  const closeWithAnim = useCallback((closeFn: () => void, setExiting: (v: boolean) => void) => {
+    setExiting(true);
+    setTimeout(() => { closeFn(); setExiting(false); }, 200);
+  }, []);
+
+  // Close all popovers on navigation
+  const closeAllPopovers = useCallback(() => {
+    setTalentPopOpen(false); setTalentExiting(false);
+    setConstPopOpen(false); setConstExiting(false);
+    setArtifactPopOpen(false); setArtifactExiting(false);
+    setResultPopOpen(false); setResultExiting(false);
+    setTeambuffPopOpen(false); setTeambuffExiting(false);
+    setWeaponPassivePopOpen(false); setWeaponPassiveExiting(false);
+    setSetOverridePopOpen(false); setSetOverrideExiting(false);
+  }, []);
+  React.useEffect(() => { closeAllPopovers(); }, [currentIndex, closeAllPopovers]);
+
+  // Brief loading state for character/weapon selection
+  const [isCharLoading, setIsCharLoading] = useState(false);
+  const handleSelectCharacter = useCallback((id: string) => {
+    setIsCharLoading(true);
+    selectCharacter(id);
+    requestAnimationFrame(() => requestAnimationFrame(() => setIsCharLoading(false)));
+  }, [selectCharacter]);
+  const handleSelectWeapon = useCallback((id: string) => {
+    setIsCharLoading(true);
+    const wd = getWeaponById(id);
+    if (wd) setWeaponConfig(wd, 90);
+    requestAnimationFrame(() => requestAnimationFrame(() => setIsCharLoading(false)));
+  }, [setWeaponConfig]);
 
   // Imported artifact set detection for ArtifactSetSelect
   const importedSetCounts = useMemo(() => {
@@ -385,49 +432,41 @@ function WizardPage(): React.ReactElement {
               }} />
           </Box>
           {idealResult ? <>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
-              <Button size="small" variant="outlined" onClick={clearResults}>重新优化</Button>
-            </Box>
             <Box sx={{ textAlign: 'center', mb: 2 }}>
               <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 700 }}>{Math.round(idealResult.theoreticalDamage).toLocaleString('en-US')}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>理论伤害（{idealRollCount} 词条）</Typography>
             </Box>
             {idealResult.idealStats && computedStats && (
-              <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 1, mb: 2 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>理想面板对比</Typography>
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 0.5 }}>
-                  {([
-                    ['生命值', 'totalHp', 0], ['攻击力', 'totalAtk', 0], ['防御力', 'totalDef', 0],
-                    ['暴击率', 'critRate', 1], ['暴击伤害', 'critDmg', 1], ['元素精通', 'em', 0],
-                    ['充能效率', 'er', 1], ['伤害加成', 'dmgBonus', 1],
-                  ] as const).map(([label, key, isPct]) => {
+              <Box sx={{ p: 1, mb: 1.5, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 1.5, border: '1px solid rgba(255,255,255,0.06)' }}>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', mb: 0.5, display: 'block', px: 0.25 }}>理想面板对比</Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 0.8fr', gap: 0, fontSize: '0.65rem' }}>
+                  <Typography variant="caption" sx={{ px: 0.5, py: 0.25, color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>属性</Typography>
+                  <Typography variant="caption" sx={{ px: 0.5, py: 0.25, color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>当前</Typography>
+                  <Typography variant="caption" sx={{ px: 0.5, py: 0.25, color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>理想</Typography>
+                  <Typography variant="caption" sx={{ px: 0.5, py: 0.25, color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>Δ</Typography>
+                  {(([['生命值', 'totalHp', 0], ['攻击力', 'totalAtk', 0], ['防御力', 'totalDef', 0], ['暴击率', 'critRate', 1], ['暴击伤害', 'critDmg', 1], ['元素精通', 'em', 0], ['充能效率', 'er', 1], ['伤害加成', 'dmgBonus', 1]]) as const).map(([label, key, isPct]) => {
                     const oldVal = (computedStats as any)?.[key] ?? 0;
                     const newVal = (idealResult.idealStats as any)?.[key] ?? 0;
-                    const changed = Math.abs(newVal - oldVal) > 1e-6;
-                    const fmtVal = (v: number) => isPct ? (v * 100).toFixed(4) + '%' : v.toFixed(4);
-                    return (
-                      <Box key={key} sx={{ display: 'flex', justifyContent: 'space-between', px: 0.5 }}>
-                        <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.45)' }}>{label}</Typography>
-                        <Typography variant="caption" sx={{ fontSize: '0.65rem', color: changed ? 'success.light' : 'rgba(255,255,255,0.7)', fontWeight: changed ? 600 : 400 }}>{fmtVal(newVal)}</Typography>
-                      </Box>
-                    );
+                    const delta = newVal - oldVal;
+                    const changed = Math.abs(delta) > 1e-6;
+                    const fmt = (v: number) => isPct ? (v * 100).toFixed(1) + '%' : Math.round(v).toString();
+                    const deltaFmt = isPct ? (delta * 100).toFixed(1) + '%' : Math.round(delta).toString();
+                    return (<React.Fragment key={key}>
+                      <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: changed ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)' }}>{label}</Typography>
+                      <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: 'rgba(255,255,255,0.45)', textAlign: 'right', fontFamily: 'monospace' }}>{fmt(oldVal)}</Typography>
+                      <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: changed ? 'success.light' : 'rgba(255,255,255,0.6)', textAlign: 'right', fontFamily: 'monospace', fontWeight: changed ? 600 : 400 }}>{fmt(newVal)}</Typography>
+                      <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: delta > 0 ? 'success.light' : delta < 0 ? 'error.light' : 'rgba(255,255,255,0.3)', textAlign: 'right', fontFamily: 'monospace', fontWeight: changed ? 600 : 400 }}>{delta > 0 ? '+' : ''}{deltaFmt}</Typography>
+                    </React.Fragment>);
                   })}
                 </Box>
               </Box>
             )}
-            {idealResult.idealAllocations && (
-              <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 1, mb: 2 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>理想词条分配</Typography>
-                {idealResult.idealAllocations.map((a) => (
-                  <Box key={a.type} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
-                    <Typography variant="caption" sx={{ fontSize: '0.6rem', width: 90, color: 'rgba(255,255,255,0.45)' }}>{STAT_DISPLAY_NAMES[a.type] ?? a.type}</Typography>
-                    <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)' }}>{a.rolls.toFixed(4)}条</Typography>
-                  </Box>
-                ))}
-              </Box>
-            )}
+            <Box onClick={() => setResultPopOpen(true)} sx={{ mb: 1, p: 1, display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', borderRadius: 1.5, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', '&:hover': { bgcolor: 'rgba(91,192,235,0.06)', borderColor: 'rgba(91,192,235,0.2)' }, transition: 'background-color 0.2s, border-color 0.2s' }}><Typography variant="subtitle2" sx={{ color: 'primary.main', flexGrow: 1 }}>查看详情</Typography><Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>点击展开</Typography><ExpandMoreIcon sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 18 }} /></Box>
+            {resultPopOpen && createPortal(<Box sx={{ position: 'fixed', inset: 0, zIndex: 1300, display: 'flex', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', animation: resultExiting ? 'overlayExit 200ms ease-in forwards' : 'overlayEnter 280ms cubic-bezier(0.16,1,0.3,1)' }} onClick={() => closeWithAnim(() => setResultPopOpen(false), setResultExiting)}><Box onClick={e => e.stopPropagation()} sx={{ maxWidth: 700, width: '92vw', my: 'auto', minHeight: 0, maxHeight: '85vh', bgcolor: 'rgba(22,33,62,0.96)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, p: 2.5, overflowY: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}><Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}><Typography variant="subtitle2" sx={{ color: 'primary.main' }}>理想模板详情</Typography><Button size="small" variant="outlined" onClick={clearResults}>重新优化</Button></Box>
+            
+            {idealResult.idealAllocations && (<Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 1, mb: 2 }}><Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>理想词条分配</Typography>{idealResult.idealAllocations.map((a) => (<Box key={a.type} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}><Typography variant="caption" sx={{ fontSize: '0.6rem', width: 90, color: 'rgba(255,255,255,0.45)' }}>{STAT_DISPLAY_NAMES[a.type] ?? a.type}</Typography><Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.7)' }}>{a.rolls.toFixed(4)}条</Typography></Box>))}</Box>)}
             {idealResult.breakdown && <DamageFlow result={idealResult.breakdown} computedStats={idealResult.idealStats ?? computedStats} />}
-          </> : (() => {
+            </Box></Box>, document.body)}</> : (() => {
             const anchoredSum = Array.from(idealAnchors.values()).reduce((s, v) => s + v, 0);
             const remainingBudget = idealRollCount - anchoredSum;
             const canRun = remainingBudget > 0;
@@ -485,66 +524,40 @@ function WizardPage(): React.ReactElement {
         return (<Box>
           <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>同词条重优化</Typography>
           {redistributeResult ? <>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
-              <Button size="small" variant="outlined" onClick={clearResults}>重新优化</Button>
-            </Box>
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, mb: 2 }}>
               <Box sx={{ textAlign: 'center' }}><Typography variant="caption" color="text.secondary">优化前</Typography><Typography variant="h6">{formatDamage(redistributeResult.originalDamage)}</Typography></Box>
               <Box sx={{ textAlign: 'center' }}><Typography variant="caption" color="text.secondary">优化后</Typography><Typography variant="h6" sx={{ color: 'success.light' }}>{formatDamage(redistributeResult.optimizedDamage)}</Typography></Box>
             </Box>
             {damageComparison && <Typography variant="body1" sx={{ textAlign: 'center', color: damageComparison.improvementPercent > 0 ? 'success.main' : 'text.primary', fontWeight: 600, mb: 2 }}>提升 {damageComparison.improvementPercent >= 0 ? '+' : ''}{(damageComparison.improvementPercent * 100).toFixed(4)}%</Typography>}
-
-            {/* 优化后角色面板对比 */}
-            {redistributeResult.optimizedStats && (
-              <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 1, mb: 2 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>优化后角色面板</Typography>
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 0.5 }}>
-                  {([
-                    ['生命值', 'totalHp', 0], ['攻击力', 'totalAtk', 0], ['防御力', 'totalDef', 0],
-                    ['暴击率', 'critRate', 1], ['暴击伤害', 'critDmg', 1], ['元素精通', 'em', 0],
-                    ['充能效率', 'er', 1], ['伤害加成', 'dmgBonus', 1],
-                  ] as const).map(([label, key, isPct]) => {
-                    const oldVal = (redistributeResult.originalStats as any)?.[key] ?? 0;
-                    const newVal = (redistributeResult.optimizedStats as any)?.[key] ?? 0;
-                    const changed = Math.abs(newVal - oldVal) > 1e-6;
-                    const fmtVal = (v: number) => isPct ? (v * 100).toFixed(4) + '%' : v.toFixed(4);
-                    return (
-                      <Box key={key} sx={{ display: 'flex', justifyContent: 'space-between', px: 0.5 }}>
-                        <Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.45)' }}>{label}</Typography>
-                        <Typography variant="caption" sx={{ fontSize: '0.65rem', color: changed ? 'success.light' : 'rgba(255,255,255,0.7)', fontWeight: changed ? 600 : 400 }}>
-                          {fmtVal(newVal)}
-                        </Typography>
-                      </Box>
-                    );
+            {redistributeResult.currentAllocations && redistributeResult.optimizedAllocations && (
+              <Box sx={{ p: 1, mb: 1.5, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 1.5, border: '1px solid rgba(255,255,255,0.06)' }}>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', mb: 0.5, display: 'block', px: 0.25 }}>词条分布对比</Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 0.8fr', gap: 0, fontSize: '0.65rem' }}>
+                  <Typography variant="caption" sx={{ px: 0.5, py: 0.25, color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>词条</Typography>
+                  <Typography variant="caption" sx={{ px: 0.5, py: 0.25, color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>优化前</Typography>
+                  <Typography variant="caption" sx={{ px: 0.5, py: 0.25, color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>优化后</Typography>
+                  <Typography variant="caption" sx={{ px: 0.5, py: 0.25, color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>Δ</Typography>
+                  {redistributeResult.optimizedAllocations.map((opt) => {
+                    const cur = redistributeResult.currentAllocations.find(a => a.type === opt.type);
+                    const curRolls = cur?.rolls ?? 0;
+                    const delta = opt.rolls - curRolls;
+                    const changed = Math.abs(delta) > 0.001;
+                    return (<React.Fragment key={opt.type}>
+                      <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: changed ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)' }}>{STAT_DISPLAY_NAMES[opt.type] ?? opt.type}</Typography>
+                      <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: 'rgba(255,255,255,0.45)', textAlign: 'right', fontFamily: 'monospace' }}>{curRolls.toFixed(1)}</Typography>
+                      <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: changed ? 'success.light' : 'rgba(255,255,255,0.6)', textAlign: 'right', fontFamily: 'monospace', fontWeight: changed ? 600 : 400 }}>{opt.rolls.toFixed(1)}</Typography>
+                      <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: delta > 0 ? 'success.light' : delta < 0 ? 'error.light' : 'rgba(255,255,255,0.3)', textAlign: 'right', fontFamily: 'monospace', fontWeight: changed ? 600 : 400 }}>{delta > 0 ? '+' : ''}{delta.toFixed(1)}</Typography>
+                    </React.Fragment>);
                   })}
                 </Box>
               </Box>
             )}
-
-            {/* 词条分布对比 */}
-            {redistributeResult.currentAllocations && redistributeResult.optimizedAllocations && (
-              <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 1, mb: 2 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>词条分布对比</Typography>
-                {redistributeResult.optimizedAllocations.map((opt) => {
-                  const cur = redistributeResult.currentAllocations.find(a => a.type === opt.type);
-                  const curRolls = cur?.rolls ?? 0;
-                  const changed = Math.abs(opt.rolls - curRolls) > 0.001;
-                  return (
-                    <Box key={opt.type} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
-                      <Typography variant="caption" sx={{ fontSize: '0.6rem', width: 90, color: 'rgba(255,255,255,0.45)' }}>{STAT_DISPLAY_NAMES[opt.type] ?? opt.type}</Typography>
-                      <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)' }}>{curRolls.toFixed(4)}条</Typography>
-                      <Typography variant="caption" sx={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.2)' }}>→</Typography>
-                      <Typography variant="caption" sx={{ fontSize: '0.65rem', color: changed ? 'success.light' : 'rgba(255,255,255,0.7)', fontWeight: changed ? 600 : 400 }}>{opt.rolls.toFixed(4)}条</Typography>
-                    </Box>
-                  );
-                })}
-              </Box>
-            )}
-
+            <Box onClick={() => setResultPopOpen(true)} sx={{ mb: 1, p: 1, display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', borderRadius: 1.5, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', '&:hover': { bgcolor: 'rgba(91,192,235,0.06)', borderColor: 'rgba(91,192,235,0.2)' }, transition: 'background-color 0.2s, border-color 0.2s' }}><Typography variant="subtitle2" sx={{ color: 'primary.main', flexGrow: 1 }}>查看详情</Typography><Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>点击展开</Typography><ExpandMoreIcon sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 18 }} /></Box>
+            {resultPopOpen && createPortal(<Box sx={{ position: 'fixed', inset: 0, zIndex: 1300, display: 'flex', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', animation: resultExiting ? 'overlayExit 200ms ease-in forwards' : 'overlayEnter 280ms cubic-bezier(0.16,1,0.3,1)' }} onClick={() => closeWithAnim(() => setResultPopOpen(false), setResultExiting)}><Box onClick={e => e.stopPropagation()} sx={{ maxWidth: 700, width: '92vw', my: 'auto', minHeight: 0, maxHeight: '85vh', bgcolor: 'rgba(22,33,62,0.96)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, p: 2.5, overflowY: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}><Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}><Typography variant="subtitle2" sx={{ color: 'primary.main' }}>重优化详情</Typography><Button size="small" variant="outlined" onClick={clearResults}>重新优化</Button></Box>
+            {redistributeResult.optimizedStats && (<Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 1, mb: 2 }}><Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>优化后角色面板</Typography><Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 0.5 }}>{(([['生命值', 'totalHp', 0], ['攻击力', 'totalAtk', 0], ['防御力', 'totalDef', 0], ['暴击率', 'critRate', 1], ['暴击伤害', 'critDmg', 1], ['元素精通', 'em', 0], ['充能效率', 'er', 1], ['伤害加成', 'dmgBonus', 1]]) as const).map(([label, key, isPct]) => { const oldVal = (redistributeResult.originalStats as any)?.[key] ?? 0; const newVal = (redistributeResult.optimizedStats as any)?.[key] ?? 0; const changed = Math.abs(newVal - oldVal) > 1e-6; const fmtVal = (v: number) => isPct ? (v * 100).toFixed(4) + '%' : v.toFixed(4); return (<Box key={key} sx={{ display: 'flex', justifyContent: 'space-between', px: 0.5 }}><Typography variant="caption" sx={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.45)' }}>{label}</Typography><Typography variant="caption" sx={{ fontSize: '0.65rem', color: changed ? 'success.light' : 'rgba(255,255,255,0.7)', fontWeight: changed ? 600 : 400 }}>{fmtVal(newVal)}</Typography></Box>); })}</Box></Box>)}
             {zoneAnalysis && <ZoneAnalysisTable analysis={zoneAnalysis} />}
-
             <ErrorBoundary><DamageFlow result={redistributeResult.optimizedBreakdown ?? damageResult!} computedStats={redistributeResult.optimizedStats ?? computedStats} /></ErrorBoundary>
-          </> : (() => {
+            </Box></Box>, document.body)}</> : (() => {
             const freeRollSum = currentAllocations.filter((a) => !anchoredTypes.has(a.type)).reduce((s, a) => s + a.rolls, 0);
             const freeCount = currentAllocations.filter((a) => !anchoredTypes.has(a.type)).length;
             const canRun = freeCount > 0 && freeRollSum > 0;
@@ -583,7 +596,7 @@ function WizardPage(): React.ReactElement {
           })()}
         </Box>);
       }
-      return (<Box><Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>伤害计算结果</Typography>{damageResult ? <><Box sx={{ textAlign: 'center', mb: 2 }}><Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 700 }}>{formatDamage(damageResult.totalDamage)}</Typography><Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>当前配置伤害</Typography></Box><DamageFlow result={damageResult} computedStats={computedStats} /></> : <Typography color="text.secondary">尚未计算</Typography>}</Box>);
+      return (<Box><Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>伤害计算结果</Typography>{damageResult ? <><Box sx={{ textAlign: 'center', mb: 2 }}><Typography variant="h3" sx={{ color: 'primary.main', fontWeight: 700 }}>{formatDamage(damageResult.totalDamage)}</Typography><Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>当前配置伤害</Typography></Box><Box onClick={() => setResultPopOpen(true)} sx={{ mb: 1, p: 1, display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', borderRadius: 1.5, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', '&:hover': { bgcolor: 'rgba(91,192,235,0.06)', borderColor: 'rgba(91,192,235,0.2)' }, transition: 'background-color 0.2s, border-color 0.2s' }}><Typography variant="subtitle2" sx={{ color: 'primary.main', flexGrow: 1 }}>伤害计算流程</Typography><Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>点击展开</Typography><ExpandMoreIcon sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 18 }} /></Box>{resultPopOpen && createPortal(<Box sx={{ position: 'fixed', inset: 0, zIndex: 1300, display: 'flex', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', animation: resultExiting ? 'overlayExit 200ms ease-in forwards' : 'overlayEnter 280ms cubic-bezier(0.16,1,0.3,1)' }} onClick={() => closeWithAnim(() => setResultPopOpen(false), setResultExiting)}><Box onClick={e => e.stopPropagation()} sx={{ maxWidth: 700, width: '92vw', my: 'auto', minHeight: 0, maxHeight: '85vh', bgcolor: 'rgba(22,33,62,0.96)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, p: 2.5, overflowY: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}><Typography variant="subtitle2" sx={{ mb: 1, color: 'primary.main' }}>伤害计算流程</Typography><DamageFlow result={damageResult} computedStats={computedStats} /></Box></Box>, document.body)}</> : <Typography color="text.secondary">尚未计算</Typography>}</Box>);
     }
 
     switch (s) {
@@ -591,131 +604,208 @@ function WizardPage(): React.ReactElement {
         return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>Enka 导入</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>输入 UID 自动导入角色展柜数据，省去手动填写</Typography><ArtifactImport /></Box>);
 
       case 'character':
-        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>选择角色</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择一位需要分析的角色</Typography><CharacterSelect /><Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}><TextField label="角色等级" type="number" size="small" value={characterLevel} onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1 && v <= 90) setCharacterLevel(v); }} slotProps={{ htmlInput: { min: 1, max: 90 } }} sx={{ width: 120 }} /></Box></Box>);
+        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>选择角色</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择一位需要分析的角色</Typography><CharacterSelect onSelectCharacter={handleSelectCharacter} /><Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}><TextField label="角色等级" type="number" size="small" value={characterLevel} onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1 && v <= 90) setCharacterLevel(v); }} slotProps={{ htmlInput: { min: 1, max: 90 } }} sx={{ width: 120 }} /></Box></Box>);
 
       case 'weapon':
         return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>武器配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择武器并查看被动效果</Typography>
-          <WeaponSelect />
+          <WeaponSelect onSelectWeapon={handleSelectWeapon} />
           {weaponConfig && (<><Box sx={{ mt: 1, mb: 1, p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2 }}><Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600 }}>{weaponConfig.weaponData.nameZh}</Typography><Typography variant="body2" color="text.secondary">基础攻击力: {weaponConfig.weaponData.baseAtk}</Typography>{weaponConfig.weaponData.substatType && weaponConfig.weaponData.substatValue > 0 && <Typography variant="body2" color="text.secondary">{({ ATK_PERCENT: '攻击力%', DEF_PERCENT: '防御力%', HP_PERCENT: '生命值%', CRIT_RATE: '暴击率%', CRIT_DMG: '暴击伤害%', ELEMENTAL_MASTERY: '元素精通', ENERGY_RECHARGE: '充能效率', PHYSICAL_DMG_BONUS: '物理伤害%' } as Record<string,string>)[weaponConfig.weaponData.substatType] || weaponConfig.weaponData.substatType}: {weaponConfig.weaponData.substatType === 'ELEMENTAL_MASTERY' ? Math.round(weaponConfig.weaponData.substatValue) : `${(weaponConfig.weaponData.substatValue*100).toFixed(4)}%`}</Typography>}<Typography variant="body2" color="text.secondary">等级: {weaponConfig.weaponLevel}</Typography>
             <Box sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}><Typography variant="body2" color="text.secondary">精炼:</Typography>{[1,2,3,4,5].map((r) => (<Chip key={r} label={`R${r}`} size="small" color={weaponConfig.refinement === r ? 'primary' : 'default'} variant={weaponConfig.refinement === r ? 'filled' : 'outlined'} onClick={() => setWeaponRefinement(r)} sx={{ cursor: 'pointer', minWidth: 36 }} />))}</Box></Box>
             <Box className="diamond-divider">◆</Box>
-            <WeaponPassiveInput /></>)}</Box>);
+
+            <Box
+              onClick={() => setWeaponPassivePopOpen(true)}
+              sx={{
+                mb: 1, p: 1, display: 'flex', alignItems: 'center', gap: 1,
+                cursor: 'pointer', borderRadius: 1.5,
+                bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+                '&:hover': { bgcolor: 'rgba(91,192,235,0.06)', borderColor: 'rgba(91,192,235,0.2)' },
+                transition: 'background-color 0.2s, border-color 0.2s',
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ color: 'primary.main', flexGrow: 1 }}>被动效果模拟</Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>点击展开</Typography>
+              <ExpandMoreIcon sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 18 }} />
+            </Box>
+
+            {weaponPassivePopOpen && createPortal(
+            <Box sx={{ position: 'fixed', inset: 0, zIndex: 1300, display: 'flex', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', animation: weaponPassiveExiting ? 'overlayExit 200ms ease-in forwards' : 'overlayEnter 280ms cubic-bezier(0.16,1,0.3,1)' }} onClick={() => closeWithAnim(() => setWeaponPassivePopOpen(false), setWeaponPassiveExiting)}>
+            <Box onClick={e => e.stopPropagation()} sx={{ maxWidth: 600, width: '90vw', my: 'auto', minHeight: 0, maxHeight: '80vh', bgcolor: 'rgba(22,33,62,0.96)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, p: 2.5, overflowY: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
+              <Typography variant="subtitle2" sx={{ mb: 1, color: 'primary.main' }}>被动效果模拟</Typography>
+              <WeaponPassiveInput />
+            </Box></Box>, document.body)}
+          </>)}</Box>);
 
       case 'artifacts':
-        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>圣遗物配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>逐部位填入圣遗物主/副词条属性</Typography>
-          <Accordion
-            key={`artifact-editor-${selectedCharacter?.id ?? 'none'}`}
-            defaultExpanded={false}
+        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>圣遗物配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>逐部位填入圣遗物主/副词条属性</Typography>
+          <Box
+            onClick={() => setArtifactPopOpen(true)}
             sx={{
-              mb: 2,
-              bgcolor: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: '8px !important',
-              '&:before': { display: 'none' },
+              mb: 2, p: 1, display: 'flex', alignItems: 'center', gap: 1,
+              cursor: 'pointer', borderRadius: 1.5,
+              bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+              '&:hover': { bgcolor: 'rgba(91,192,235,0.06)', borderColor: 'rgba(91,192,235,0.2)' },
+              transition: 'background-color 0.2s, border-color 0.2s',
             }}
           >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ minHeight: 44, '& .MuiAccordionSummary-content': { my: 0.5, alignItems: 'center' } }}>
-              <Typography variant="subtitle2" sx={{ color: 'primary.main' }}>圣遗物编辑</Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', ml: 1.5 }}>
-                点击展开，查看/编辑 5 部位圣遗物主副词条
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails sx={{ pt: 0 }}>
-              <ArtifactEditor />
-            </AccordionDetails>
-          </Accordion>
-          <Box sx={{ mt: 2 }}><ArtifactSetSelect importedSetNames={importedSetNames} importedSetCounts={importedSetCounts} /></Box></Box>);
+            <Typography variant="subtitle2" sx={{ color: 'primary.main', flexGrow: 1 }}>圣遗物编辑</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>点击展开</Typography>
+            <ExpandMoreIcon sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 18 }} />
+          </Box>
+                    <style>{`
+            @keyframes overlayEnter {
+              from { opacity: 0; transform: translateY(16px) scale(0.96); }
+              to   { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            @keyframes overlayExit {
+              from { opacity: 1; transform: translateY(0) scale(1); }
+              to   { opacity: 0; transform: translateY(12px) scale(0.97); }
+            }
+          `}</style>
+          {artifactPopOpen && createPortal(
+          <Box sx={{ position: 'fixed', inset: 0, zIndex: 1300, display: 'flex', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', animation: artifactExiting ? 'overlayExit 200ms ease-in forwards' : 'overlayEnter 280ms cubic-bezier(0.16,1,0.3,1)' }} onClick={() => closeWithAnim(() => setArtifactPopOpen(false), setArtifactExiting)}>
+          <Box onClick={e => e.stopPropagation()} sx={{ maxWidth: 600, width: '90vw', my: 'auto', minHeight: 0, maxHeight: '80vh', bgcolor: 'rgba(22,33,62,0.96)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, p: 2.5, overflowY: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, color: 'primary.main' }}>圣遗物编辑</Typography>
+            <ArtifactEditor />
+</Box></Box>, document.body)}
+
+          <Box
+            onClick={() => setSetOverridePopOpen(true)}
+            sx={{
+              mb: 1, p: 1, display: 'flex', alignItems: 'center', gap: 1,
+              cursor: 'pointer', borderRadius: 1.5,
+              bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+              '&:hover': { bgcolor: 'rgba(91,192,235,0.06)', borderColor: 'rgba(91,192,235,0.2)' },
+              transition: 'background-color 0.2s, border-color 0.2s',
+            }}
+          >
+            <Typography variant="subtitle2" sx={{ color: 'primary.main', flexGrow: 1 }}>套装组合</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>点击展开</Typography>
+            <ExpandMoreIcon sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 18 }} />
+          </Box>
+
+          {setOverridePopOpen && createPortal(
+          <Box sx={{ position: 'fixed', inset: 0, zIndex: 1300, display: 'flex', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', animation: setOverrideExiting ? 'overlayExit 200ms ease-in forwards' : 'overlayEnter 280ms cubic-bezier(0.16,1,0.3,1)' }} onClick={() => closeWithAnim(() => setSetOverridePopOpen(false), setSetOverrideExiting)}>
+          <Box onClick={e => e.stopPropagation()} sx={{ maxWidth: 600, width: '90vw', my: 'auto', minHeight: 0, maxHeight: '70vh', bgcolor: 'rgba(22,33,62,0.96)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, p: 2.5, overflowY: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, color: 'primary.main' }}>套装组合</Typography>
+            <ArtifactSetSelect importedSetNames={importedSetNames} importedSetCounts={importedSetCounts} />
+          </Box></Box>, document.body)}
+        </Box>);
 
       case 'talents':
         return (<Box>
           <Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>天赋与命座</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>手动填入天赋和命座对应的实际加成数值</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>手动填入天赋和命座对应的实际加成数值</Typography>
 
-          {/* 天赋模拟 Accordion */}
-          <Accordion
-            key={`talent-sim-${selectedCharacter?.id ?? 'none'}`}
-            defaultExpanded={false}
+          {/* 天赋模拟 — click to popover */}
+          <Box
+            onClick={() => setTalentPopOpen(true)}
             sx={{
-              mb: 2,
-              bgcolor: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: '8px !important',
-              '&:before': { display: 'none' },
+              mb: 1, p: 1, display: 'flex', alignItems: 'center', gap: 1,
+              cursor: 'pointer', borderRadius: 1.5,
+              bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+              '&:hover': { bgcolor: 'rgba(91,192,235,0.06)', borderColor: 'rgba(91,192,235,0.2)' },
+              transition: 'background-color 0.2s, border-color 0.2s',
             }}
           >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ minHeight: 44, '& .MuiAccordionSummary-content': { my: 0.5 } }}>
-              <Typography variant="subtitle2" sx={{ color: 'primary.main' }}>天赋模拟</Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', ml: 1.5, alignSelf: 'center' }}>
-                固有天赋等角色自身机制乘区加成
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails sx={{ pt: 0 }}>
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 0.25 }}>
-                <BonusRow label="大权区" value={showPct(tb, 'authorityMultiplier')} onChange={setPct(setTb, tb, 'authorityMultiplier')} hint="%" />
-                <BonusRow label="月兆区" value={showPct(tb, 'moonSignBonus')} onChange={setPct(setTb, tb, 'moonSignBonus')} hint="%" />
-                <BonusRow label="增伤区" value={showPct(tb, 'dmgBonus')} onChange={setPct(setTb, tb, 'dmgBonus')} hint="%" />
-                <BonusRow label="精通区" value={showNum(tb, 'elementalMastery')} onChange={setFlat(setTb, tb, 'elementalMastery')} hint="EM" />
-                <BonusRow label="攻击力%" value={showPct(tb, 'atkPercent')} onChange={setPct(setTb, tb, 'atkPercent')} hint="%" />
-                <BonusRow label="防御力%" value={showPct(tb, 'defPercent')} onChange={setPct(setTb, tb, 'defPercent')} hint="%" />
-                <BonusRow label="生命值%" value={showPct(tb, 'hpPercent')} onChange={setPct(setTb, tb, 'hpPercent')} hint="%" />
-                <BonusRow label="攻击力" value={showNum(tb, 'atkFlat')} onChange={setFlat(setTb, tb, 'atkFlat')} hint="固定值" />
-                <BonusRow label="防御力" value={showNum(tb, 'defFlat')} onChange={setFlat(setTb, tb, 'defFlat')} hint="固定值" />
-                <BonusRow label="生命值" value={showNum(tb, 'hpFlat')} onChange={setFlat(setTb, tb, 'hpFlat')} hint="固定值" />
-                <BonusRow label="羽毛附伤" value={showNum(tb, 'featherFlat')} onChange={setFlat(setTb, tb, 'featherFlat')} hint="固定值" />
-              </Box>
-              <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 1 }}>
-                ⚠ 百分比类数值无需输入 % 号，直接填数字即可（如 61.7 表示 61.7%）
-              </Typography>
-              <RefAccordion open={talentExpand} onToggle={() => setTalentExpand(!talentExpand)} entries={talentEntries} buttonLabel="查看天赋详情" emptyHint={selectedCharacter ? '暂无天赋数据' : '请先选择角色'} />
-            </AccordionDetails>
-          </Accordion>
+            <Typography variant="subtitle2" sx={{ color: 'primary.main', flexGrow: 1 }}>天赋模拟</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>点击展开</Typography>
+            <ExpandMoreIcon sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 18 }} />
+          </Box>
+          {talentPopOpen && createPortal(
+          <Box sx={{ position: 'fixed', inset: 0, zIndex: 1300, display: 'flex', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', animation: talentExiting ? 'overlayExit 200ms ease-in forwards' : 'overlayEnter 280ms cubic-bezier(0.16,1,0.3,1)' }} onClick={() => closeWithAnim(() => setTalentPopOpen(false), setTalentExiting)}>
+          <Box onClick={e => e.stopPropagation()} sx={{ maxWidth: 600, width: '90vw', my: 'auto', minHeight: 0, maxHeight: '75vh', bgcolor: 'rgba(22,33,62,0.96)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, p: 2.5, overflowY: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
+            <Typography variant="subtitle2" sx={{ mb: 0.25, color: 'primary.main' }}>天赋模拟</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', display: 'block', mb: 1 }}>固有天赋等角色自身机制提供的乘区加成</Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 0.25 }}>
+              <BonusRow label="大权区" value={showPct(tb, 'authorityMultiplier')} onChange={setPct(setTb, tb, 'authorityMultiplier')} hint="%" />
+              <BonusRow label="月兆区" value={showPct(tb, 'moonSignBonus')} onChange={setPct(setTb, tb, 'moonSignBonus')} hint="%" />
+              <BonusRow label="增伤区" value={showPct(tb, 'dmgBonus')} onChange={setPct(setTb, tb, 'dmgBonus')} hint="%" />
+              <BonusRow label="精通区" value={showNum(tb, 'elementalMastery')} onChange={setFlat(setTb, tb, 'elementalMastery')} hint="EM" />
+              <BonusRow label="攻击力%" value={showPct(tb, 'atkPercent')} onChange={setPct(setTb, tb, 'atkPercent')} hint="%" />
+              <BonusRow label="防御力%" value={showPct(tb, 'defPercent')} onChange={setPct(setTb, tb, 'defPercent')} hint="%" />
+              <BonusRow label="生命值%" value={showPct(tb, 'hpPercent')} onChange={setPct(setTb, tb, 'hpPercent')} hint="%" />
+              <BonusRow label="攻击力" value={showNum(tb, 'atkFlat')} onChange={setFlat(setTb, tb, 'atkFlat')} hint="固定值" />
+              <BonusRow label="防御力" value={showNum(tb, 'defFlat')} onChange={setFlat(setTb, tb, 'defFlat')} hint="固定值" />
+              <BonusRow label="生命值" value={showNum(tb, 'hpFlat')} onChange={setFlat(setTb, tb, 'hpFlat')} hint="固定值" />
+              <BonusRow label="羽毛附伤" value={showNum(tb, 'featherFlat')} onChange={setFlat(setTb, tb, 'featherFlat')} hint="固定值" />
+            </Box>
+            <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 1 }}>
+              ⚠ 百分比类数值无需输入 % 号，直接填数字即可（如 61.7 表示 61.7%）
+            </Typography>
+            <RefAccordion open={talentExpand} onToggle={() => setTalentExpand(!talentExpand)} entries={talentEntries} buttonLabel="查看天赋详情" emptyHint={selectedCharacter ? '暂无天赋数据' : '请先选择角色'} />
+</Box></Box>, document.body)}
 
           <Box className="diamond-divider">◆</Box>
 
-          {/* 命座模拟 Accordion */}
-          <Accordion
-            key={`const-sim-${selectedCharacter?.id ?? 'none'}`}
-            defaultExpanded={false}
+          {/* 命座模拟 — click to popover */}
+          <Box
+            onClick={() => setConstPopOpen(true)}
             sx={{
-              mb: 2,
-              bgcolor: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: '8px !important',
-              '&:before': { display: 'none' },
+              mb: 1, p: 1, display: 'flex', alignItems: 'center', gap: 1,
+              cursor: 'pointer', borderRadius: 1.5,
+              bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+              '&:hover': { bgcolor: 'rgba(91,192,235,0.06)', borderColor: 'rgba(91,192,235,0.2)' },
+              transition: 'background-color 0.2s, border-color 0.2s',
             }}
           >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ minHeight: 44, '& .MuiAccordionSummary-content': { my: 0.5 } }}>
-              <Typography variant="subtitle2" sx={{ color: 'secondary.main' }}>命座模拟</Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', ml: 1.5, alignSelf: 'center' }}>
-                命之座效果提供的乘区加成
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails sx={{ pt: 0 }}>
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 0.25 }}>
-                <BonusRow label="暴击率" value={showPct(cb, 'critRate')} onChange={setPct(setCb, cb, 'critRate')} hint="%" />
-                <BonusRow label="暴击伤害" value={showPct(cb, 'critDmg')} onChange={setPct(setCb, cb, 'critDmg')} hint="%" />
-                <BonusRow label="擢升区" value={showPct(cb, 'elevationBonus')} onChange={setPct(setCb, cb, 'elevationBonus')} hint="%" />
-                <BonusRow label="减抗" value={showPct(cb, 'resistReduction')} onChange={setPct(setCb, cb, 'resistReduction')} hint="%" />
-                <BonusRow label="增伤区" value={showPct(cb, 'dmgBonus')} onChange={setPct(setCb, cb, 'dmgBonus')} hint="%" />
-                <BonusRow label="攻击力%" value={showPct(cb, 'atkPercent')} onChange={setPct(setCb, cb, 'atkPercent')} hint="%" />
-                <BonusRow label="防御力%" value={showPct(cb, 'defPercent')} onChange={setPct(setCb, cb, 'defPercent')} hint="%" />
-                <BonusRow label="生命值%" value={showPct(cb, 'hpPercent')} onChange={setPct(setCb, cb, 'hpPercent')} hint="%" />
-                <BonusRow label="攻击力" value={showNum(cb, 'atkFlat')} onChange={setFlat(setCb, cb, 'atkFlat')} hint="固定值" />
-                <BonusRow label="防御力" value={showNum(cb, 'defFlat')} onChange={setFlat(setCb, cb, 'defFlat')} hint="固定值" />
-                <BonusRow label="生命值" value={showNum(cb, 'hpFlat')} onChange={setFlat(setCb, cb, 'hpFlat')} hint="固定值" />
-              </Box>
-              <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 1 }}>
-                ⚠ 百分比类数值无需输入 % 号，直接填数字即可（如 61.7 表示 61.7%）
-              </Typography>
-              <RefAccordion open={constExpand} onToggle={() => setConstExpand(!constExpand)} entries={constEntries} buttonLabel="查看命座详情" emptyHint={selectedCharacter ? '暂无命座数据' : '请先选择角色'} />
-            </AccordionDetails>
-          </Accordion>
+            <Typography variant="subtitle2" sx={{ color: 'secondary.main', flexGrow: 1 }}>命座模拟</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>点击展开</Typography>
+            <ExpandMoreIcon sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 18 }} />
+          </Box>
+          {constPopOpen && createPortal(
+          <Box sx={{ position: 'fixed', inset: 0, zIndex: 1300, display: 'flex', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', animation: constExiting ? 'overlayExit 200ms ease-in forwards' : 'overlayEnter 280ms cubic-bezier(0.16,1,0.3,1)' }} onClick={() => closeWithAnim(() => setConstPopOpen(false), setConstExiting)}>
+          <Box onClick={e => e.stopPropagation()} sx={{ maxWidth: 600, width: '90vw', my: 'auto', minHeight: 0, maxHeight: '75vh', bgcolor: 'rgba(22,33,62,0.96)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, p: 2.5, overflowY: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
+            <Typography variant="subtitle2" sx={{ mb: 0.25, color: 'secondary.main' }}>命座模拟</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', display: 'block', mb: 1 }}>命之座效果提供的乘区加成</Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 0.25 }}>
+              <BonusRow label="暴击率" value={showPct(cb, 'critRate')} onChange={setPct(setCb, cb, 'critRate')} hint="%" />
+              <BonusRow label="暴击伤害" value={showPct(cb, 'critDmg')} onChange={setPct(setCb, cb, 'critDmg')} hint="%" />
+              <BonusRow label="擢升区" value={showPct(cb, 'elevationBonus')} onChange={setPct(setCb, cb, 'elevationBonus')} hint="%" />
+              <BonusRow label="减抗" value={showPct(cb, 'resistReduction')} onChange={setPct(setCb, cb, 'resistReduction')} hint="%" />
+              <BonusRow label="增伤区" value={showPct(cb, 'dmgBonus')} onChange={setPct(setCb, cb, 'dmgBonus')} hint="%" />
+              <BonusRow label="攻击力%" value={showPct(cb, 'atkPercent')} onChange={setPct(setCb, cb, 'atkPercent')} hint="%" />
+              <BonusRow label="防御力%" value={showPct(cb, 'defPercent')} onChange={setPct(setCb, cb, 'defPercent')} hint="%" />
+              <BonusRow label="生命值%" value={showPct(cb, 'hpPercent')} onChange={setPct(setCb, cb, 'hpPercent')} hint="%" />
+              <BonusRow label="攻击力" value={showNum(cb, 'atkFlat')} onChange={setFlat(setCb, cb, 'atkFlat')} hint="固定值" />
+              <BonusRow label="防御力" value={showNum(cb, 'defFlat')} onChange={setFlat(setCb, cb, 'defFlat')} hint="固定值" />
+              <BonusRow label="生命值" value={showNum(cb, 'hpFlat')} onChange={setFlat(setCb, cb, 'hpFlat')} hint="固定值" />
+            </Box>
+            <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 1 }}>
+              ⚠ 百分比类数值无需输入 % 号，直接填数字即可（如 61.7 表示 61.7%）
+            </Typography>
+            <RefAccordion open={constExpand} onToggle={() => setConstExpand(!constExpand)} entries={constEntries} buttonLabel="查看命座详情" emptyHint={selectedCharacter ? '暂无命座数据' : '请先选择角色'} />
+</Box></Box>, document.body)}
         </Box>);
 
       case 'teambuffs': {
         const isMB = reactionType === ('MOON_BLOOM' as any);
-        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>队伍 Buff</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>添加辅助角色、圣遗物套装、元素共鸣等增益（自由输入已整合至⑤）</Typography><TeamBuffPanel config={teamBuffConfig} onChange={setTeamBuffConfig} />
-          {isMB && (<Box sx={{ mt: 2, p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2 }}><Typography variant="body2" sx={{ mb: 0.5, color: 'primary.main' }}>祷歌型附伤（菈乌玛·月绽放专用）</Typography><Box sx={{ display: 'flex', gap: 1, mb: 1 }}><FormControl size="small" sx={{ width: 120 }}><Select value={laumaCons} onChange={(e) => setLaumaCons(e.target.value)}><MenuItem value="c0">0 命</MenuItem><MenuItem value="c2">2 命</MenuItem><MenuItem value="c3">3 命</MenuItem></Select></FormControl><TextField label="菈乌玛精通" type="number" size="small" value={laumaEM || ''} placeholder="0" sx={{ width: 120 }} slotProps={{ htmlInput: { step: 1 } }} onChange={(e) => { const raw = e.target.value; if (raw === '' || raw === '-') { setLaumaEM(0); return; } const v = parseInt(raw); if (!isNaN(v)) setLaumaEM(v); }} /></Box><Typography variant="caption" color="text.secondary">= {laumaEM || 0} × {laumaCons === 'c0' ? '4.0' : laumaCons === 'c2' ? '8.0' : '8.723'} = {Math.round(calcLaumaPrayer(laumaEM, laumaCons)).toLocaleString()}</Typography></Box>)}
+        return (<Box>
+          <Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>队伍 Buff</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>添加辅助角色、圣遗物套装、元素共鸣等增益</Typography>
+
+          <Box
+            onClick={() => setTeambuffPopOpen(true)}
+            sx={{
+              mb: 2, p: 1, display: 'flex', alignItems: 'center', gap: 1,
+              cursor: 'pointer', borderRadius: 1.5,
+              bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+              '&:hover': { bgcolor: 'rgba(91,192,235,0.06)', borderColor: 'rgba(91,192,235,0.2)' },
+              transition: 'background-color 0.2s, border-color 0.2s',
+            }}
+          >
+            <Typography variant="subtitle2" sx={{ color: 'primary.main', flexGrow: 1 }}>队伍增益</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>点击展开</Typography>
+            <ExpandMoreIcon sx={{ color: 'rgba(255,255,255,0.3)', fontSize: 18 }} />
+          </Box>
+
+          {teambuffPopOpen && createPortal(
+          <Box sx={{ position: 'fixed', inset: 0, zIndex: 1300, display: 'flex', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', animation: teambuffExiting ? 'overlayExit 200ms ease-in forwards' : 'overlayEnter 280ms cubic-bezier(0.16,1,0.3,1)' }} onClick={() => closeWithAnim(() => setTeambuffPopOpen(false), setTeambuffExiting)}>
+          <Box onClick={e => e.stopPropagation()} sx={{ maxWidth: 600, width: '90vw', my: 'auto', minHeight: 0, maxHeight: '80vh', bgcolor: 'rgba(22,33,62,0.96)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, p: 2.5, overflowY: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, color: 'primary.main' }}>队伍增益</Typography>
+            <TeamBuffPanel config={teamBuffConfig} onChange={setTeamBuffConfig} />
+            {isMB && (<Box sx={{ mt: 2, p: 1.5, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2 }}><Typography variant="body2" sx={{ mb: 0.5, color: 'primary.main' }}>祷歌型附伤（菈乌玛·月绽放专用）</Typography><Box sx={{ display: 'flex', gap: 1, mb: 1 }}><FormControl size="small" sx={{ width: 120 }}><Select value={laumaCons} onChange={(e) => setLaumaCons(e.target.value)}><MenuItem value="c0">0 命</MenuItem><MenuItem value="c2">2 命</MenuItem><MenuItem value="c3">3 命</MenuItem></Select></FormControl><TextField label="菈乌玛精通" type="number" size="small" value={laumaEM || ''} placeholder="0" sx={{ width: 120 }} slotProps={{ htmlInput: { step: 1 } }} onChange={(e) => { const raw = e.target.value; if (raw === '' || raw === '-') { setLaumaEM(0); return; } const v = parseInt(raw); if (!isNaN(v)) setLaumaEM(v); }} /></Box><Typography variant="caption" color="text.secondary">= {laumaEM || 0} × {laumaCons === 'c0' ? '4.0' : laumaCons === 'c2' ? '8.0' : '8.723'} = {Math.round(calcLaumaPrayer(laumaEM, laumaCons)).toLocaleString()}</Typography></Box>)}
+          </Box></Box>, document.body)}
         </Box>);
       }
 
@@ -779,7 +869,7 @@ function WizardPage(): React.ReactElement {
       default:
         return <Typography color="text.secondary">未知板块</Typography>;
     }
-  }, [selectedCharacter, characterLevel, skillMultiplier, amplifyingMultiplier, weaponConfig, talentConfig, teamBuffConfig, reactionOptions, reactIdx, handleReactionChange, damageResult, redistributeResult, idealResult, damageComparison, idealRollCount, resultLabels, customScaling, laumaCons, laumaEM, talentExpand, constExpand, setSkillMultiplier, setCharacterLevel, setTalentConfig, setWeaponConfig, setConstellationBonus, constellationConfig, talentConfig, currentAllocations, anchoredTypes, toggleAnchor, handleRunRedistribute, handleRunIdeal, isCalculating, idealAvailableTypes, idealAnchors, idealInputs, handleIdealPinToggle, handleIdealInputChange]);
+  }, [selectedCharacter, characterLevel, skillMultiplier, amplifyingMultiplier, weaponConfig, talentConfig, teamBuffConfig, reactionOptions, reactIdx, handleReactionChange, damageResult, redistributeResult, idealResult, damageComparison, idealRollCount, resultLabels, customScaling, laumaCons, laumaEM, talentExpand, constExpand, setSkillMultiplier, setCharacterLevel, setTalentConfig, setWeaponConfig, setConstellationBonus, constellationConfig, talentConfig, currentAllocations, anchoredTypes, toggleAnchor, handleRunRedistribute, handleRunIdeal, isCalculating, idealAvailableTypes, idealAnchors, idealInputs, handleIdealPinToggle, handleIdealInputChange, talentPopOpen, constPopOpen, artifactPopOpen, resultPopOpen, teambuffPopOpen, weaponPassivePopOpen, setOverridePopOpen, talentExiting, constExiting, artifactExiting, resultExiting, teambuffExiting, weaponPassiveExiting, setOverrideExiting, importedSetNames, importedSetCounts, closeWithAnim]);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -825,7 +915,7 @@ function WizardPage(): React.ReactElement {
       </Box>
 
       <Box sx={{ position: 'relative', width: '100vw', height: '100vh', bgcolor: 'transparent' }}>
-      <LoadingOverlay visible={isCalculating} progress={progress} message="正在计算…" />
+      <LoadingOverlay visible={isCalculating || isCharLoading} progress={isCalculating ? progress : undefined} message={isCalculating ? '正在计算…' : '正在加载…'} />
       <StickerThrower characterName={selectedCharacter?.nameZh ?? null} />
       <Box sx={{ position: 'fixed', top: { xs: 8, md: 16 }, left: { xs: 8, md: 16 }, zIndex: 20, display: 'flex', alignItems: 'center', gap: { xs: 0.5, md: 1 } }}>
         <IconButton onClick={exitWizard} sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}><ArrowBackIcon /></IconButton>

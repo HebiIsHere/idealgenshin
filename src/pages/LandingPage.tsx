@@ -209,7 +209,7 @@ function LandingPage(): React.ReactElement {
 
         <Typography variant="caption" sx={{ color: 'text.disabled', mt: 4, display: 'block',
           animation: `${fadeIn} 0.8s 0.6s cubic-bezier(0.16,1,0.3,1) both` }}>
-          作者：袔苾 · v4.0
+          作者：袔苾 · v4.1
         </Typography>
       </Container>
 
@@ -252,7 +252,7 @@ function LandingPage(): React.ReactElement {
               fullWidth
               variant="text"
               startIcon={<DescriptionIcon fontSize="small" />}
-              href="/理想原生v4.0-项目介绍手册.docx"
+              href="/理想原生v4.1-项目介绍手册.docx"
               download
               sx={{ justifyContent: 'flex-start', color: 'text.secondary', mb: 0.5, fontSize: '0.8rem' }}
             >
@@ -263,7 +263,7 @@ function LandingPage(): React.ReactElement {
               fullWidth
               variant="text"
               startIcon={<DescriptionIcon fontSize="small" />}
-              href="/理想原生v4.0-使用说明.docx"
+              href="/理想原生v4.1-使用说明.docx"
               download
               sx={{ justifyContent: 'flex-start', color: 'text.secondary', fontSize: '0.8rem' }}
             >

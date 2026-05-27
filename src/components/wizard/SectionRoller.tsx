@@ -140,7 +140,7 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
             sx={{
               width: '100%',
               maxWidth: 600,
-              maxHeight: '100%',
+              maxHeight: { xs: 'calc(100vh - 64px)', md: 'calc(100vh - 96px)' },
               overflowY: 'auto',
               py: 1,
               px: 0.5,
