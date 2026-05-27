@@ -107,9 +107,41 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
     };
   }, [currentIndex, snapType]);
 
-  // Touch scroll → store: detect user scroll and sync snapped index back to store
+  const isTouchingRef = useRef(false);
+  const momentumSettlingRef = useRef(false);
+
+  // Mobile touch: suppress store sync during touch, sync once after momentum settles
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const onTouchStart = () => { isTouchingRef.current = true; momentumSettlingRef.current = false; };
+    const onTouchEnd = () => {
+      isTouchingRef.current = false;
+      momentumSettlingRef.current = true;
+      setTimeout(() => {
+        momentumSettlingRef.current = false;
+        const cur = scrollRef.current;
+        if (!cur) return;
+        const vh = cur.clientHeight;
+        const idx = Math.round(cur.scrollTop / vh);
+        if (idx !== currentIndexRef.current && idx >= 0 && idx < sectionsLenRef.current) {
+          goToSection(idx);
+        }
+      }, 350);
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [goToSection]);
+
+  // Scroll → store: sync snapped index back (skipped during touch & momentum)
   const handleScroll = useCallback(() => {
-    if (scrollingByStore.current) return;
+    if (scrollingByStore.current || isTouchingRef.current || momentumSettlingRef.current) return;
     const el = scrollRef.current;
     if (!el) return;
     const vh = el.clientHeight;
@@ -119,8 +151,6 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
     }
   }, [currentIndex, sections.length, goToSection]);
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <Box
@@ -132,7 +162,6 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
         overflowY: 'scroll',
         scrollSnapType: snapType,
         overscrollBehavior: 'contain',
-        WebkitOverflowScrolling: 'touch',
         '&::-webkit-scrollbar': { display: 'none' },
         scrollbarWidth: 'none',
       }}
@@ -143,7 +172,6 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
           sx={{
             height: { xs: '100dvh', md: '100vh' },
             scrollSnapAlign: 'start',
-            scrollSnapStop: isMobile ? 'always' : 'normal',
             display: 'flex',
             alignItems: 'safe center',
             justifyContent: 'center',
