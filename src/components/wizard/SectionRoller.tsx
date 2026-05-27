@@ -1,12 +1,20 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { useWizardStore, type WizardSection } from '../../store/slices/wizardSlice';
 
 interface SectionRollerProps {
   renderSection: (section: WizardSection) => React.ReactNode;
 }
 
+/** Natural snap type — mandatory on mobile for sticky feel, proximity on desktop to avoid wheel jitter. */
+function useSnapType(): string {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  return isMobile ? 'y mandatory' : 'y proximity';
+}
 
 function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElement {
   const currentIndex = useWizardStore((s) => s.currentIndex);
@@ -16,6 +24,7 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollingByStore = useRef(false);
   const floatRef = useRef({ duration: 5.5 + Math.random() * 2, delay: Math.random() * 2 });
+  const snapType = useSnapType();
 
   // Stable refs for wheel handler closure
   const currentIndexRef = useRef(currentIndex);
@@ -78,7 +87,7 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
             return;
           }
           // Reached target — restore snap
-          cur.style.scrollSnapType = 'y proximity';
+          cur.style.scrollSnapType = snapType;
           scrollingByStore.current = false;
           return;
         }
@@ -93,10 +102,10 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
     return () => {
       cancelAnimationFrame(rafId);
       if (scrollRef.current) {
-        scrollRef.current.style.scrollSnapType = 'y proximity';
+        scrollRef.current.style.scrollSnapType = snapType;
       }
     };
-  }, [currentIndex]);
+  }, [currentIndex, snapType]);
 
   // Touch scroll → store: detect user scroll and sync snapped index back to store
   const handleScroll = useCallback(() => {
@@ -110,6 +119,9 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
     }
   }, [currentIndex, sections.length, goToSection]);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   return (
     <Box
       ref={scrollRef}
@@ -118,7 +130,9 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
         width: '100%',
         height: '100%',
         overflowY: 'scroll',
-        scrollSnapType: 'y proximity',
+        scrollSnapType: snapType,
+        overscrollBehavior: 'contain',
+        WebkitOverflowScrolling: 'touch',
         '&::-webkit-scrollbar': { display: 'none' },
         scrollbarWidth: 'none',
       }}
@@ -127,8 +141,9 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
         <Box
           key={String(section)}
           sx={{
-            height: '100vh',
+            height: { xs: '100dvh', md: '100vh' },
             scrollSnapAlign: 'start',
+            scrollSnapStop: isMobile ? 'always' : 'normal',
             display: 'flex',
             alignItems: 'safe center',
             justifyContent: 'center',
@@ -140,7 +155,7 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
             sx={{
               width: '100%',
               maxWidth: 600,
-              maxHeight: { xs: 'calc(100vh - 64px)', md: 'calc(100vh - 96px)' },
+              maxHeight: { xs: 'calc(100dvh - 64px)', md: 'calc(100vh - 96px)' },
               overflowY: 'auto',
               py: 1,
               px: 0.5,
