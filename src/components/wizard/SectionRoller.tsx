@@ -56,8 +56,9 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const vh = el.clientHeight;
-    const targetTop = currentIndex * vh;
+    // Use actual card height (may differ from container height on mobile)
+    const cardH = (el.firstElementChild?.getBoundingClientRect().height ?? el.clientHeight) || el.clientHeight;
+    const targetTop = currentIndex * cardH;
     if (Math.abs(el.scrollTop - targetTop) < 1) return;
 
     // Disable snap so intermediate snap points don't hijack the scroll
@@ -137,8 +138,8 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
     debounceTimerRef.current = setTimeout(() => {
       const el = scrollRef.current;
       if (!el) return;
-      const vh = el.clientHeight;
-      const idx = Math.round(el.scrollTop / vh);
+      const cardH = (el.firstElementChild?.getBoundingClientRect().height ?? el.clientHeight) || el.clientHeight;
+      const idx = Math.round(el.scrollTop / cardH);
       if (idx !== currentIndex && idx >= 0 && idx < sections.length) {
         goToSection(idx);
       }
