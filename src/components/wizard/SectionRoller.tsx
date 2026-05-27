@@ -123,7 +123,7 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
         scrollbarWidth: 'none',
       }}
     >
-      {sections.map((section, idx) => (
+      {sections.map((section, _idx) => (
         <Box
           key={String(section)}
           sx={{
