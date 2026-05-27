@@ -23,8 +23,9 @@ export class StatCalculator {
    * @returns 应用所有修饰后的 ComputedStats
    */
   static compute(build: CharacterBuild): ComputedStats {
-    const { character, weaponConfig, artifacts, teamBuffs, constellationConfig, talentConfig, teamBuffBonuses, setBonus } = build;
-    const base = character.baseStats;
+    const { character, weaponConfig, artifacts, teamBuffs, constellationConfig, talentConfig, teamBuffBonuses, setBonus, characterLevel } = build;
+    // Use per-level stats when available (1–100), fallback to legacy fixed baseStats
+    const base = (character.statsByLevel?.[String(characterLevel)] as typeof character.baseStats | undefined) ?? character.baseStats;
     const weapon = weaponConfig.weaponData;
 
     // 百分比加成累加器（乘算叠加到基础值上）

@@ -145,7 +145,10 @@ export interface CharacterData {
   nameZh: string;
   element: ElementType;
   weaponType: WeaponType;
+  /** Base stats at level 90 (legacy — prefer statsByLevel for level-specific lookups). */
   baseStats: BaseStats;
+  /** Per-level base stats keyed by level string ("1"–"100"). */
+  statsByLevel?: Record<string, BaseStats>;
   ascensionStat: AscensionStat;
   /** Sub-stats relevant to this character's optimization. */
   relevantSubstats: SubstatType[];
