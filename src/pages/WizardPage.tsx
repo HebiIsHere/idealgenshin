@@ -604,7 +604,7 @@ function WizardPage(): React.ReactElement {
         return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>Enka 导入</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>输入 UID 自动导入角色展柜数据，省去手动填写</Typography><ArtifactImport /></Box>);
 
       case 'character':
-        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>选择角色</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择一位需要分析的角色</Typography><CharacterSelect onSelectCharacter={handleSelectCharacter} /><Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}><TextField label="角色等级" type="number" size="small" value={characterLevel} onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1 && v <= 90) setCharacterLevel(v); }} slotProps={{ htmlInput: { min: 1, max: 90 } }} sx={{ width: 120 }} /></Box></Box>);
+        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>选择角色</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择一位需要分析的角色</Typography><CharacterSelect onSelectCharacter={handleSelectCharacter} /><Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}><TextField label="角色等级" type="number" size="small" value={characterLevel} onChange={(e) => { const v = parseInt(e.target.value); if (!isNaN(v) && v >= 1 && v <= 100) setCharacterLevel(v); }} slotProps={{ htmlInput: { min: 1, max: 100 } }} sx={{ width: 120 }} /></Box></Box>);
 
       case 'weapon':
         return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>武器配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>选择武器并查看被动效果</Typography>
