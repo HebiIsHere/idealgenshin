@@ -6,6 +6,9 @@ import IconButton from '@mui/material/IconButton';
 import Container from '@mui/material/Container';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import DescriptionIcon from '@mui/icons-material/Description';
+import CloseIcon from '@mui/icons-material/Close';
+import Paper from '@mui/material/Paper';
 import { keyframes } from '@mui/system';
 import { useWizardStore } from '../store/slices/wizardSlice';
 import SaveManager from '../components/layout/SaveManager';
@@ -28,9 +31,9 @@ const waveShift = keyframes`
 
 // 气泡上升
 const bubbleRise = keyframes`
-  0% { transform: translateY(0) scale(0.6); opacity: 0.25; }
+  0% { transform: translateY(0) scale(0.4); opacity: 0.3; }
   20% { opacity: 0.5; }
-  100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+  100% { transform: translateY(-100vh) scale(1.4); opacity: 0; }
 `;
 
 // 按钮沉浮
@@ -42,20 +45,21 @@ const float = keyframes`
 const EXIT_MS = 350;
 
 const BUBBLES = [
-  { left: '10%', size: 12, delay: 0, duration: 7 },
-  { left: '22%', size: 8, delay: 1.5, duration: 8 },
-  { left: '35%', size: 16, delay: 0.8, duration: 6.5 },
-  { left: '48%', size: 10, delay: 3, duration: 9 },
-  { left: '58%', size: 14, delay: 2, duration: 7.5 },
-  { left: '68%', size: 6, delay: 4, duration: 8.5 },
-  { left: '78%', size: 12, delay: 1, duration: 6 },
-  { left: '88%', size: 8, delay: 2.5, duration: 7.5 },
+  { left: '10%', size: 22, delay: 0, duration: 7 },
+  { left: '22%', size: 14, delay: 1.5, duration: 8 },
+  { left: '35%', size: 30, delay: 0.8, duration: 6.5 },
+  { left: '48%', size: 18, delay: 3, duration: 9 },
+  { left: '58%', size: 26, delay: 2, duration: 7.5 },
+  { left: '68%', size: 10, delay: 4, duration: 8.5 },
+  { left: '78%', size: 22, delay: 1, duration: 6 },
+  { left: '88%', size: 14, delay: 2.5, duration: 7.5 },
 ];
 
 function LandingPage(): React.ReactElement {
   const enterWizard = useWizardStore((s) => s.enterWizard);
   const [exiting, setExiting] = useState(false);
   const [saveManagerOpen, setSaveManagerOpen] = useState(false);
+  const [downloadPanelOpen, setDownloadPanelOpen] = useState(false);
 
   const handleEnter = () => {
     setExiting(true);
@@ -205,11 +209,69 @@ function LandingPage(): React.ReactElement {
 
         <Typography variant="caption" sx={{ color: 'text.disabled', mt: 4, display: 'block',
           animation: `${fadeIn} 0.8s 0.6s cubic-bezier(0.16,1,0.3,1) both` }}>
-          作者：袔苾 · v3.2
+          作者：袔苾 · v4.0
         </Typography>
       </Container>
 
       <SaveManager open={saveManagerOpen} onClose={() => setSaveManagerOpen(false)} />
+
+      {/* Download panel */}
+      <Box sx={{ position: 'fixed', bottom: 16, left: 16, zIndex: 20 }}>
+        <IconButton
+          onClick={() => setDownloadPanelOpen(!downloadPanelOpen)}
+          sx={{
+            color: 'rgba(255,255,255,0.35)',
+            '&:hover': { color: 'primary.main', bgcolor: 'rgba(91,192,235,0.08)' },
+            transition: 'color 0.3s, background-color 0.3s',
+          }}
+          title="下载文档"
+        >
+          {downloadPanelOpen ? <CloseIcon fontSize="small" /> : <DescriptionIcon fontSize="small" />}
+        </IconButton>
+        {downloadPanelOpen && (
+          <Paper
+            elevation={4}
+            sx={{
+              position: 'absolute',
+              bottom: 48,
+              left: 0,
+              p: 2,
+              minWidth: 220,
+              bgcolor: 'rgba(15,22,41,0.95)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 2,
+              animation: `${fadeIn} 0.25s cubic-bezier(0.16,1,0.3,1)`,
+            }}
+          >
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', mb: 1, display: 'block' }}>
+              下载文档
+            </Typography>
+            <Button
+              size="small"
+              fullWidth
+              variant="text"
+              startIcon={<DescriptionIcon fontSize="small" />}
+              href="/理想原生v4.0-项目介绍手册.docx"
+              download
+              sx={{ justifyContent: 'flex-start', color: 'text.secondary', mb: 0.5, fontSize: '0.8rem' }}
+            >
+              项目介绍手册
+            </Button>
+            <Button
+              size="small"
+              fullWidth
+              variant="text"
+              startIcon={<DescriptionIcon fontSize="small" />}
+              href="/理想原生v4.0-使用说明.docx"
+              download
+              sx={{ justifyContent: 'flex-start', color: 'text.secondary', fontSize: '0.8rem' }}
+            >
+              使用说明
+            </Button>
+          </Paper>
+        )}
+      </Box>
     </Box>
   );
 }

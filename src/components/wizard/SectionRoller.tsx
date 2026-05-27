@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import { useWizardStore, type WizardSection } from '../../store/slices/wizardSlice';
@@ -7,138 +7,169 @@ interface SectionRollerProps {
   renderSection: (section: WizardSection) => React.ReactNode;
 }
 
-const ANIM_MS = 380;
-
-const STYLE = `
-.section-old-left  { animation: slideOutL ${ANIM_MS}ms cubic-bezier(0.22,1,0.36,1) forwards; pointer-events: none; }
-.section-new-left  { animation: slideInL  ${ANIM_MS}ms cubic-bezier(0.22,1,0.36,1) forwards; }
-.section-old-right { animation: slideOutR ${ANIM_MS}ms cubic-bezier(0.22,1,0.36,1) forwards; pointer-events: none; }
-.section-new-right { animation: slideInR  ${ANIM_MS}ms cubic-bezier(0.22,1,0.36,1) forwards; }
-@keyframes slideOutR { from { transform: translateX(0) scale(1); opacity: 1; } to { transform: translateX(-32px) scale(0.97); opacity: 0; } }
-@keyframes slideInR  { from { transform: translateX(32px) scale(0.97); opacity: 0; } to { transform: translateX(0) scale(1); opacity: 1; } }
-@keyframes slideOutL { from { transform: translateX(0) scale(1); opacity: 1; } to { transform: translateX(32px) scale(0.97); opacity: 0; } }
-@keyframes slideInL  { from { transform: translateX(-32px) scale(0.97); opacity: 0; } to { transform: translateX(0) scale(1); opacity: 1; } }
-@media (prefers-reduced-motion: reduce) {
-  .section-old-left, .section-new-left, .section-old-right, .section-new-right { animation: none !important; opacity: 1 !important; transform: none !important; }
-}
-`;
 
 function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElement {
   const currentIndex = useWizardStore((s) => s.currentIndex);
   const sections = useWizardStore((s) => s.sections);
-
-  const [animating, setAnimating] = useState(false);
-  const [slideDir, setSlideDir] = useState<'left' | 'right'>('right');
-  const [activeIdx, setActiveIdx] = useState(currentIndex);
-  const [incomingIdx, setIncomingIdx] = useState<number | null>(null);
-  const prevKey = useRef(sections[currentIndex] ?? '');
+  const goToSection = useWizardStore((s) => s.goToSection);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Stable random float params
+  const scrollingByStore = useRef(false);
   const floatRef = useRef({ duration: 5.5 + Math.random() * 2, delay: Math.random() * 2 });
 
+  // Stable refs for wheel handler closure
+  const currentIndexRef = useRef(currentIndex);
+  currentIndexRef.current = currentIndex;
+  const sectionsLenRef = useRef(sections.length);
+  sectionsLenRef.current = sections.length;
+
+  // Desktop wheel → immediate card switch, one tick = one card
   useEffect(() => {
-    const thisKey = sections[currentIndex] ?? '';
-    if (thisKey === prevKey.current) return;
-    const prevIdx = sections.indexOf(prevKey.current);
-    setSlideDir(currentIndex >= prevIdx ? 'right' : 'left');
-    // 记录切换前卡片中心位置
-    const container = scrollRef.current;
-    const prevCenter = container ? container.scrollTop + container.clientHeight / 2 : 0;
-    if (container) container.scrollTop = 0;
-    setIncomingIdx(currentIndex);
-    setAnimating(true);
+    const el = scrollRef.current;
+    if (!el) return;
 
-    const timer = setTimeout(() => {
-      setActiveIdx(currentIndex);
-      setIncomingIdx(null);
-      setAnimating(false);
-      prevKey.current = thisKey;
-      // 补偿高度差：保持中心点不变
-      requestAnimationFrame(() => {
-        if (container) {
-          const newCenter = container.scrollHeight / 2;
-          container.scrollTop = Math.max(0, newCenter - prevCenter + container.scrollTop);
+    const onWheel = (e: WheelEvent) => {
+      if (scrollingByStore.current) return;
+
+      e.preventDefault();
+      const dir = e.deltaY > 0 ? 1 : -1;
+      const newIdx = currentIndexRef.current + dir;
+      if (newIdx >= 0 && newIdx < sectionsLenRef.current) {
+        scrollingByStore.current = true;
+        goToSection(newIdx);
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [goToSection]);
+
+  // Store → scroll: navigate to card when currentIndex changes externally
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const vh = el.clientHeight;
+    const targetTop = currentIndex * vh;
+    if (Math.abs(el.scrollTop - targetTop) < 1) return;
+
+    // Disable snap so intermediate snap points don't hijack the scroll
+    el.style.scrollSnapType = 'none';
+    scrollingByStore.current = true;
+    el.scrollTo({ top: targetTop, behavior: 'smooth' });
+
+    // rAF polling: wait until scrollTop stabilises (3 consecutive identical frames)
+    // then verify we reached the target — retry if not
+    let sameCount = 0;
+    let lastTop = -1;
+    let rafId: number;
+    const checkDone = () => {
+      const cur = scrollRef.current;
+      if (!cur) return;
+      if (cur.scrollTop === lastTop) {
+        sameCount++;
+        if (sameCount >= 3) {
+          const dist = Math.abs(cur.scrollTop - targetTop);
+          if (dist > 2) {
+            // Scroll stopped short — retry
+            sameCount = 0;
+            lastTop = -1;
+            cur.scrollTo({ top: targetTop, behavior: 'smooth' });
+            rafId = requestAnimationFrame(checkDone);
+            return;
+          }
+          // Reached target — restore snap
+          cur.style.scrollSnapType = 'y proximity';
+          scrollingByStore.current = false;
+          return;
         }
-      });
-    }, ANIM_MS);
-    return () => clearTimeout(timer);
-  }, [currentIndex, sections]);
+      } else {
+        sameCount = 0;
+        lastTop = cur.scrollTop;
+      }
+      rafId = requestAnimationFrame(checkDone);
+    };
+    rafId = requestAnimationFrame(checkDone);
 
-  const dir = slideDir === 'right' ? 'right' : 'left';
-  const oldCls = `section-old-${dir}`;
-  const newCls = `section-new-${dir}`;
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (scrollRef.current) {
+        scrollRef.current.style.scrollSnapType = 'y proximity';
+      }
+    };
+  }, [currentIndex]);
 
-  const card = (idx: number, cls: string) => {
-    const key = sections[idx];
-    if (!key) return null;
-    return (
-      <Box
-        className={cls || undefined}
-        sx={{
-          width: '100%',
-          maxWidth: 600,
-          flexShrink: 0,
-        }}
-      >
-        <Paper
-          elevation={0}
-          sx={{
-            width: '100%',
-            p: { xs: 2.5, md: 4 },
-            borderRadius: 3,
-            border: '1px solid',
-            borderColor: 'rgba(255,255,255,0.08)',
-            bgcolor: 'rgba(22,33,62,0.6)',
-            backdropFilter: 'blur(12px)',
-            overflow: 'visible',
-            animation: `cardFloat ${floatRef.current.duration}s cubic-bezier(0.45,0,0.55,1) ${floatRef.current.delay}s infinite`,
-            '&:hover': {
-              animationPlayState: 'paused',
-            },
-          }}
-        >
-          <Box className="card-accent" sx={{ pt: 1 }}>
-            {renderSection(key)}
-          </Box>
-        </Paper>
-      </Box>
-    );
-  };
+  // Touch scroll → store: detect user scroll and sync snapped index back to store
+  const handleScroll = useCallback(() => {
+    if (scrollingByStore.current) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const vh = el.clientHeight;
+    const idx = Math.round(el.scrollTop / vh);
+    if (idx !== currentIndex && idx >= 0 && idx < sections.length) {
+      goToSection(idx);
+    }
+  }, [currentIndex, sections.length, goToSection]);
 
   return (
     <Box
       ref={scrollRef}
+      onScroll={handleScroll}
       sx={{
         width: '100%',
-        height: { xs: 'auto', md: '100vh' },
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
+        height: '100%',
         overflowY: 'scroll',
-        px: { xs: 1.5, md: 6 },
-        py: { xs: 6, md: 6 },
-        '&::-webkit-scrollbar': { width: 4 },
-        '&::-webkit-scrollbar-thumb': { background: 'rgba(212,168,67,0.15)', borderRadius: 2 },
+        scrollSnapType: 'y proximity',
+        '&::-webkit-scrollbar': { display: 'none' },
+        scrollbarWidth: 'none',
       }}
     >
-      <style>{STYLE}</style>
-      <Box sx={{
-        position: 'relative', width: '100%', maxWidth: 600,
-        mt: 'auto', mb: 'auto',
-      }}>
-        <Box sx={{ display: 'grid', '& > *': { gridArea: '1/1' } }}>
-          {animating && incomingIdx != null ? (
-            <>
-              {card(activeIdx, oldCls)}
-              {card(incomingIdx, newCls)}
-            </>
-          ) : (
-            card(activeIdx, '')
-          )}
+      {sections.map((section, idx) => (
+        <Box
+          key={String(section)}
+          sx={{
+            height: '100vh',
+            scrollSnapAlign: 'start',
+            display: 'flex',
+            alignItems: 'safe center',
+            justifyContent: 'center',
+            px: { xs: 1.5, md: 6 },
+            py: { xs: 4, md: 6 },
+          }}
+        >
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: 600,
+              maxHeight: '100%',
+              overflowY: 'auto',
+              py: 1,
+              px: 0.5,
+              '&::-webkit-scrollbar': { display: 'none' },
+              scrollbarWidth: 'none',
+            }}
+          >
+            <Paper
+              elevation={0}
+              sx={{
+                width: '100%',
+                p: { xs: 2.5, md: 4 },
+                borderRadius: 3,
+                border: '1px solid',
+                borderColor: 'rgba(255,255,255,0.08)',
+                bgcolor: 'rgba(22,33,62,0.6)',
+                backdropFilter: 'blur(12px)',
+                overflow: 'visible',
+                animation: `cardFloat ${floatRef.current.duration}s cubic-bezier(0.45,0,0.55,1) ${floatRef.current.delay}s infinite`,
+                '&:hover': { animationPlayState: 'paused' },
+              }}
+            >
+              <Box className="card-accent" sx={{ pt: 1 }}>
+                {renderSection(section)}
+              </Box>
+            </Paper>
+          </Box>
         </Box>
-      </Box>
+      ))}
     </Box>
   );
 }

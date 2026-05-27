@@ -10,6 +10,10 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PushPinIcon from '@mui/icons-material/PushPin';
 import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
@@ -598,55 +602,115 @@ function WizardPage(): React.ReactElement {
             <WeaponPassiveInput /></>)}</Box>);
 
       case 'artifacts':
-        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>圣遗物配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>逐部位填入圣遗物主/副词条属性</Typography><ArtifactEditor /><Box sx={{ mt: 2 }}><ArtifactSetSelect importedSetNames={importedSetNames} importedSetCounts={importedSetCounts} /></Box></Box>);
+        return (<Box><Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>圣遗物配置</Typography><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>逐部位填入圣遗物主/副词条属性</Typography>
+          <Accordion
+            key={`artifact-editor-${selectedCharacter?.id ?? 'none'}`}
+            defaultExpanded={false}
+            sx={{
+              mb: 2,
+              bgcolor: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: '8px !important',
+              '&:before': { display: 'none' },
+            }}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ minHeight: 44, '& .MuiAccordionSummary-content': { my: 0.5, alignItems: 'center' } }}>
+              <Typography variant="subtitle2" sx={{ color: 'primary.main' }}>圣遗物编辑</Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', ml: 1.5 }}>
+                点击展开，查看/编辑 5 部位圣遗物主副词条
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{ pt: 0 }}>
+              <ArtifactEditor />
+            </AccordionDetails>
+          </Accordion>
+          <Box sx={{ mt: 2 }}><ArtifactSetSelect importedSetNames={importedSetNames} importedSetCounts={importedSetCounts} /></Box></Box>);
 
       case 'talents':
         return (<Box>
           <Typography variant="h6" sx={{ mb: 0.5, color: 'primary.main' }}>天赋与命座</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>手动填入天赋和命座对应的实际加成数值</Typography>
-          <Box sx={{ mb: 2, p: 1.25, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, borderLeft: '2px solid', borderColor: 'primary.main' }}>
-            <Typography variant="subtitle2" sx={{ mb: 0.25, color: 'primary.main' }}>天赋模拟</Typography>
-            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', display: 'block', mb: 0.5 }}>固有天赋等角色自身机制提供的乘区加成</Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 0.5 }}>
-              <BonusRow label="大权区" value={showPct(tb, 'authorityMultiplier')} onChange={setPct(setTb, tb, 'authorityMultiplier')} hint="%" />
-              <BonusRow label="月兆区" value={showPct(tb, 'moonSignBonus')} onChange={setPct(setTb, tb, 'moonSignBonus')} hint="%" />
-              <BonusRow label="增伤区" value={showPct(tb, 'dmgBonus')} onChange={setPct(setTb, tb, 'dmgBonus')} hint="%" />
-              <BonusRow label="精通区" value={showNum(tb, 'elementalMastery')} onChange={setFlat(setTb, tb, 'elementalMastery')} hint="EM" />
-              <BonusRow label="攻击力%" value={showPct(tb, 'atkPercent')} onChange={setPct(setTb, tb, 'atkPercent')} hint="%" />
-              <BonusRow label="防御力%" value={showPct(tb, 'defPercent')} onChange={setPct(setTb, tb, 'defPercent')} hint="%" />
-              <BonusRow label="生命值%" value={showPct(tb, 'hpPercent')} onChange={setPct(setTb, tb, 'hpPercent')} hint="%" />
-              <BonusRow label="攻击力" value={showNum(tb, 'atkFlat')} onChange={setFlat(setTb, tb, 'atkFlat')} hint="固定值" />
-              <BonusRow label="防御力" value={showNum(tb, 'defFlat')} onChange={setFlat(setTb, tb, 'defFlat')} hint="固定值" />
-              <BonusRow label="生命值" value={showNum(tb, 'hpFlat')} onChange={setFlat(setTb, tb, 'hpFlat')} hint="固定值" />
-              <BonusRow label="羽毛附伤" value={showNum(tb, 'featherFlat')} onChange={setFlat(setTb, tb, 'featherFlat')} hint="固定值" />
-            </Box>
-            <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 0.25 }}>
-              ⚠ 百分比类数值无需输入 % 号，直接填数字即可（如 61.7 表示 61.7%）
-            </Typography>
-            <RefAccordion open={talentExpand} onToggle={() => setTalentExpand(!talentExpand)} entries={talentEntries} buttonLabel="查看天赋详情" emptyHint={selectedCharacter ? '暂无天赋数据' : '请先选择角色'} />
-          </Box>
+
+          {/* 天赋模拟 Accordion */}
+          <Accordion
+            key={`talent-sim-${selectedCharacter?.id ?? 'none'}`}
+            defaultExpanded={false}
+            sx={{
+              mb: 2,
+              bgcolor: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: '8px !important',
+              '&:before': { display: 'none' },
+            }}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ minHeight: 44, '& .MuiAccordionSummary-content': { my: 0.5 } }}>
+              <Typography variant="subtitle2" sx={{ color: 'primary.main' }}>天赋模拟</Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', ml: 1.5, alignSelf: 'center' }}>
+                固有天赋等角色自身机制乘区加成
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{ pt: 0 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 0.25 }}>
+                <BonusRow label="大权区" value={showPct(tb, 'authorityMultiplier')} onChange={setPct(setTb, tb, 'authorityMultiplier')} hint="%" />
+                <BonusRow label="月兆区" value={showPct(tb, 'moonSignBonus')} onChange={setPct(setTb, tb, 'moonSignBonus')} hint="%" />
+                <BonusRow label="增伤区" value={showPct(tb, 'dmgBonus')} onChange={setPct(setTb, tb, 'dmgBonus')} hint="%" />
+                <BonusRow label="精通区" value={showNum(tb, 'elementalMastery')} onChange={setFlat(setTb, tb, 'elementalMastery')} hint="EM" />
+                <BonusRow label="攻击力%" value={showPct(tb, 'atkPercent')} onChange={setPct(setTb, tb, 'atkPercent')} hint="%" />
+                <BonusRow label="防御力%" value={showPct(tb, 'defPercent')} onChange={setPct(setTb, tb, 'defPercent')} hint="%" />
+                <BonusRow label="生命值%" value={showPct(tb, 'hpPercent')} onChange={setPct(setTb, tb, 'hpPercent')} hint="%" />
+                <BonusRow label="攻击力" value={showNum(tb, 'atkFlat')} onChange={setFlat(setTb, tb, 'atkFlat')} hint="固定值" />
+                <BonusRow label="防御力" value={showNum(tb, 'defFlat')} onChange={setFlat(setTb, tb, 'defFlat')} hint="固定值" />
+                <BonusRow label="生命值" value={showNum(tb, 'hpFlat')} onChange={setFlat(setTb, tb, 'hpFlat')} hint="固定值" />
+                <BonusRow label="羽毛附伤" value={showNum(tb, 'featherFlat')} onChange={setFlat(setTb, tb, 'featherFlat')} hint="固定值" />
+              </Box>
+              <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 1 }}>
+                ⚠ 百分比类数值无需输入 % 号，直接填数字即可（如 61.7 表示 61.7%）
+              </Typography>
+              <RefAccordion open={talentExpand} onToggle={() => setTalentExpand(!talentExpand)} entries={talentEntries} buttonLabel="查看天赋详情" emptyHint={selectedCharacter ? '暂无天赋数据' : '请先选择角色'} />
+            </AccordionDetails>
+          </Accordion>
+
           <Box className="diamond-divider">◆</Box>
-          <Box sx={{ p: 1.25, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2, borderLeft: '2px solid', borderColor: 'primary.main' }}>
-            <Typography variant="subtitle2" sx={{ mb: 0.25, color: 'secondary.main' }}>命座模拟</Typography>
-            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', display: 'block', mb: 0.5 }}>命之座效果提供的乘区加成</Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 0.5 }}>
-              <BonusRow label="暴击率" value={showPct(cb, 'critRate')} onChange={setPct(setCb, cb, 'critRate')} hint="%" />
-              <BonusRow label="暴击伤害" value={showPct(cb, 'critDmg')} onChange={setPct(setCb, cb, 'critDmg')} hint="%" />
-              <BonusRow label="擢升区" value={showPct(cb, 'elevationBonus')} onChange={setPct(setCb, cb, 'elevationBonus')} hint="%" />
-              <BonusRow label="减抗" value={showPct(cb, 'resistReduction')} onChange={setPct(setCb, cb, 'resistReduction')} hint="%" />
-              <BonusRow label="增伤区" value={showPct(cb, 'dmgBonus')} onChange={setPct(setCb, cb, 'dmgBonus')} hint="%" />
-              <BonusRow label="攻击力%" value={showPct(cb, 'atkPercent')} onChange={setPct(setCb, cb, 'atkPercent')} hint="%" />
-              <BonusRow label="防御力%" value={showPct(cb, 'defPercent')} onChange={setPct(setCb, cb, 'defPercent')} hint="%" />
-              <BonusRow label="生命值%" value={showPct(cb, 'hpPercent')} onChange={setPct(setCb, cb, 'hpPercent')} hint="%" />
-              <BonusRow label="攻击力" value={showNum(cb, 'atkFlat')} onChange={setFlat(setCb, cb, 'atkFlat')} hint="固定值" />
-              <BonusRow label="防御力" value={showNum(cb, 'defFlat')} onChange={setFlat(setCb, cb, 'defFlat')} hint="固定值" />
-              <BonusRow label="生命值" value={showNum(cb, 'hpFlat')} onChange={setFlat(setCb, cb, 'hpFlat')} hint="固定值" />
-            </Box>
-            <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 0.25 }}>
-              ⚠ 百分比类数值无需输入 % 号，直接填数字即可（如 61.7 表示 61.7%）
-            </Typography>
-            <RefAccordion open={constExpand} onToggle={() => setConstExpand(!constExpand)} entries={constEntries} buttonLabel="查看命座详情" emptyHint={selectedCharacter ? '暂无命座数据' : '请先选择角色'} />
-          </Box></Box>);
+
+          {/* 命座模拟 Accordion */}
+          <Accordion
+            key={`const-sim-${selectedCharacter?.id ?? 'none'}`}
+            defaultExpanded={false}
+            sx={{
+              mb: 2,
+              bgcolor: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: '8px !important',
+              '&:before': { display: 'none' },
+            }}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ minHeight: 44, '& .MuiAccordionSummary-content': { my: 0.5 } }}>
+              <Typography variant="subtitle2" sx={{ color: 'secondary.main' }}>命座模拟</Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', ml: 1.5, alignSelf: 'center' }}>
+                命之座效果提供的乘区加成
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{ pt: 0 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 0.25 }}>
+                <BonusRow label="暴击率" value={showPct(cb, 'critRate')} onChange={setPct(setCb, cb, 'critRate')} hint="%" />
+                <BonusRow label="暴击伤害" value={showPct(cb, 'critDmg')} onChange={setPct(setCb, cb, 'critDmg')} hint="%" />
+                <BonusRow label="擢升区" value={showPct(cb, 'elevationBonus')} onChange={setPct(setCb, cb, 'elevationBonus')} hint="%" />
+                <BonusRow label="减抗" value={showPct(cb, 'resistReduction')} onChange={setPct(setCb, cb, 'resistReduction')} hint="%" />
+                <BonusRow label="增伤区" value={showPct(cb, 'dmgBonus')} onChange={setPct(setCb, cb, 'dmgBonus')} hint="%" />
+                <BonusRow label="攻击力%" value={showPct(cb, 'atkPercent')} onChange={setPct(setCb, cb, 'atkPercent')} hint="%" />
+                <BonusRow label="防御力%" value={showPct(cb, 'defPercent')} onChange={setPct(setCb, cb, 'defPercent')} hint="%" />
+                <BonusRow label="生命值%" value={showPct(cb, 'hpPercent')} onChange={setPct(setCb, cb, 'hpPercent')} hint="%" />
+                <BonusRow label="攻击力" value={showNum(cb, 'atkFlat')} onChange={setFlat(setCb, cb, 'atkFlat')} hint="固定值" />
+                <BonusRow label="防御力" value={showNum(cb, 'defFlat')} onChange={setFlat(setCb, cb, 'defFlat')} hint="固定值" />
+                <BonusRow label="生命值" value={showNum(cb, 'hpFlat')} onChange={setFlat(setCb, cb, 'hpFlat')} hint="固定值" />
+              </Box>
+              <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 1 }}>
+                ⚠ 百分比类数值无需输入 % 号，直接填数字即可（如 61.7 表示 61.7%）
+              </Typography>
+              <RefAccordion open={constExpand} onToggle={() => setConstExpand(!constExpand)} entries={constEntries} buttonLabel="查看命座详情" emptyHint={selectedCharacter ? '暂无命座数据' : '请先选择角色'} />
+            </AccordionDetails>
+          </Accordion>
+        </Box>);
 
       case 'teambuffs': {
         const isMB = reactionType === ('MOON_BLOOM' as any);
@@ -752,7 +816,7 @@ function WizardPage(): React.ReactElement {
         {['10%','22%','35%','48%','58%','68%','78%','88%'].map((left, i) => (
           <Box key={i} sx={{
             position: 'absolute', bottom: -20, left, zIndex: 0,
-            width: ([8,6,12,8,10,5,9,6] as number[])[i], height: ([8,6,12,8,10,5,9,6] as number[])[i],
+            width: ([14,10,22,14,18,8,16,10] as number[])[i], height: ([14,10,22,14,18,8,16,10] as number[])[i],
             borderRadius: '50%', bgcolor: 'transparent',
             border: '1.5px solid rgba(130,200,230,0.2)',
             animation: `bubbleRise ${([8,9,7,10,8.5,9.5,7.5,9] as number[])[i]}s ${([0,1.5,0.8,3,2,4,1,2.5] as number[])[i]}s linear infinite`,
@@ -779,11 +843,16 @@ function WizardPage(): React.ReactElement {
           <CharacterStatPanel stats={computedStats} showActions onCalcDamage={handleCalcDamage} onRedistribute={handleRedistribute} onIdealTemplate={handleIdealTemplate} compact />
         </Box>
       ) : (
-        <Box sx={{ position: 'fixed', top: 56, right: 16, width: 248, zIndex: 5, maxHeight: 'calc(100vh - 80px)', overflowY: 'auto', '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.15)', borderRadius: 2 } }}>
+        <Box sx={{ position: 'fixed', top: 56, right: 16, width: 248, zIndex: 5, maxHeight: 'calc(100vh - 80px)', overflowY: 'auto' }}>
           <CharacterStatPanel stats={computedStats} showActions onCalcDamage={handleCalcDamage} onRedistribute={handleRedistribute} onIdealTemplate={handleIdealTemplate} />
         </Box>
       )}
       <SaveManager open={saveManagerOpen} onClose={() => setSaveManagerOpen(false)} />
+      <Box sx={{ position: 'fixed', bottom: { xs: 4, md: 8 }, left: { xs: 8, md: 16 }, zIndex: 5, pointerEvents: 'none' }}>
+        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.18)', fontSize: { xs: '0.55rem', md: '0.65rem' } }}>
+          数据来源：genshin-db · Enka Network API
+        </Typography>
+      </Box>
     </Box>
     </>
   );
