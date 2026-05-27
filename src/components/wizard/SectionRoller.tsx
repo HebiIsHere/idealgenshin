@@ -1,19 +1,15 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
 import { useWizardStore, type WizardSection } from '../../store/slices/wizardSlice';
 
 interface SectionRollerProps {
   renderSection: (section: WizardSection) => React.ReactNode;
 }
 
-/** Natural snap type — mandatory on mobile for sticky feel, proximity on desktop to avoid wheel jitter. */
+/** Natural snap type — proximity universally to avoid fighting native touch/wheel momentum. */
 function useSnapType(): string {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  return isMobile ? 'y mandatory' : 'y proximity';
+  return 'y proximity';
 }
 
 function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElement {
@@ -119,16 +115,7 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
     const onTouchEnd = () => {
       isTouchingRef.current = false;
       momentumSettlingRef.current = true;
-      setTimeout(() => {
-        momentumSettlingRef.current = false;
-        const cur = scrollRef.current;
-        if (!cur) return;
-        const vh = cur.clientHeight;
-        const idx = Math.round(cur.scrollTop / vh);
-        if (idx !== currentIndexRef.current && idx >= 0 && idx < sectionsLenRef.current) {
-          goToSection(idx);
-        }
-      }, 350);
+      setTimeout(() => { momentumSettlingRef.current = false; }, 400);
     };
 
     el.addEventListener('touchstart', onTouchStart, { passive: true });
