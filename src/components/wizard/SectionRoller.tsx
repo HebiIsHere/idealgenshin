@@ -1,15 +1,18 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { useWizardStore, type WizardSection } from '../../store/slices/wizardSlice';
 
 interface SectionRollerProps {
   renderSection: (section: WizardSection) => React.ReactNode;
 }
 
-/** Natural snap type — proximity universally to avoid fighting native touch/wheel momentum. */
 function useSnapType(): string {
-  return 'y proximity';
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  return isMobile ? 'none' : 'y proximity';
 }
 
 function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElement {
@@ -138,6 +141,8 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
     }
   }, [currentIndex, sections.length, goToSection]);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <Box
@@ -157,8 +162,9 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
         <Box
           key={String(section)}
           sx={{
-            height: { xs: '100dvh', md: '100vh' },
-            scrollSnapAlign: 'start',
+            height: isMobile ? undefined : '100vh',
+            minHeight: isMobile ? '100dvh' : undefined,
+            scrollSnapAlign: isMobile ? undefined : 'start',
             display: 'flex',
             alignItems: 'safe center',
             justifyContent: 'center',
