@@ -155,7 +155,7 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
       sx={{
         width: '100%',
         height: '100%',
-        overflowY: 'scroll',
+        overflowY: isMobile ? 'hidden' : 'scroll',
         scrollSnapType: snapType,
         '&::-webkit-scrollbar': { display: 'none' },
         scrollbarWidth: 'none',
