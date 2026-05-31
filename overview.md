@@ -1,62 +1,70 @@
-# V2 交付总结
+# 理想原生 v4.2 — 项目概述
 
 ## TL;DR
-理想原生 V2 完成：两页合并为单页面3Tab + 武器/命座输入 + 伤害前后对比 + 乘区分析 + 存档系统
+
+理想原生是一款纯前端的原神期望伤害圣遗物词条优化工具，基于完整期望伤害公式，支持滚动向导式配置、词条重分配优化、理想模板生成和可视化期望伤害分析。
 
 ## 交付概览
 
 | 指标 | 状态 |
 |------|------|
-| 交付状态 | ✅ 完成 |
-| 测试通过率 | 115/115 (100%) |
+| 版本 | v4.2 |
 | TypeScript 错误 | 0 |
-| 生产构建 | ✅ 成功 (8.96s) |
-| 已修复 Bug | 1 (defReductions双重计入) |
+| 生产构建 | ✅ 成功 |
+| 贴纸资源 | 851 张 PNG，压缩至 6.5MB |
 
-## 文件清单
+## v4.2 核心特性
 
-### 新建文件 (20+)
-- `docs/PRD-v2.md`, `docs/ARCHITECTURE-v2.md` — V2 文档
-- `src/types/index.ts` — 更新所有V2类型
-- `src/data/weapons/*.json` (13) — 武器JSON数据
-- `src/data/weapons/index.ts` — 武器加载器 + DEFAULT_WEAPON
-- `src/data/scenarios/*.json` (5) — 典型场景数据
-- `src/data/scenarios/index.ts` — 场景加载器
-- `src/utils/mergeExtraBonuses.ts` — 公共工具
-- `src/services/save.ts` — SaveService
-- `src/store/slices/saveSlice.ts` — 存档状态管理
-- `src/components/common/ZoneBonusInput.tsx` — 乘区加成输入
-- `src/components/weapon/WeaponPassiveInput.tsx` — 武器被动输入
-- `src/components/character/ConstellationInput.tsx` — 命座输入
-- `src/components/optimizer/CharacterAnalyzerPage.tsx` — 统一页面
-- `src/components/optimizer/CharacterSetupTab.tsx` — Tab1
-- `src/components/optimizer/DamageCalcTab.tsx` — Tab2
-- `src/components/optimizer/AnalysisTab.tsx` — Tab3
-- `src/components/optimizer/ScenarioSelect.tsx` — 场景选择
-- `src/components/optimizer/DamageComparison.tsx` — 伤害对比
-- `src/components/optimizer/ZoneAnalysisTable.tsx` — 乘区分析
-- `src/components/layout/Header.tsx` — 顶部标题栏
-- `src/components/layout/SaveManager.tsx` — 存档管理弹窗
+- **竖屏信息流** — scrollIntoView + snap 吸附，触摸板/鼠标滚轮精确控卡
+- **Enka 导入** — 输入 UID 一键导入角色展柜数据
+- **七步向导** — 导入 → 角色 → 武器 → 圣遗物 → 天赋&命座 → 倍率&反应 → 队伍增益
+- **期望伤害引擎** — 15 乘区统一管道，5 条伤害路径 + 5 个特殊乘区
+- **同词条重优化** — 爬山算法重分配，面板对比 + 词条分布 + 乘区分析
+- **理想模板** — 理论最优期望伤害计算，理想面板对比
+- **配置分享** — lz-string 压缩到 URL hash，一键复制链接，粘贴即复刻
+- **芙宁娜水蓝主题** — 青瓷白点缀，卡片呼吸浮沉，胶囊形按钮 spring 回弹 + 涟漪
+- **配置存档** — JSON 导入/导出 + localStorage 持久化
+- **移动端适配** — 上下步按钮导航 + 底部角色面板
 
-### 修改文件 (10+)
-- `src/engine/stats.ts` — applyZoneBonus + WeaponConfig 适配
-- `src/engine/zones/*.ts` (6) — extraBonuses 叠加
-- `src/optimizer/redistribute.ts`, `ideal.ts` — ZoneBonusInput + mergeExtraBonuses
-- `src/store/slices/characterSlice.ts`, `optimizerSlice.ts` — V2 状态扩展
-- `src/components/weapon/WeaponSelect.tsx` — 按类型过滤
-- `src/components/layout/AppLayout.tsx` — Header 替代 Sidebar
-- `src/App.tsx` — 路由简化
-- `src/pages/HomePage.tsx` — 重定向
+## 技术栈
 
-### 删除文件 (4)
-- `src/components/layout/Sidebar.tsx`
-- `src/components/optimizer/RedistributePage.tsx`
-- `src/components/optimizer/IdealTemplatePage.tsx`
-- `src/data/weapons.ts`
+- **前端**: Vite · React 18 · TypeScript · MUI v6 · Zustand · Recharts
+- **引擎**: 自研期望伤害公式管道（15 个独立乘区）
+- **优化器**: Web Worker 爬山算法 · 枚举+剪枝+重分配+理想模板+主属性搜索
+- **数据**: genshin-db（112 角色 / 224 武器 / 55 圣遗物套装）· Enka Network API
 
-## 用户下一步建议
-1. `npm run dev` 启动开发服务器，访问 /analyzer 体验 V2
-2. 尝试完整流程：选角色 → 选武器+填被动 → 填命座 → 录入圣遗物 → 计算伤害 → 词条优化
-3. 测试存档：保存角色 → 导出JSON → 清除 → 导入JSON → 恢复
-4. 补充更多角色和武器的 JSON 数据（目前 5 角色 / 13 武器）
-5. 典型场景可按需在 `src/data/scenarios/` 中扩展
+## 关键目录
+
+```
+src/
+├── engine/          # 期望伤害公式引擎
+│   ├── formula.ts   # 统一公式管道
+│   ├── stats.ts     # 属性计算器
+│   └── zones/       # 15个独立乘区
+├── optimizer/       # 词条优化器（Web Worker）
+├── components/
+│   ├── wizard/      # 向导导航 + 8个板块组件
+│   ├── optimizer/   # 期望伤害流程/乘区分析
+│   ├── character/   # 角色/天赋/命座
+│   ├── weapon/      # 武器选择/被动
+│   ├── artifact/    # 圣遗物编辑/Enka导入
+│   └── layout/      # 存档管理
+├── store/slices/    # Zustand 切片
+├── hooks/           # useV5Ripple 涟漪
+├── utils/           # share / applyShare / buildLoader
+├── data/            # 角色/武器/圣遗物数据
+└── pages/           # LandingPage / WizardPage
+```
+
+## 运行
+
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # dist/
+npm test         # vitest
+```
+
+## 作者
+
+袔苾 · v4.2
