@@ -1,13 +1,12 @@
-# Cloudflare Pages 自定义 HTTP 头
-# 文档: https://developers.cloudflare.com/pages/configuration/headers/
+# Cloudflare Pages 缓存策略
 
-# API 代理 — 允许跨域 + 不缓存
+# API 代理 — 不缓存
 /enka-api/*
   Access-Control-Allow-Origin: *
   Access-Control-Allow-Methods: GET, OPTIONS
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache
 
-# 静态资源 — 长期缓存（带 hash 文件名保证更新）
+# 静态资源 — 长期缓存（hash 文件名保证更新）
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
@@ -15,12 +14,21 @@
 /stickers/*
   Cache-Control: public, max-age=31536000
 
-# HTML / 根路径 — 不缓存（SPA 路由入口）
-/index.html
-  Cache-Control: no-cache, no-store, must-revalidate
+# SVG 装饰 — 周缓存
+/furina-bg.svg
+  Cache-Control: public, max-age=604800
 
+# favicon — 周缓存
+/favicon.ico
+  Cache-Control: public, max-age=604800
+
+# HTML SPA 入口 — 短缓存（5 分钟）
+/index.html
+  Cache-Control: public, max-age=300
+
+# 兜底 — 1 小时缓存
 /*
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: public, max-age=3600
   X-Content-Type-Options: nosniff
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
