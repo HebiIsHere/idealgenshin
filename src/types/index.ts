@@ -361,6 +361,8 @@ export interface RedistributeRequest {
   currentAllocations: SubstatAllocation[];
   /** 锚定的词条类型 — 这些类型的词条保持当前值不变，不参与重分配。 */
   anchoredTypes?: SubstatType[];
+  /** 是否搜索最优主属性（沙/杯/头）。默认 false，保持向后兼容。 */
+  enableMainStatSearch?: boolean;
 }
 
 /** Result from the redistribute optimizer. */
@@ -378,6 +380,8 @@ export interface RedistributeResult {
   optimizedStats?: ComputedStats;
   /** Original character stats. */
   originalStats?: ComputedStats;
+  /** Best main stat combo found. */
+  mainStatCombo?: { sands: SubstatType; goblet: SubstatType; circlet: SubstatType };
 }
 
 /** Request for the ideal template optimizer. */
@@ -392,10 +396,10 @@ export interface IdealRequest {
   baseDmgMultiplier?: number;
   /** 使用当前角色构建（含武器/命座/套装/队伍 buff）而非默认参考构建。 */
   build?: CharacterBuild;
-  /** 是否搜索主词条组合（420 种）。默认 false，保持向后兼容。 */
-  searchMainStats?: boolean;
   /** 锚定的词条分配 — 这些词条保持当前值不变，从目标总词条数中扣除。 */
   anchoredAllocations?: SubstatAllocation[];
+  /** 是否搜索最优主属性（沙/杯/头）。默认 false，保持向后兼容。 */
+  enableMainStatSearch?: boolean;
 }
 
 /** Result from the ideal template optimizer. */
@@ -406,7 +410,7 @@ export interface IdealResult {
   breakdown?: DamageResult;
   /** Optimized character stats. */
   idealStats?: ComputedStats;
-  /** 主词条组合（仅在 searchMainStats=true 时有值）。 */
+  /** 最优主词条组合（优化算法自动搜索）。 */
   mainStatCombo?: {
     sands: SubstatType;
     goblet: SubstatType;

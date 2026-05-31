@@ -20,14 +20,14 @@ function DamageComparisonView({ comparison }: DamageComparisonProps): React.Reac
   return (
     <Paper sx={{ p: 3, textAlign: 'center' }}>
       <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
-        伤害前后对比 — {comparison.scenarioName}
+        期望伤害前后对比 — {comparison.scenarioName}
       </Typography>
 
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
         {/* 当前伤害 */}
         <Box>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-            当前伤害
+            当前期望伤害
           </Typography>
           <Typography variant="h4" sx={{ fontWeight: 600 }}>
             {formatDamage(comparison.currentDamage)}

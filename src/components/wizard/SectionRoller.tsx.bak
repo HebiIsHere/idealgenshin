@@ -1,0 +1,197 @@
+import React, { useState, useEffect, useRef } from 'react';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import { useWizardStore, type WizardSection } from '../../store/slices/wizardSlice';
+
+interface SectionRollerProps {
+  renderSection: (section: WizardSection) => React.ReactNode;
+}
+
+const ANIM_MS = 380;
+const HEIGHT_TRANSITION_MS = 350;
+
+const STYLE = `
+.card-exit {
+  position: absolute !important;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  animation: cardExitUp ${ANIM_MS}ms cubic-bezier(0.55,0,1,0.45) both;
+  pointer-events: none;
+}
+.card-enter {
+  position: absolute !important;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  animation: cardEnterUp ${ANIM_MS}ms cubic-bezier(0,0.55,0.45,1) both;
+}
+@keyframes cardExitUp {
+  from { transform: translate(-50%, -50%); opacity: 1; }
+  to   { transform: translate(-50%, calc(-50% - 100vh)); opacity: 0; }
+}
+@keyframes cardEnterUp {
+  from { transform: translate(-50%, calc(-50% + 100vh)); opacity: 0; }
+  to   { transform: translate(-50%, -50%); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-exit, .card-enter { animation: none !important; opacity: 1 !important; transform: translate(-50%, -50%) !important; }
+}
+`;
+
+type Phase = 'stable' | 'animate' | 'heightTransition';
+
+function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElement {
+  const currentIndex = useWizardStore((s) => s.currentIndex);
+  const sections = useWizardStore((s) => s.sections);
+
+  const [phase, setPhase] = useState<Phase>('stable');
+  const [activeIdx, setActiveIdx] = useState(currentIndex);
+  const [incomingIdx, setIncomingIdx] = useState<number | null>(null);
+  const [lockedHeight, setLockedHeight] = useState<number | null>(null);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const floatRef = useRef({ duration: 5.5 + Math.random() * 2, delay: Math.random() * 2 });
+  const lastIndexRef = useRef(currentIndex);
+  const heightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // Skip if currentIndex hasn't changed (handles mount + StrictMode remount)
+    if (currentIndex === lastIndexRef.current) return;
+    lastIndexRef.current = currentIndex;
+
+    /* ---- Phase 1: lock height, start card animation ---- */
+    const currentEl = innerRef.current?.firstElementChild;
+    const currentHeight = currentEl ? currentEl.getBoundingClientRect().height : null;
+    setLockedHeight(currentHeight);
+    setIncomingIdx(currentIndex);
+    setPhase('animate');
+
+    const animTimer = setTimeout(() => {
+      /* ---- Phase 2: height transition ---- */
+      setActiveIdx(currentIndex);
+      setIncomingIdx(null);
+      setPhase('heightTransition');
+
+      requestAnimationFrame(() => {
+        const newCardEl = innerRef.current?.firstElementChild;
+        const newHeight = newCardEl ? newCardEl.getBoundingClientRect().height : null;
+        if (newHeight != null) setLockedHeight(newHeight);
+
+        /* ---- Phase 3: release to normal flow ---- */
+        heightTimerRef.current = setTimeout(() => {
+          heightTimerRef.current = null;
+          setPhase('stable');
+          setLockedHeight(null);
+        }, HEIGHT_TRANSITION_MS);
+      });
+    }, ANIM_MS);
+
+    return () => {
+      clearTimeout(animTimer);
+      if (heightTimerRef.current != null) {
+        clearTimeout(heightTimerRef.current);
+        heightTimerRef.current = null;
+      }
+    };
+  }, [currentIndex, sections]);
+
+  const renderCard = (idx: number, cssClass: 'card-exit' | 'card-enter' | '', absolute: boolean) => {
+    const key = sections[idx];
+    if (!key) return null;
+
+    return (
+      <Box
+        className={cssClass || undefined}
+        sx={{
+          width: '100%',
+          maxWidth: 600,
+          flexShrink: 0,
+          ...(absolute && !cssClass
+            ? { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
+            : {}),
+        }}
+      >
+        <Paper
+          elevation={0}
+          sx={{
+            width: '100%',
+            p: { xs: 2.5, md: 4 },
+            borderRadius: 3,
+            border: '1px solid',
+            borderColor: 'rgba(255,255,255,0.08)',
+            bgcolor: 'rgba(22,33,62,0.6)',
+            backdropFilter: 'blur(12px)',
+            overflow: 'visible',
+            animation: phase === 'stable'
+              ? `cardFloat ${floatRef.current.duration}s cubic-bezier(0.45,0,0.55,1) ${floatRef.current.delay}s infinite`
+              : 'none',
+            '&:hover': phase === 'stable' ? { animationPlayState: 'paused' } : {},
+          }}
+        >
+          <Box className="card-accent" sx={{ pt: 1 }}>
+            {renderSection(key)}
+          </Box>
+        </Paper>
+      </Box>
+    );
+  };
+
+  const renderContent = () => {
+    switch (phase) {
+      case 'animate':
+        return incomingIdx != null ? (
+          <>
+            {renderCard(activeIdx, 'card-exit', false)}
+            {renderCard(incomingIdx, 'card-enter', false)}
+          </>
+        ) : (
+          renderCard(activeIdx, '', false)
+        );
+      case 'heightTransition':
+        return renderCard(activeIdx, '', true);
+      case 'stable':
+      default:
+        return renderCard(activeIdx, '', false);
+    }
+  };
+
+  return (
+    <Box
+      ref={scrollRef}
+      sx={{
+        width: '100%',
+        height: { xs: 'auto', md: '100vh' },
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'safe center',
+        alignItems: 'center',
+        overflowY: phase === 'stable' ? 'scroll' : 'hidden',
+        px: { xs: 1.5, md: 6 },
+        py: { xs: 6, md: 6 },
+      }}
+    >
+      <style>{STYLE}</style>
+      <Box
+        ref={innerRef}
+        sx={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'safe center',
+          justifyContent: 'center',
+          width: '100%',
+          maxWidth: 600,
+          height: lockedHeight ?? 'auto',
+          transition: lockedHeight != null
+            ? `height ${HEIGHT_TRANSITION_MS}ms cubic-bezier(0.16,1,0.3,1)`
+            : 'none',
+        }}
+      >
+        {renderContent()}
+      </Box>
+    </Box>
+  );
+}
+
+export default SectionRoller;

@@ -29,7 +29,6 @@ import {
   MOON_RATES,
   getLevelMultiplier,
   getAggravationEMBonus,
-  getMoonsignEMBonus,
   getTransformativeEMBonus,
 } from '../data/constants';
 
@@ -338,10 +337,9 @@ describe('AmplifyingZone', () => {
       reactionType: ReactionType.MELT,
       amplifyingMultiplier: 2.0,
     });
-    // EM bonus = 2.78 * 100 / (100 + 1400) = 278/1500
-    const emBonus = 2.78 * 100 / 1500;
-    // Result = 2.0 * (1 + emBonus)
-    expect(zone.calculate(ctx)).toBeCloseTo(2.0 * (1 + emBonus), 3);
+    // V4.4: AmplifyingZone now returns only the base multiplier (2.0);
+    // EM bonus is handled by MasteryZone in the unified pipeline.
+    expect(zone.calculate(ctx)).toBeCloseTo(2.0, 3);
   });
 
   it('EM bonus formula: 2.78*EM/(EM+1400)', () => {
@@ -354,9 +352,9 @@ describe('AmplifyingZone', () => {
       reactionType: ReactionType.VAPORIZE,
       amplifyingMultiplier: 1.5,
     });
-    const emBonus = 2.78 * 200 / (200 + 1400);
-    // 1.5 * (1 + emBonus)
-    expect(zone.calculate(ctx)).toBeCloseTo(1.5 * (1 + emBonus), 3);
+    // V4.4: AmplifyingZone now returns only the base multiplier (1.5);
+    // EM bonus (2.78*EM/(EM+1400)) is handled by MasteryZone.
+    expect(zone.calculate(ctx)).toBeCloseTo(1.5, 3);
   });
 
   it('Non-amplifying new reaction types return 1.0 (path guard)', () => {
@@ -451,46 +449,48 @@ describe('CatalyzeZone', () => {
 });
 
 // ============================================================
-// 10. MoonsignZone
+// 10. MoonsignZone — V4.4: now a flat multiplier (1 + moonSignBonus)
 // ============================================================
 describe('MoonsignZone', () => {
   const zone = new MoonsignZone();
 
-  it('NONE reaction returns 0', () => {
+  it('NONE reaction returns 1.0', () => {
     const ctx = makeCtx({ reactionType: ReactionType.NONE });
-    expect(zone.calculate(ctx)).toBe(0);
+    // V4.4: MoonsignZone is 1 + moonSignBonus (default 0).
+    // Reaction rate × levelMult × (1 + EM) is now in formula.ts + MasteryZone.
+    expect(zone.calculate(ctx)).toBe(1);
   });
 
-  it('MOON_BLOOM: rate 1.0 × levelMult × (1 + EM bonus)', () => {
+  it('MOON_BLOOM: returns 1 with default moonSignBonus=0', () => {
     const stats: ComputedStats = {
       totalHp: 30000, totalAtk: 2000, totalDef: 800,
       critRate: 0.5, critDmg: 1.0, dmgBonus: 0, em: 100, er: 1.0,
     };
     const ctx = makeCtx({ stats, reactionType: ReactionType.MOON_BLOOM, characterLevel: 90 });
-    const emBonus = getMoonsignEMBonus(100);
-    const expected = 1.0 * 1446.85 * (1 + emBonus);
-    expect(zone.calculate(ctx)).toBeCloseTo(expected, 1);
+    expect(zone.calculate(ctx)).toBe(1);
   });
 
-  it('MOON_ELECTRO: rate 3.0 × levelMult × (1 + EM bonus)', () => {
+  it('MOON_ELECTRO: returns 1 with default moonSignBonus=0', () => {
     const stats: ComputedStats = {
       totalHp: 30000, totalAtk: 2000, totalDef: 800,
       critRate: 0.5, critDmg: 1.0, dmgBonus: 0, em: 200, er: 1.0,
     };
     const ctx = makeCtx({ stats, reactionType: ReactionType.MOON_ELECTRO, characterLevel: 90 });
-    const emBonus = getMoonsignEMBonus(200);
-    const expected = 3.0 * 1446.85 * (1 + emBonus);
-    expect(zone.calculate(ctx)).toBeCloseTo(expected, 1);
+    expect(zone.calculate(ctx)).toBe(1);
   });
 
-  it('REACTION_MOON_CRYSTAL: rate 0.96', () => {
+  it('REACTION_MOON_CRYSTAL: returns 1 with default moonSignBonus=0', () => {
     const stats: ComputedStats = {
       totalHp: 30000, totalAtk: 2000, totalDef: 800,
       critRate: 0.5, critDmg: 1.0, dmgBonus: 0, em: 0, er: 1.0,
     };
     const ctx = makeCtx({ stats, reactionType: ReactionType.REACTION_MOON_CRYSTAL, characterLevel: 90 });
-    const expected = 0.96 * 1446.85;
-    expect(zone.calculate(ctx)).toBeCloseTo(expected, 1);
+    expect(zone.calculate(ctx)).toBe(1);
+  });
+
+  it('moonSignBonus from extraBonuses is applied', () => {
+    const ctx = makeCtx({ reactionType: ReactionType.MOON_BLOOM, extraBonuses: { moonSignBonus: 0.15 } });
+    expect(zone.calculate(ctx)).toBeCloseTo(1.15, 3);
   });
 });
 
@@ -549,8 +549,10 @@ describe('DamageFormula.resolvePath', () => {
     expect(DamageFormula.resolvePath(ReactionType.SPREAD)).toBe(DamagePath.CATALYZE);
   });
 
-  it('MOON_BLOOM → MOONSIGN', () => {
-    expect(DamageFormula.resolvePath(ReactionType.MOON_BLOOM)).toBe(DamagePath.MOONSIGN);
+  it('MOON_BLOOM → MOONSIGN_DIRECT', () => {
+    // V4.4: moon reactions (MOON_BLOOM, MOON_ELECTRO, etc.) now resolve to MOONSIGN_DIRECT,
+    // which uses BaseDamageZone (skill × stats) + reaction coefficient + MasteryZone.
+    expect(DamageFormula.resolvePath(ReactionType.MOON_BLOOM)).toBe(DamagePath.MOONSIGN_DIRECT);
   });
 
   it('REACTION_MOON_ELECTRO → MOONSIGN_DIRECT', () => {
@@ -562,7 +564,7 @@ describe('DamageFormula.resolvePath', () => {
 // 13. Full Pipeline — DIRECT path
 // ============================================================
 describe('DamageFormula — DIRECT path', () => {
-  it('No reaction: DIRECT path, no reaction multiplier', () => {
+  it('No reaction: DIRECT path, reactionMultiplier = mastery * bonus', () => {
     const stats: ComputedStats = {
       totalHp: 30000,
       totalAtk: 2000,
@@ -593,10 +595,11 @@ describe('DamageFormula — DIRECT path', () => {
     // crit = 1 + 0.5 * 1.0 = 1.5
     // resistance = 1 - 0.10 = 0.90
     // defense = 190/380 = 0.5
-    // reaction = 1.0 (no reaction)
+    // V4.4: reactionMultiplier = reactionCoeff * moonSign * mastery * bonus
+    //   = 1 * 1 * 1 * 1.466 = 1.466 (NONE: mastery=1, no reactionCoeff)
     const expected = 4000 * 1.466 * 1.5 * 0.90 * 0.5;
     expect(result.totalDamage).toBeCloseTo(expected, -1);
-    expect(result.reactionMultiplier).toBeCloseTo(1.0, 3);
+    expect(result.reactionMultiplier).toBeCloseTo(1.466, 3);
   });
 });
 
@@ -680,7 +683,7 @@ describe('DamageFormula — AMPLIFYING path', () => {
 // 15. Full Pipeline — TRANSFORMATIVE path
 // ============================================================
 describe('DamageFormula — TRANSFORMATIVE path', () => {
-  it('Overloaded: rate × levelMult × (1+EM) × resistance', () => {
+  it('Overloaded: rate × levelMult × (1+EM) × resistance × defense', () => {
     const stats: ComputedStats = {
       totalHp: 30000,
       totalAtk: 2000,
@@ -706,16 +709,18 @@ describe('DamageFormula — TRANSFORMATIVE path', () => {
     const result = DamageFormula.calculate(ctx);
     expect(result.damagePath).toBe(DamagePath.TRANSFORMATIVE);
 
-    // Transformative: baseDamage = 2.75 * 1446.85 * (1 + emBonus)
+    // V4.4: Transformative now includes mastery (1 + 16*EM/(EM+2000)) and defense.
     const emBonus = getTransformativeEMBonus(100);
-    const baseDamage = 2.75 * 1446.85 * (1 + emBonus);
+    const mastery = 1 + emBonus;
+    const baseDamage = 2.75 * 1446.85;
     const resistance = 0.90;
-    const expected = baseDamage * resistance;
+    const defense = 0.5; // lv90 vs lv90
+    const expected = baseDamage * mastery * resistance * defense;
     expect(result.totalDamage).toBeCloseTo(expected, -1);
 
-    // No crit, no defense, no bonus
+    // No crit, no bonus for transformative
     expect(result.critMultiplier).toBe(1);
-    expect(result.defenseMultiplier).toBe(1);
+    expect(result.defenseMultiplier).toBeCloseTo(0.5, 3);
     expect(result.bonusMultiplier).toBe(1);
   });
 });
@@ -802,7 +807,7 @@ describe('DamageFormula — CATALYZE path', () => {
 // 17. Full Pipeline — MOONSIGN path
 // ============================================================
 describe('DamageFormula — MOONSIGN path', () => {
-  it('MOON_BLOOM: moonBaseDamage × crit × resist × elevation, no bonus/defense', () => {
+  it('MOON_BLOOM: skillBasedDamage × reactionCoeff × mastery × crit × resist × elevation, no bonus/defense', () => {
     const stats: ComputedStats = {
       totalHp: 30000,
       totalAtk: 2000,
@@ -827,17 +832,22 @@ describe('DamageFormula — MOONSIGN path', () => {
     };
 
     const result = DamageFormula.calculate(ctx);
-    expect(result.damagePath).toBe(DamagePath.MOONSIGN);
+    // V4.4: MOON_BLOOM now resolves to MOONSIGN_DIRECT (uses BaseDamageZone + reactionCoeff + MasteryZone)
+    expect(result.damagePath).toBe(DamagePath.MOONSIGN_DIRECT);
 
-    // moonBaseDamage = 1.0 * 1446.85 * (1 + emBonus)
-    const emBonus = getMoonsignEMBonus(100);
-    const moonBaseDamage = 1.0 * 1446.85 * (1 + emBonus);
-
-    // crit = 1.5, resist = 0.90, elevation = 1.3
-    const expected = moonBaseDamage * 1.5 * 0.90 * 1.3;
+    // baseDamage = 2.0 * 2000 = 4000
+    // reactionCoeff = MOON_RATES[MOON_BLOOM] = 1.0
+    // moonSign = 1
+    // reactionCore = 1.0 * 4000 * 1 = 4000
+    // mastery = 1 + 6*100/(100+2000) = 1 + 600/2100 = 1 + 2/7
+    // bonus = 1 (skipped for MOONSIGN_DIRECT)
+    // reactedBase = 4000 * (1 + 2/7) * 1
+    // crit = 1.5, elevation = 1.3, defense = 1, resist = 0.90
+    const mastery = 1 + 6 * 100 / 2100;
+    const expected = 4000 * 1.0 * mastery * 1.5 * 1.3 * 1.0 * 0.90;
     expect(result.totalDamage).toBeCloseTo(expected, -1);
 
-    // No bonus, no defense
+    // No bonus, no defense for MOONSIGN_DIRECT
     expect(result.bonusMultiplier).toBe(1);
     expect(result.defenseMultiplier).toBe(1);
     expect(result.elevationMultiplier).toBeCloseTo(1.3, 3);
@@ -868,11 +878,17 @@ describe('DamageFormula — MOONSIGN path', () => {
     };
 
     const result = DamageFormula.calculate(ctx);
-    expect(result.damagePath).toBe(DamagePath.MOONSIGN);
+    // V4.4: MOON_ELECTRO resolves to MOONSIGN_DIRECT, uses BaseDamageZone + reactionCoeff
+    expect(result.damagePath).toBe(DamagePath.MOONSIGN_DIRECT);
     expect(result.elevationMultiplier).toBeCloseTo(1.0, 3);
 
-    // moonBaseDamage = 3.0 * 1446.85 * (1 + 0) = 4340.55
-    const expected = 3.0 * 1446.85 * 1.0 * 1.5 * 0.90 * 1.0;
+    // V4.4: MOONSIGN_DIRECT formula:
+    // baseDamage = 1.0 * 2000 = 2000
+    // reactionCoeff = MOON_RATES[MOON_ELECTRO] = 3.0
+    // reactionCore = 3.0 * 2000 * 1 = 6000
+    // mastery = 1 (EM=0), bonus = 1 (skipped), defense = 1 (skipped)
+    // total = 6000 * 1.5 * 1.0 * 0.90 = 8100
+    const expected = 2000 * 3.0 * 1.5 * 0.90;
     expect(result.totalDamage).toBeCloseTo(expected, -1);
   });
 });

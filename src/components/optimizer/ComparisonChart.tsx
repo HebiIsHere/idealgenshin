@@ -85,8 +85,8 @@ function ComparisonChart({
             <Radar
               name="优化"
               dataKey="优化"
-              stroke="#D4A843"
-              fill="#D4A843"
+              stroke="#D0E4DC"
+              fill="#D0E4DC"
               fillOpacity={0.2}
             />
             <Legend
@@ -108,7 +108,7 @@ function ComparisonChart({
               }}
             />
             <Bar dataKey="当前" fill="#4CC2F1" radius={[2, 2, 0, 0]} />
-            <Bar dataKey="优化" fill="#D4A843" radius={[2, 2, 0, 0]} />
+            <Bar dataKey="优化" fill="#D0E4DC" radius={[2, 2, 0, 0]} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
           </BarChart>
         </ResponsiveContainer>

@@ -11,8 +11,9 @@ import type {
 import { StatCalculator } from '../engine/stats';
 import { DamageFormula } from '../engine/formula';
 import { SearchSpaceExplorer } from './search';
-import { SUBSTAT_MID_VALUES, DEFAULT_ENEMY_LEVEL, DEFAULT_ENEMY_RESISTANCE } from '../data/constants';
+import { SUBSTAT_MID_VALUES, DEFAULT_ENEMY_LEVEL, DEFAULT_ENEMY_RESISTANCE, ELEMENT_DMG_BONUS_STAT } from '../data/constants';
 import { mergeExtraBonuses } from '../utils/mergeExtraBonuses';
+import { enumerateMainStatCombos, applyMainStats, getCurrentMainStats, type MainStatCombo } from './mainStatSearch';
 
 /**
  * RedistributeOptimizer — finds the optimal sub-stat allocation
@@ -35,7 +36,7 @@ export class RedistributeOptimizer {
     req: RedistributeRequest,
     onProgress?: (progress: number) => void,
   ): RedistributeResult {
-    const { build, currentAllocations, anchoredTypes } = req;
+    const { build, currentAllocations, anchoredTypes, enableMainStatSearch } = req;
 
     // Calculate current damage
     const currentStats = StatCalculator.compute(build);
@@ -62,7 +63,6 @@ export class RedistributeOptimizer {
     const relevantTypes = Array.from(relSet) as any[];
 
     if (totalRolls === 0 || relevantTypes.length === 0) {
-      // 无可优化词条：结果 = 当前分配
       const fullAllocation = [...freeAllocations, ...anchoredAllocations];
       return {
         originalDamage: currentDamage,
@@ -74,36 +74,79 @@ export class RedistributeOptimizer {
         optimizedBreakdown: originalBreakdown,
         originalStats: currentStats,
         optimizedStats: currentStats,
+        mainStatCombo: getCurrentMainStats(build),
       };
     }
 
-    // Use hill-climbing optimization on free types only.
-    // 评估时始终合并锚定词条，确保 bestDamage 代表完整伤害。
-    const { bestAllocation } = SearchSpaceExplorer.hillClimb(
-      totalRolls,
-      relevantTypes,
-      (allocation: SubstatAllocation[]): number => {
-        const fullAllocation = [...allocation, ...anchoredAllocations];
-        const virtualBuild = buildWithAllocation(build, fullAllocation);
-        const virtualStats = StatCalculator.compute(virtualBuild);
-        return evaluateDamage(virtualBuild, virtualStats);
-      },
-      freeAllocations,  // use free allocation as initial guess
-      onProgress,
-    );
+    let bestAllocation = freeAllocations;
+    let bestDamage = currentDamage;
+    let bestCombo: MainStatCombo = getCurrentMainStats(build);
 
-    // 合并结果：自由词条优化分配 + 锚定词条不变
+    if (enableMainStatSearch) {
+      // Phase 1: enumerate main stat combos, quick evaluate
+      const elementDmgStat = ELEMENT_DMG_BONUS_STAT[build.character.element];
+      const allCombos = enumerateMainStatCombos(elementDmgStat);
+      const scored: { combo: MainStatCombo; damage: number }[] = [];
+      for (let i = 0; i < allCombos.length; i++) {
+        const combo = allCombos[i];
+        const b = applyMainStats(build, combo);
+        const { damage } = SearchSpaceExplorer.quickEvaluate(totalRolls, relevantTypes,
+          (alloc) => {
+            const fullAlloc = [...alloc, ...anchoredAllocations];
+            const vb = buildWithAllocation(b, fullAlloc);
+            return evaluateDamage(vb, StatCalculator.compute(vb));
+          });
+        scored.push({ combo, damage });
+        if (onProgress) onProgress((i / allCombos.length) * 0.3);
+      }
+
+      // Top 20 by quick score
+      scored.sort((a, b) => b.damage - a.damage);
+      const topN = scored.slice(0, 20);
+
+      // Phase 2: full hill climbing on top N combos
+      bestDamage = -Infinity;
+      bestCombo = topN[0].combo;
+
+      for (let i = 0; i < topN.length; i++) {
+        const { combo } = topN[i];
+        const buildWithMain = applyMainStats(build, combo);
+        const { bestAllocation: alloc, bestDamage: dmg } = SearchSpaceExplorer.hillClimb(
+          totalRolls, relevantTypes,
+          (allocation) => {
+            const fullAlloc = [...allocation, ...anchoredAllocations];
+            const vb = buildWithAllocation(buildWithMain, fullAlloc);
+            return evaluateDamage(vb, StatCalculator.compute(vb));
+          },
+          freeAllocations,
+          (p) => onProgress?.(0.3 + (i + p) / topN.length * 0.7),
+        );
+        if (dmg > bestDamage) { bestDamage = dmg; bestAllocation = alloc; bestCombo = combo; }
+      }
+    } else {
+      // Single combo: hill climbing with current main stats
+      const { bestAllocation: alloc, bestDamage: dmg } = SearchSpaceExplorer.hillClimb(
+        totalRolls, relevantTypes,
+        (allocation) => {
+          const fullAlloc = [...allocation, ...anchoredAllocations];
+          const vb = buildWithAllocation(build, fullAlloc);
+          return evaluateDamage(vb, StatCalculator.compute(vb));
+        },
+        freeAllocations,
+        onProgress,
+      );
+      bestDamage = dmg;
+      bestAllocation = alloc;
+    }
+
     const mergedAllocations = [...bestAllocation, ...anchoredAllocations];
-
-    // 用完整分配重新计算伤害和 breakdown，确保一致性
-    const optimizedBuild = buildWithAllocation(build, mergedAllocations);
-    const optimizedStats = StatCalculator.compute(optimizedBuild);
-    const optimizedDamage = evaluateDamage(optimizedBuild, optimizedStats);
-    const optimizedBreakdown = evaluateDamageWithBreakdown(optimizedBuild, optimizedStats);
+    const finalBuild = buildWithAllocation(applyMainStats(build, bestCombo), mergedAllocations);
+    const optimizedStats = StatCalculator.compute(finalBuild);
+    const optimizedDamage = evaluateDamage(finalBuild, optimizedStats);
+    const optimizedBreakdown = evaluateDamageWithBreakdown(finalBuild, optimizedStats);
 
     const improvementPercent = currentDamage > 0
-      ? (optimizedDamage - currentDamage) / currentDamage
-      : 0;
+      ? (optimizedDamage - currentDamage) / currentDamage : 0;
 
     return {
       originalDamage: currentDamage,
@@ -115,6 +158,7 @@ export class RedistributeOptimizer {
       optimizedBreakdown,
       originalStats: currentStats,
       optimizedStats,
+      mainStatCombo: bestCombo,
     };
   }
 }

@@ -40,6 +40,12 @@ export default defineConfig({
             if (id.includes('recharts')) {
               return 'recharts';
             }
+            if (id.includes('react-router') || id.includes('@remix-run/router')) {
+              return 'vendor';
+            }
+            if (id.includes('react-window')) {
+              return 'vendor';
+            }
           }
         },
       },

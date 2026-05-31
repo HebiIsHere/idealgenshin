@@ -61,7 +61,7 @@ function DamageFlow({ result, computedStats }: DamageFlowProps): React.ReactElem
     <Paper sx={{ p: 2, mt: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
         <Typography variant="subtitle2" sx={{ color: 'primary.main' }}>
-          伤害计算流程
+          期望伤害计算流程
         </Typography>
         <Chip label={pathName} size="small" variant="outlined" sx={{ fontSize: '0.6rem', height: 18 }} />
       </Box>

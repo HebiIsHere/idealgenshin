@@ -30,9 +30,24 @@ function StickerThrower({ characterName }: { characterName: string | null }): Re
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const preloadRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     fetch(MANIFEST_URL).then((r) => r.json()).then(setManifest).catch(() => {});
   }, []);
+
+  // Preload all sticker images for the current character as soon as it's selected
+  useEffect(() => {
+    if (!manifest || !characterName) return;
+    const pool = manifest[characterName];
+    if (!pool || pool.length === 0) return;
+    for (const src of pool) {
+      if (preloadRef.current.has(src)) continue;
+      preloadRef.current.add(src);
+      const img = new Image();
+      img.src = src;
+    }
+  }, [manifest, characterName]);
 
   useEffect(() => { activeRef.current = active; }, [active]);
 

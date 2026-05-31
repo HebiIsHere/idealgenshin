@@ -11,6 +11,7 @@ import { ArtifactSlotType, SubstatType } from '../types';
 import { StatCalculator } from '../engine/stats';
 import { DamageFormula } from '../engine/formula';
 import { SearchSpaceExplorer } from './search';
+import { enumerateMainStatCombos, applyMainStats, getCurrentMainStats, type MainStatCombo } from './mainStatSearch';
 import {
   SUBSTAT_MID_VALUES,
   MAIN_STAT_MAX_VALUES,
@@ -22,122 +23,110 @@ import {
 } from '../data/constants';
 import { mergeExtraBonuses } from '../utils/mergeExtraBonuses';
 
-/** 主词条组合结果。 */
-interface MainStatCombo {
-  sands: SubstatType;
-  goblet: SubstatType;
-  circlet: SubstatType;
-}
+/** Top-N combos from quick evaluation to run full hill climbing on. */
+const TOP_N_COMBOS = 20;
 
 /**
  * IdealTemplateOptimizer — 生成理论最优圣遗物方案。
- *
- * 支持两种模式：
- * 1. 基础模式（searchMainStats=false）：固定主词条，仅搜索副词条分配
- * 2. 主词条搜索模式（searchMainStats=true）：枚举 420 种主词条组合，每种内部搜索副词条
- *
- * 当 req.build 存在时，使用当前角色配置（武器/命座/套装/队伍 buff），
- * 否则回退到默认参考构建。
+ * 默认搜索主属性组合（420 种 × 快速评估取 Top20 × 爬山精算）。
  */
 export class IdealTemplateOptimizer {
   static generate(
     req: IdealRequest,
     onProgress?: (progress: number) => void,
   ): IdealResult {
-    const { character, totalRolls, skillMultiplier, reactionType, amplifyingMultiplier, baseDmgMultiplier, build, searchMainStats, anchoredAllocations } = req;
+    const { character, totalRolls, skillMultiplier, reactionType, amplifyingMultiplier, baseDmgMultiplier, build, anchoredAllocations, enableMainStatSearch } = req;
 
-    // 扣除锚定词条预算
     const anchoredRollSum = anchoredAllocations?.reduce((s, a) => s + a.rolls, 0) ?? 0;
     const remainingRolls = totalRolls - anchoredRollSum;
     const anchoredTypeSet = new Set((anchoredAllocations ?? []).map((a) => a.type));
 
     if (remainingRolls <= 0 && anchoredRollSum > 0) {
-      // 全部锚定：返回锚定分配本身
       const refBuild = (build ?? createDefaultBuild(character, skillMultiplier, reactionType, amplifyingMultiplier, baseDmgMultiplier));
       const finalBuild = applyAllocation(ensureArtifacts(refBuild, character), anchoredAllocations ?? []);
       const finalStats = StatCalculator.compute(finalBuild);
       const dmg = evaluateDamage(finalBuild, finalStats);
-      return { theoreticalDamage: dmg, idealAllocations: anchoredAllocations ?? [], breakdown: evaluateDamageWithBreakdown(finalBuild, finalStats), idealStats: finalStats, _debug: { artifacts: refBuild.artifacts?.length ?? 0, weapon: refBuild.weaponConfig?.weaponData?.nameZh || 'unknown', totalAtk: finalStats.totalAtk, skillMultiplier: refBuild.skillMultiplier, reactionType: refBuild.reactionType, firstDamage: dmg } };
+      return { theoreticalDamage: dmg, idealAllocations: anchoredAllocations ?? [], breakdown: evaluateDamageWithBreakdown(finalBuild, finalStats), idealStats: finalStats, mainStatCombo: getCurrentMainStats(finalBuild), _debug: { artifacts: refBuild.artifacts?.length ?? 0, weapon: refBuild.weaponConfig?.weaponData?.nameZh || 'unknown', totalAtk: finalStats.totalAtk, skillMultiplier: refBuild.skillMultiplier, reactionType: refBuild.reactionType, firstDamage: dmg } };
     }
 
     const relevantTypes = character.relevantSubstats.filter((t) => !anchoredTypeSet.has(t));
-
-    // 词条数不能超过可分配上限（理论最大 45 条，5 个圣遗物各 9 个词条槽）
     const effectiveRolls = Math.min(remainingRolls, MAX_TOTAL_ROLLS);
-
-    // 使用传入的 build 或创建默认参考构建
     const baseBuild = build ?? createDefaultBuild(character, skillMultiplier, reactionType, amplifyingMultiplier, baseDmgMultiplier);
-
-    // 确保 build 至少有 5 个圣遗物位置（无导入时补默认主词条）
     const refBuild = ensureArtifacts(baseBuild, character);
-
-    if (!searchMainStats) {
-      // 基础模式：固定主词条
-      const result = runSingleSearch(refBuild, effectiveRolls, relevantTypes, onProgress);
-      // 合并锚定分配
-      const mergedAllocations = [...result.idealAllocations, ...(anchoredAllocations ?? [])];
-      const finalBuildForStats = applyAllocation(refBuild, mergedAllocations);
-      const mergedStats = StatCalculator.compute(finalBuildForStats);
-      const mergedBreakdown = evaluateDamageWithBreakdown(finalBuildForStats, mergedStats);
-      return {
-        ...result,
-        idealAllocations: mergedAllocations,
-        breakdown: mergedBreakdown,
-        idealStats: mergedStats,
-        mainStatCombo: getCurrentMainStats(refBuild),
-      };
-    }
-
-    // 主词条搜索模式：枚举所有合法组合
-    const elementDmgStat = ELEMENT_DMG_BONUS_STAT[character.element];
-    const combos = enumerateMainStatCombos(elementDmgStat);
 
     let globalBestAllocation: SubstatAllocation[] = [];
     let globalBestDamage = -Infinity;
-    let globalBestCombo: MainStatCombo = combos[0];
-    let globalBestBreakdown: DamageResult | undefined;
-    const totalCombos = combos.length;
+    let globalBestCombo: MainStatCombo = getCurrentMainStats(refBuild);
 
-    for (let i = 0; i < totalCombos; i++) {
-      const combo = combos[i];
-      const buildWithMain = applyMainStats(refBuild, combo);
+    if (enableMainStatSearch) {
+      // Phase 1: enumerate main stat combos, quick evaluate with uniform allocation
+      const elementDmgStat = ELEMENT_DMG_BONUS_STAT[character.element];
+      const allCombos = enumerateMainStatCombos(elementDmgStat);
+      const scored: { combo: MainStatCombo; damage: number }[] = [];
 
-      // 均匀分配作为爬山初始值
-      const initialGuess = relevantTypes.map((type) => ({
-        type,
-        rolls: effectiveRolls / relevantTypes.length,
-      }));
-
-      const { bestAllocation, bestDamage } = SearchSpaceExplorer.hillClimb(
-        effectiveRolls,
-        relevantTypes,
-        (allocation: SubstatAllocation[]): number => {
-          const virtualBuild = applyAllocation(buildWithMain, allocation);
-          const virtualStats = StatCalculator.compute(virtualBuild);
-          return evaluateDamage(virtualBuild, virtualStats);
-        },
-        initialGuess,
-        (subProgress) => onProgress?.((i + subProgress) / totalCombos),
-      );
-
-      if (bestDamage > globalBestDamage) {
-        globalBestDamage = bestDamage;
-        globalBestAllocation = bestAllocation;
-        globalBestCombo = combo;
+      for (let i = 0; i < allCombos.length; i++) {
+        const combo = allCombos[i];
+        const b = applyMainStats(refBuild, combo);
+        const { damage } = SearchSpaceExplorer.quickEvaluate(
+          effectiveRolls, relevantTypes,
+          (alloc) => evaluateDamage(b, StatCalculator.compute(applyAllocation(b, alloc))),
+        );
+        scored.push({ combo, damage });
+        if (onProgress) onProgress((i / allCombos.length) * 0.3);
       }
 
-      onProgress?.((i + 1) / totalCombos);
+      scored.sort((a, b) => b.damage - a.damage);
+      const topN = scored.slice(0, TOP_N_COMBOS);
+
+      // Phase 2: full hill climbing on top N
+      globalBestCombo = topN[0].combo;
+
+      for (let i = 0; i < topN.length; i++) {
+        const { combo } = topN[i];
+        const buildWithMain = applyMainStats(refBuild, combo);
+        const initialGuess = relevantTypes.map((t) => ({ type: t, rolls: effectiveRolls / relevantTypes.length }));
+
+        const { bestAllocation, bestDamage } = SearchSpaceExplorer.hillClimb(
+          effectiveRolls, relevantTypes,
+          (alloc) => {
+            const vb = applyAllocation(buildWithMain, alloc);
+            return evaluateDamage(vb, StatCalculator.compute(vb));
+          },
+          initialGuess,
+          (p) => onProgress?.(0.3 + (i + p) / topN.length * 0.7),
+        );
+
+        if (bestDamage > globalBestDamage) {
+          globalBestDamage = bestDamage;
+          globalBestAllocation = bestAllocation;
+          globalBestCombo = combo;
+        }
+      }
+    } else {
+      // Single combo: hill climbing with current main stats
+      const initialGuess = relevantTypes.map((t) => ({ type: t, rolls: effectiveRolls / relevantTypes.length }));
+      const { bestAllocation, bestDamage } = SearchSpaceExplorer.hillClimb(
+        effectiveRolls, relevantTypes,
+        (alloc) => {
+          const vb = applyAllocation(refBuild, alloc);
+          return evaluateDamage(vb, StatCalculator.compute(vb));
+        },
+        initialGuess,
+        onProgress,
+      );
+      globalBestDamage = bestDamage;
+      globalBestAllocation = bestAllocation;
     }
 
     const mergedAllocations = [...globalBestAllocation, ...(anchoredAllocations ?? [])];
     const finalBuild = applyAllocation(applyMainStats(refBuild, globalBestCombo), mergedAllocations);
     const finalStats = StatCalculator.compute(finalBuild);
-    globalBestBreakdown = evaluateDamageWithBreakdown(finalBuild, finalStats);
+    const breakdown = evaluateDamageWithBreakdown(finalBuild, finalStats);
 
     return {
       theoreticalDamage: globalBestDamage,
       idealAllocations: mergedAllocations,
-      breakdown: globalBestBreakdown,
+      breakdown,
       idealStats: finalStats,
       mainStatCombo: globalBestCombo,
       _debug: {
@@ -150,57 +139,6 @@ export class IdealTemplateOptimizer {
       },
     };
   }
-}
-
-/** 基础模式：单次主词条搜索，使用 hill-climb（与重优化一致）。 */
-function runSingleSearch(
-  baseBuild: CharacterBuild,
-  totalRolls: number,
-  relevantTypes: SubstatType[],
-  onProgress?: (progress: number) => void,
-): IdealResult {
-  // 均匀分配作为爬山初始值
-  const initialGuess = relevantTypes.map((type) => ({
-    type,
-    rolls: totalRolls / relevantTypes.length,
-  }));
-
-  const { bestAllocation, bestDamage } = SearchSpaceExplorer.hillClimb(
-    totalRolls,
-    relevantTypes,
-    (allocation: SubstatAllocation[]): number => {
-      const virtualBuild = applyAllocation(baseBuild, allocation);
-      const virtualStats = StatCalculator.compute(virtualBuild);
-      return evaluateDamage(virtualBuild, virtualStats);
-    },
-    initialGuess,
-    onProgress,
-  );
-
-  // round to 1 decimal for display consistency (hillClimb already does this)
-  const roundedAllocation = bestAllocation.map((a) => ({
-    ...a,
-    rolls: Math.round(a.rolls * 10) / 10,
-  }));
-
-  const bestBuild = applyAllocation(baseBuild, roundedAllocation);
-  const bestStats = StatCalculator.compute(bestBuild);
-  const breakdown = evaluateDamageWithBreakdown(bestBuild, bestStats);
-
-  return {
-    theoreticalDamage: bestDamage,
-    idealAllocations: roundedAllocation,
-    breakdown,
-    idealStats: bestStats,
-    _debug: {
-      artifacts: baseBuild.artifacts?.length ?? 0,
-      weapon: baseBuild.weaponConfig?.weaponData?.nameZh || 'unknown',
-      totalAtk: bestStats.totalAtk,
-      skillMultiplier: baseBuild.skillMultiplier,
-      reactionType: baseBuild.reactionType,
-      firstDamage: bestDamage,
-    },
-  };
 }
 
 /** 确保 build 有 5 个圣遗物位置（缺失的补默认主词条）。 */
@@ -227,56 +165,6 @@ function ensureArtifacts(build: CharacterBuild, character: CharacterBuild['chara
   }
 
   return { ...build, artifacts: existing };
-}
-
-/** 通用杯子主词条（非元素伤害）。 */
-const UNIVERSAL_GOBLET_TYPES: SubstatType[] = [
-  SubstatType.ATK_PERCENT,
-  SubstatType.HP_PERCENT,
-  SubstatType.DEF_PERCENT,
-  SubstatType.ELEMENTAL_MASTERY,
-];
-
-/** 枚举所有合法主词条组合。
- *  杯子规则：排除物理伤害；元素伤害只保留与角色匹配的一种。 */
-function enumerateMainStatCombos(elementDmgStat: SubstatType | undefined): MainStatCombo[] {
-  const sandsOptions = MAIN_STAT_BY_SLOT['SANDS'];
-  const gobletOptions = MAIN_STAT_BY_SLOT['GOBLET'];
-  const circletOptions = MAIN_STAT_BY_SLOT['CIRCLET'];
-
-  // 过滤杯子选项：通用 + 匹配的元素伤害（排除物理）
-  const filteredGoblet = gobletOptions.filter(
-    (t) =>
-      UNIVERSAL_GOBLET_TYPES.includes(t) ||
-      (elementDmgStat !== undefined && t === elementDmgStat),
-  );
-
-  const combos: MainStatCombo[] = [];
-  for (const sands of sandsOptions) {
-    for (const goblet of filteredGoblet) {
-      for (const circlet of circletOptions) {
-        combos.push({ sands, goblet, circlet });
-      }
-    }
-  }
-  return combos;
-}
-
-/** 将主词条组合应用到 build 的圣遗物上。 */
-function applyMainStats(build: CharacterBuild, combo: MainStatCombo): CharacterBuild {
-  const newArtifacts = build.artifacts.map((a) => {
-    switch (a.slot) {
-      case ArtifactSlotType.SANDS:
-        return { ...a, mainStatType: combo.sands, mainStatValue: MAIN_STAT_MAX_VALUES[combo.sands] ?? 0 };
-      case ArtifactSlotType.GOBLET:
-        return { ...a, mainStatType: combo.goblet, mainStatValue: MAIN_STAT_MAX_VALUES[combo.goblet] ?? 0 };
-      case ArtifactSlotType.CIRCLET:
-        return { ...a, mainStatType: combo.circlet, mainStatValue: MAIN_STAT_MAX_VALUES[combo.circlet] ?? 0 };
-      default:
-        return a;
-    }
-  });
-  return { ...build, artifacts: newArtifacts };
 }
 
 /** 将副词条分配应用到 build。 */
@@ -373,15 +261,3 @@ function evaluateDamageWithBreakdown(build: CharacterBuild, stats: ComputedStats
   });
 }
 
-/** 从 build 中提取当前沙/杯/头的主词条类型。 */
-function getCurrentMainStats(build: CharacterBuild): { sands: SubstatType; goblet: SubstatType; circlet: SubstatType } {
-  const artifacts = build.artifacts ?? [];
-  const sands = artifacts.find((a) => a.slot === ArtifactSlotType.SANDS);
-  const goblet = artifacts.find((a) => a.slot === ArtifactSlotType.GOBLET);
-  const circlet = artifacts.find((a) => a.slot === ArtifactSlotType.CIRCLET);
-  return {
-    sands: sands?.mainStatType ?? SubstatType.ATK_PERCENT,
-    goblet: goblet?.mainStatType ?? SubstatType.ATK_PERCENT,
-    circlet: circlet?.mainStatType ?? SubstatType.CRIT_RATE,
-  };
-}

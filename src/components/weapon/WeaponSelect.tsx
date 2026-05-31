@@ -70,8 +70,8 @@ function WeaponSelect({ onSelectWeapon }: { onSelectWeapon?: (id: string) => voi
               label={`${option.rarity}★`}
               size="small"
               sx={{
-                bgcolor: option.rarity >= 5 ? 'rgba(212, 168, 67, 0.2)' : 'rgba(160, 120, 80, 0.15)',
-                color: option.rarity >= 5 ? '#D4A843' : '#C0A080',
+                bgcolor: option.rarity >= 5 ? 'rgba(208, 228, 220, 0.18)' : 'rgba(180, 200, 195, 0.15)',
+                color: option.rarity >= 5 ? '#D0E4DC' : '#B0C8C0',
                 fontWeight: 600,
                 fontSize: '0.7rem',
               }}

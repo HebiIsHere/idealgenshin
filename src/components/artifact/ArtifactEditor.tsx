@@ -151,7 +151,7 @@ function ArtifactSlotEditor({
 
       {/* Sub-stats */}
       {artifact?.subStats.map((sub, index) => (
-        <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Box key={`${sub.type}-${index}`} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <Select
               value={sub.type}

@@ -1,31 +1,57 @@
-import React from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { keyframes } from '@mui/system';
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import LandingPage from './pages/LandingPage';
-import WizardPage from './pages/WizardPage';
+import MenuPauseObserver from './components/wizard/MenuPauseObserver';
 import { useWizardStore } from './store/slices/wizardSlice';
+import { decodeBuildFromHash } from './utils/share';
+import { applySharePayload } from './utils/applyShare';
 
-const slideUp = keyframes`
-  from { transform: translateY(32px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-`;
+const WizardPage = lazy(() => import('./pages/WizardPage'));
 
 const ANIM_MS = 400;
 
 function App(): React.ReactElement {
   const wizardActive = useWizardStore((s) => s.active);
+  const enterWizard = useWizardStore((s) => s.enterWizard);
+
+  // Auto-enter wizard if shared config hash is present — fully replicate the build
+  useEffect(() => {
+    if (!wizardActive && window.location.hash) {
+      const payload = decodeBuildFromHash(window.location.hash);
+      if (payload) {
+        applySharePayload(payload);
+        enterWizard();
+      }
+    }
+  }, [wizardActive, enterWizard]);
 
   return (
     <Box>
+      <MenuPauseObserver />
       {wizardActive ? (
         <Box
           sx={{
-            animation: `${slideUp} ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1) both`,
+            animation: `slideUp ${ANIM_MS}ms cubic-bezier(0.16,1,0.3,1) both`,
             '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
           }}
         >
-          <WizardPage />
+          <Suspense fallback={
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 3, bgcolor: '#0B1424' }}>
+              <div className="spinner-ring" />
+              <Typography sx={{ color: 'rgba(208,232,239,0.55)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 0 }}>
+                加载中
+                <span className="loading-dots">
+                  <span className="loading-dot" />
+                  <span className="loading-dot" />
+                  <span className="loading-dot" />
+                </span>
+              </Typography>
+            </Box>
+          }>
+            <WizardPage />
+          </Suspense>
         </Box>
       ) : (
         <Routes>

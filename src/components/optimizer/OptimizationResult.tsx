@@ -23,21 +23,26 @@ const DAMAGE_PATH_LABELS: Record<DamagePath, string> = {
 };
 
 /** Mapping from DamageResult multiplier field key to Chinese display name. */
-const ZONE_LABELS: Partial<Record<keyof Omit<DamageResult, 'totalDamage' | 'scalingMultiplier'>, string>> = {
+const ZONE_LABELS: Record<string, string> = {
+  damagePath: '伤害路径',
   baseDamage: '倍率区',
   bonusMultiplier: '增伤区',
   critMultiplier: '暴击区',
   resistanceMultiplier: '抗性区',
   defenseMultiplier: '防御区',
   reactionMultiplier: '反应区(系数×月兆)',
-  damagePath: '伤害路径',
   aggravationBonus: '激化加成',
   elevationMultiplier: '擢升区',
   independentMultiplier: '独立乘区',
+  authorityMultiplier: '大权区',
+  masteryBonus: '精通加成',
+  moonSignBonus: '月兆加成',
+  featherFlat: '羽毛附伤',
+  prayerFlat: '祷歌附伤',
 };
 
 /** Ordered zone keys for display. */
-const ZONE_ORDER: (keyof typeof ZONE_LABELS)[] = [
+const ZONE_ORDER: string[] = [
   'damagePath',
   'baseDamage',
   'bonusMultiplier',
@@ -48,6 +53,11 @@ const ZONE_ORDER: (keyof typeof ZONE_LABELS)[] = [
   'aggravationBonus',
   'elevationMultiplier',
   'independentMultiplier',
+  'authorityMultiplier',
+  'moonSignBonus',
+  'masteryBonus',
+  'featherFlat',
+  'prayerFlat',
 ];
 
 /** 提取每个乘区的详细计算步骤。 */
@@ -207,13 +217,17 @@ function DamageBreakdownAccordion({
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
           {ZONE_ORDER.map((key) => {
             const zoneName = ZONE_LABELS[key];
-            const value = breakdown[key];
+            const d2 = breakdown as Record<string, any>;
+            const value: any =
+              key === 'authorityMultiplier' ? d2.authorityDebug?.result
+              : key === 'moonSignBonus' ? d2.moonSignDebug?.result
+              : key === 'masteryBonus' ? d2.masteryDebug?.result
+              : key === 'featherFlat' ? d2.featherDebug?.result
+              : key === 'prayerFlat' ? d2.prayerDebug?.result
+              : d2[key];
             const isNonNumeric = key === 'damagePath';
-
-            if (isNonNumeric && value === undefined) return null;
-            if (key === 'aggravationBonus' && (value === undefined || value === 0)) return null;
-            if (key === 'elevationMultiplier' && (value === undefined || value === 1)) return null;
-            if (key === 'independentMultiplier' && (value === undefined || value === 1)) return null;
+            if (value === undefined || value === null) return null;
+            if (!isNonNumeric && (value === 0 || value === 1)) return null;
 
             const detail = getZoneDetail(key, zoneName, value as number | string, breakdown);
             if (!detail) return null;
@@ -269,12 +283,17 @@ function DamageBreakdownAccordion({
         <Divider sx={{ my: 1 }} />
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: 0.5 }}>
           {ZONE_ORDER.map((key) => {
-            const value = breakdown[key];
+            const d = breakdown as Record<string, any>;
+            const value: any =
+              key === 'authorityMultiplier' ? d.authorityDebug?.result
+              : key === 'moonSignBonus' ? d.moonSignDebug?.result
+              : key === 'masteryBonus' ? d.masteryDebug?.result
+              : key === 'featherFlat' ? d.featherDebug?.result
+              : key === 'prayerFlat' ? d.prayerDebug?.result
+              : d[key];
             if (key === 'damagePath') return null;
-            if (key === 'aggravationBonus' && (value === undefined || value === 0)) return null;
-            if (key === 'elevationMultiplier' && (value === undefined || value === 1)) return null;
-            if (key === 'independentMultiplier' && (value === undefined || value === 1)) return null;
-            if (value === undefined) return null;
+            if (value === undefined || value === null) return null;
+            if (value === 0 || value === 1) return null;
 
             const zoneName = ZONE_LABELS[key];
             const isBase = key === 'baseDamage';
@@ -371,13 +390,13 @@ function OptimizationResult({
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {originalBreakdown && (
             <DamageBreakdownAccordion
-              label="▼ 当前伤害计算过程"
+              label="▼ 当前期望伤害计算"
               breakdown={originalBreakdown}
             />
           )}
           {optimizedBreakdown && (
             <DamageBreakdownAccordion
-              label="▼ 优化后伤害计算过程"
+              label="▼ 优化后期望伤害计算"
               breakdown={optimizedBreakdown}
             />
           )}

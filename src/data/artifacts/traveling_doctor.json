@@ -1,7 +1,0 @@
-{
-  "id": "traveling_doctor",
-  "name": "Traveling Doctor",
-  "nameZh": "游医",
-  "twoPcEffect": "角色受到的治疗效果提高20%。",
-  "fourPcEffect": "施放元素爆发时，恢复20%生命值。"
-}

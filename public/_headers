@@ -11,6 +11,10 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
+# 贴纸 — 长期缓存
+/stickers/*
+  Cache-Control: public, max-age=31536000
+
 # HTML / 根路径 — 不缓存（SPA 路由入口）
 /index.html
   Cache-Control: no-cache, no-store, must-revalidate

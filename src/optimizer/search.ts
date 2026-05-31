@@ -420,6 +420,25 @@ export class SearchSpaceExplorer {
    * Get the most impactful sub-stat type based on mid-value per roll.
    * Used for greedy upper bound estimation.
    */
+  /**
+   * Quick evaluation: even distribution, single evaluation, no hill climbing.
+   * Used as a fast scoring pass for main stat enumeration.
+   */
+  static quickEvaluate(
+    total: number,
+    types: SubstatType[],
+    evaluateDamage: (allocation: SubstatAllocation[]) => number,
+  ): { allocation: SubstatAllocation[]; damage: number } {
+    if (types.length === 0 || total <= 0) {
+      const dmg = evaluateDamage([]);
+      return { allocation: [], damage: isFinite(dmg) ? dmg : 0 };
+    }
+    const base = total / types.length;
+    const allocation = types.map((type) => ({ type, rolls: base }));
+    const damage = evaluateDamage(allocation);
+    return { allocation, damage: isFinite(damage) ? damage : 0 };
+  }
+
   static getMostImpactfulType(types: SubstatType[]): SubstatType | null {
     if (types.length === 0) return null;
 

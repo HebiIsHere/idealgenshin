@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 
 /**
- * 原神主题 v4.1 — 芙宁娜
+ * 原神主题 v4.2 — 芙宁娜
  * - 水蓝主色 + 金色点缀 + 深海军蓝背景
  * - Noto Serif SC 衬线体标题 + Noto Sans SC 正文
  */
@@ -14,10 +14,10 @@ const hydro = {
 };
 
 // 金色点缀（芙宁娜冠冕/饰品）
-const gold = {
-  light: '#E2C87A',
-  mid: '#C9A84C',
-  deep: '#9A7B2E',
+const celadon = {
+  light: '#EDF4F1',
+  mid: '#D0E4DC',
+  deep: '#A0BEB4',
 };
 
 export const genshinTheme = createTheme({
@@ -30,9 +30,9 @@ export const genshinTheme = createTheme({
       contrastText: '#0D1B32',
     },
     secondary: {
-      main: gold.mid,
-      light: gold.light,
-      dark: gold.deep,
+      main: celadon.mid,
+      light: celadon.light,
+      dark: celadon.deep,
       contrastText: '#0D1B32',
     },
     background: {
@@ -66,7 +66,7 @@ export const genshinTheme = createTheme({
     h4: { fontFamily: '"Noto Serif SC", "PingFang SC", serif', fontWeight: 700, letterSpacing: '0.02em' },
     h5: { fontFamily: '"Noto Serif SC", "PingFang SC", serif', fontWeight: 600 },
     h6: { fontFamily: '"Noto Serif SC", "PingFang SC", serif', fontWeight: 600 },
-    subtitle1: { color: gold.mid },
+    subtitle1: { color: celadon.mid },
     subtitle2: { fontFamily: '"Noto Serif SC", "PingFang SC", serif', fontWeight: 600 },
   },
   shape: {
@@ -78,24 +78,76 @@ export const genshinTheme = createTheme({
         root: {
           textTransform: 'none',
           fontWeight: 600,
-          borderRadius: 8,
-          padding: '8px 24px',
+          borderRadius: 999,
+          padding: '10px 28px',
           '&:focus-visible': {
-            outline: `2px solid ${hydro.mid}`,
+            outline: `2px solid #94CFF0`,
             outlineOffset: 2,
           },
         },
         containedPrimary: {
-          background: `linear-gradient(135deg, ${hydro.mid} 0%, ${hydro.deep} 100%)`,
-          boxShadow: `0 2px 8px rgba(91, 192, 235, 0.25)`,
-          transition: 'all 250ms cubic-bezier(0.16,1,0.3,1)',
+          position: 'relative',
+          overflow: 'hidden',
+          '& .MuiTouchRipple-root': { display: 'none' },
+          color: '#000030',
+          background: 'linear-gradient(135deg, #94CFF0 0%, #2850A0 100%)',
+          border: 'none',
+          borderRadius: 999,
+          boxShadow: '0 0 24px rgba(148,207,240,0.35), 0 0 0 2px rgba(208,228,220,0.12)',
+          transition: 'transform 200ms cubic-bezier(0.34,1.56,0.64,1), box-shadow 200ms cubic-bezier(0.16,1,0.3,1)',
           '&:hover': {
-            background: `linear-gradient(135deg, ${hydro.light} 0%, ${hydro.mid} 100%)`,
-            boxShadow: `0 0 20px rgba(91, 192, 235, 0.5), 0 4px 12px rgba(91, 192, 235, 0.3)`,
+            transform: 'translateY(-3px)',
+            background: 'linear-gradient(135deg, #94CFF0 0%, #2850A0 100%)',
+            boxShadow: '0 0 44px rgba(148,207,240,0.45), 0 0 0 3px rgba(208,228,220,0.25)',
           },
           '&:active': {
-            transform: 'scale(0.97)',
-            boxShadow: `0 1px 4px rgba(91, 192, 235, 0.3)`,
+            transform: 'translateY(0) scale(0.97)',
+            boxShadow: '0 0 16px rgba(148,207,240,0.35), 0 0 0 1px rgba(208,228,220,0.12)',
+          },
+          '&.Mui-disabled': {
+            color: 'rgba(0,0,48,0.4)',
+            background: 'rgba(148,207,240,0.3)',
+            boxShadow: 'none',
+          },
+        },
+        outlined: {
+          color: '#D0E8EF',
+          border: '1px solid rgba(40,80,160,0.30)',
+          borderRadius: 12,
+          padding: '8px 20px',
+          fontWeight: 500,
+          '&:hover': {
+            borderColor: '#94CFF0',
+            background: 'rgba(148,207,240,0.06)',
+            transform: 'translateY(-1px)',
+          },
+          '&:active': {
+            transform: 'translateY(0) scale(0.98)',
+          },
+        },
+        outlinedPrimary: {
+          color: '#D0E8EF',
+          border: '1px solid rgba(40,80,160,0.30)',
+          '&:hover': {
+            borderColor: '#94CFF0',
+            background: 'rgba(148,207,240,0.06)',
+          },
+        },
+        sizeSmall: {
+          padding: '3px 14px',
+          fontSize: '0.8rem',
+          borderRadius: 999,
+          '&.MuiButton-containedPrimary': {
+            padding: '4px 16px',
+            boxShadow: '0 0 10px rgba(148,207,240,0.2)',
+            '&:hover': {
+              boxShadow: '0 0 20px rgba(148,207,240,0.3), 0 0 0 1px rgba(208,228,220,0.15)',
+              transform: 'translateY(-1px)',
+            },
+            '&:active': {
+              transform: 'translateY(0) scale(0.98)',
+              boxShadow: '0 0 8px rgba(148,207,240,0.2)',
+            },
           },
         },
       },
@@ -142,7 +194,7 @@ export const genshinTheme = createTheme({
           },
           '&:hover': {
             borderColor: 'rgba(255,255,255,0.2)',
-            boxShadow: '0 4px 24px rgba(212,168,67,0.14)',
+            boxShadow: '0 4px 24px rgba(208,228,220,0.14)',
           },
         },
       },
@@ -206,12 +258,29 @@ export const genshinTheme = createTheme({
             outlineOffset: 1,
           },
         },
+        icon: {
+          transition: 'transform 250ms cubic-bezier(0.34,1.56,0.64,1)',
+        },
       },
     },
     MuiMenu: {
       styleOverrides: {
         paper: {
-          transition: 'opacity 200ms cubic-bezier(0.16,1,0.3,1), transform 200ms cubic-bezier(0.16,1,0.3,1) !important',
+          transition: 'opacity 250ms cubic-bezier(0.16,1,0.3,1), transform 250ms cubic-bezier(0.16,1,0.3,1) !important',
+          '&.MuiMenu-paper': {
+            animation: 'menuEnter 250ms cubic-bezier(0.16,1,0.3,1) both',
+            '@keyframes menuEnter': {
+              from: { opacity: 0, transform: 'translateY(-8px) scale(0.96)' },
+              to:   { opacity: 1, transform: 'translateY(0) scale(1)' },
+            },
+          },
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          transition: 'background-color 150ms cubic-bezier(0.16,1,0.3,1), color 150ms cubic-bezier(0.16,1,0.3,1)',
         },
       },
     },
@@ -219,7 +288,7 @@ export const genshinTheme = createTheme({
       styleOverrides: {
         tooltip: {
           backgroundColor: '#0F1629',
-          border: `1px solid rgba(212, 168, 67, 0.25)`,
+          border: `1px solid rgba(208, 228, 220, 0.25)`,
           fontSize: '0.8rem',
         },
       },

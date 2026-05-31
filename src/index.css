@@ -4,6 +4,7 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: #0B1424;
 }
 
 /* Global styles that complement MUI's CssBaseline */
@@ -57,31 +58,54 @@ html {
   }
 }
 
-/* 星座加载动画 */
-@keyframes star-glow {
-  0%, 100% { opacity: 0.25; }
-  50% { opacity: 1; }
+/* ── v5 加载 Spinner：双环旋转（天蓝外环顺时针 ⇄ 宝蓝内环逆时针）── */
+@keyframes v5-spin { to { transform: rotate(360deg); } }
+.spinner-ring {
+  width: 48px; height: 48px; border-radius: 50%; position: relative;
+  border: 2px solid rgba(148,207,240,0.10);
+  border-top-color: #94CFF0;
+  animation: v5-spin 1.6s linear infinite;
 }
-.constellation-star {
-  animation: star-glow 1.4s ease-in-out infinite;
+.spinner-ring::after {
+  content: '';
+  position: absolute; inset: 5px; border-radius: 50%;
+  border: 2px solid transparent;
+  border-bottom-color: #2850A0;
+  animation: v5-spin 1.0s linear infinite reverse;
 }
-.constellation-star:nth-of-type(1) { animation-delay: 0s; }
-.constellation-star:nth-of-type(2) { animation-delay: 0.16s; }
-.constellation-star:nth-of-type(3) { animation-delay: 0.32s; }
-.constellation-star:nth-of-type(4) { animation-delay: 0.48s; }
-.constellation-star:nth-of-type(5) { animation-delay: 0.64s; }
-.constellation-star:nth-of-type(6) { animation-delay: 0.8s; }
-.constellation-done .constellation-star {
-  animation: none;
-  opacity: 1;
+
+/* ── v5 加载文字弹跳点 ── */
+@keyframes v5-dot-bounce { 0%,100%{opacity:.2;transform:translateY(0)} 50%{opacity:1;transform:translateY(-6px)} }
+.loading-dots { display: inline-flex; align-items: center; gap: 4px; margin-left: 2px; }
+.loading-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: #D0E4DC;
+  animation: v5-dot-bounce 0.8s cubic-bezier(0.45,0,0.55,1) infinite;
+}
+.loading-dot:nth-child(2) { animation-delay: 0.15s; }
+.loading-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* ── v5 进度条：极细 3px 渐变条 ── */
+@keyframes v5-progress-shine { 0%,100%{opacity:.8} 50%{opacity:1} }
+.v5-progress {
+  width: 280px; height: 3px;
+  background: rgba(40,80,160,0.12); border-radius: 999px;
+  overflow: hidden; position: relative;
+}
+.v5-progress-fill {
+  height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, #2850A0, #94CFF0);
+  box-shadow: 0 0 6px rgba(148,207,240,0.35);
+  animation: v5-progress-shine 2s ease-in-out infinite;
+  transition: width 300ms cubic-bezier(0.16,1,0.3,1);
 }
 
 /* 卡片呼吸浮沉 */
 @keyframes cardFloat {
   0%, 100% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
-  25%  { transform: translateY(-7px) translateX(2px) rotate(0.4deg) scale(1.002); }
-  50%  { transform: translateY(-2px) translateX(-1px) rotate(-0.2deg) scale(1.001); }
-  75%  { transform: translateY(-6px) translateX(-2px) rotate(-0.5deg) scale(1.001); }
+  25%  { transform: translateY(-12px) translateX(3px) rotate(0.5deg) scale(1.003); }
+  50%  { transform: translateY(-3px) translateX(-2px) rotate(-0.3deg) scale(1.002); }
+  75%  { transform: translateY(-9px) translateX(-3px) rotate(-0.6deg) scale(1.002); }
 }
 
 /* 海面波动 */
@@ -142,4 +166,95 @@ html {
   right: -12px;
   border-bottom: 1.5px solid rgba(255,255,255,0.2);
   border-right: 1.5px solid rgba(255,255,255,0.2);
+}
+
+/* ============================================================
+   V5 按钮层级
+   ============================================================ */
+
+/* ── 主按钮：胶囊形 · 天蓝→宝蓝渐变 · 外发光 · 涟漪 ── */
+.btn-primary {
+  position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 36px;
+  font-family: inherit; font-size: 1rem; font-weight: 600; letter-spacing: 0.03em;
+  color: #000030;
+  background: linear-gradient(135deg, #94CFF0, #2850A0);
+  border: none; border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(148,207,240,0.35), 0 0 0 2px rgba(208,228,220,0.12);
+  transition: transform 200ms cubic-bezier(0.34,1.56,0.64,1),
+              box-shadow 200ms cubic-bezier(0.16,1,0.3,1);
+  will-change: transform;
+}
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 44px rgba(148,207,240,0.45), 0 0 0 3px rgba(208,228,220,0.25);
+}
+.btn-primary:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 0 16px rgba(148,207,240,0.35), 0 0 0 1px rgba(208,228,220,0.12);
+}
+.btn-primary .btn-icon {
+  font-size: 1.2em;
+  transition: transform 200ms cubic-bezier(0.34,1.56,0.64,1);
+}
+.btn-primary:hover .btn-icon { transform: rotate(-6deg) scale(1.1); }
+
+/* ── 次按钮：透明底 · 宝蓝边框 · 白青文字 ── */
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 24px;
+  font-family: inherit; font-size: 0.9rem; font-weight: 500; letter-spacing: 0.02em;
+  color: #D0E8EF;
+  background: transparent;
+  border: 1px solid rgba(40,80,160,0.30); border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 200ms cubic-bezier(0.16,1,0.3,1),
+              background 200ms cubic-bezier(0.16,1,0.3,1),
+              transform 200ms cubic-bezier(0.16,1,0.3,1);
+}
+.btn-secondary:hover {
+  border-color: #94CFF0;
+  background: rgba(148,207,240,0.06);
+  transform: translateY(-1px);
+}
+.btn-secondary:active { transform: translateY(0) scale(0.98); }
+
+/* ── 文字按钮 ── */
+.btn-text {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 12px;
+  font-family: inherit; font-size: 0.85rem; font-weight: 400;
+  color: rgba(208,232,239,0.55);
+  background: none; border: none; cursor: pointer;
+  transition: color 200ms cubic-bezier(0.16,1,0.3,1);
+}
+.btn-text:hover { color: #94CFF0; }
+
+/* ── v5 主按钮呼吸动画（仅 box-shadow，不影响 transform 回弹）── */
+@keyframes btnBreathe {
+  0%, 100% { box-shadow: 0 0 24px rgba(148,207,240,0.35), 0 0 0 2px rgba(208,228,220,0.12); }
+  50%      { box-shadow: 0 0 36px rgba(148,207,240,0.42), 0 0 0 2px rgba(208,228,220,0.16); }
+}
+.btn-hero {
+  animation: btnBreathe 3.5s cubic-bezier(0.45,0,0.55,1) infinite;
+}
+.btn-hero:hover {
+  animation-play-state: paused;
+}
+
+/* ── v5 涟漪效果 ── */
+@keyframes v5-ripple-out {
+  0%   { width: 0; height: 0; opacity: 1; }
+  100% { width: 240px; height: 240px; opacity: 0; margin-left: -120px; margin-top: -120px; }
+}
+.v5-ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  border: 1.5px solid rgba(148,207,240,0.5);
+  background: radial-gradient(circle, rgba(148,207,240,0.15), transparent);
+  animation: v5-ripple-out 500ms cubic-bezier(0.16,1,0.3,1) forwards;
 }

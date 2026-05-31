@@ -40,7 +40,7 @@ interface OptimizerState {
 
 interface OptimizerActions {
   /** 运行重分配优化。 */
-  runRedistribution: (build: CharacterBuild, currentAllocations: SubstatAllocation[], anchoredTypes?: SubstatType[]) => Promise<void>;
+  runRedistribution: (build: CharacterBuild, currentAllocations: SubstatAllocation[], anchoredTypes?: SubstatType[], enableMainStatSearch?: boolean) => Promise<void>;
   /** 运行理想模板优化。当 build 存在时使用当前配置（武器/命座/套装）。 */
   runIdealTemplate: (
     character: CharacterBuild['character'],
@@ -48,15 +48,14 @@ interface OptimizerActions {
     skillMultiplier: number,
     reactionType: CharacterBuild['reactionType'],
     build?: CharacterBuild,
-    searchMainStats?: boolean,
-    anchoredAllocations?: SubstatAllocation[],
+    anchoredAllocations?: SubstatAllocation[], enableMainStatSearch?: boolean,
   ) => Promise<void>;
   /** 运行优化并自动计算伤害对比和乘区分析。 */
   runOptimizationWithComparison: (
     build: CharacterBuild,
     currentAllocations: SubstatAllocation[],
     scenarioName: string,
-    anchoredTypes?: SubstatType[],
+    anchoredTypes?: SubstatType[], enableMainStatSearch?: boolean,
   ) => Promise<void>;
   /** 清除优化结果。 */
   clearResults: () => void;
@@ -249,7 +248,7 @@ function computeZoneAnalysis(
 export const useOptimizerStore = create<OptimizerState & OptimizerActions>((set, _get) => ({
   ...initialState,
 
-  runRedistribution: async (build, currentAllocations, anchoredTypes) => {
+  runRedistribution: async (build, currentAllocations, anchoredTypes, enableMainStatSearch) => {
     set({ isCalculating: true, progress: 0, error: null });
 
     try {
@@ -261,7 +260,7 @@ export const useOptimizerStore = create<OptimizerState & OptimizerActions>((set,
       });
 
       const result = await api.redistribute(
-        { build, currentAllocations, anchoredTypes },
+        { build, currentAllocations, anchoredTypes, enableMainStatSearch },
         progressCallback,
       );
       set({ redistributeResult: result, isCalculating: false, progress: 1 });
@@ -274,7 +273,7 @@ export const useOptimizerStore = create<OptimizerState & OptimizerActions>((set,
     }
   },
 
-  runIdealTemplate: async (character, totalRolls, skillMultiplier, reactionType, build, searchMainStats, anchoredAllocations) => {
+  runIdealTemplate: async (character, totalRolls, skillMultiplier, reactionType, build, anchoredAllocations, enableMainStatSearch) => {
     set({ isCalculating: true, progress: 0, error: null });
 
     try {
@@ -285,7 +284,7 @@ export const useOptimizerStore = create<OptimizerState & OptimizerActions>((set,
       });
 
       const result = await api.generateIdeal(
-        { character, totalRolls, skillMultiplier, reactionType, build, searchMainStats, anchoredAllocations },
+        { character, totalRolls, skillMultiplier, reactionType, build, anchoredAllocations, enableMainStatSearch },
         progressCallback,
       );
       set({ idealResult: result, isCalculating: false, progress: 1 });
@@ -298,7 +297,7 @@ export const useOptimizerStore = create<OptimizerState & OptimizerActions>((set,
     }
   },
 
-  runOptimizationWithComparison: async (build, currentAllocations, scenarioName, anchoredTypes) => {
+  runOptimizationWithComparison: async (build, currentAllocations, scenarioName, anchoredTypes, enableMainStatSearch) => {
     set({ isCalculating: true, progress: 0, error: null });
 
     try {
@@ -309,7 +308,7 @@ export const useOptimizerStore = create<OptimizerState & OptimizerActions>((set,
       });
 
       const result = await api.redistribute(
-        { build, currentAllocations, anchoredTypes },
+        { build, currentAllocations, anchoredTypes, enableMainStatSearch },
         progressCallback,
       );
 

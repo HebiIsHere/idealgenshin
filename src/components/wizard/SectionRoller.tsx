@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import { useWizardStore, type WizardSection } from '../../store/slices/wizardSlice';
+import { useMenuStore } from '../../stores/menuStore';
 
 interface SectionRollerProps {
   renderSection: (section: WizardSection) => React.ReactNode;
@@ -12,7 +13,7 @@ interface SectionRollerProps {
 function useSnapType(): string {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  return isMobile ? 'none' : 'y proximity';
+  return isMobile ? 'none' : 'y mandatory';
 }
 
 function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElement {
@@ -20,10 +21,15 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
   const sections = useWizardStore((s) => s.sections);
   const goToSection = useWizardStore((s) => s.goToSection);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   const scrollRef = useRef<HTMLDivElement>(null);
-  const scrollingByStore = useRef(false);
-  const floatRef = useRef({ duration: 5.5 + Math.random() * 2, delay: Math.random() * 2 });
+  const ignoringScroll = useRef(false);
+  const [floatParams] = useState(() => ({ duration: 5.5 + Math.random() * 2, delay: Math.random() * 2 }));
   const snapType = useSnapType();
+  const menuOpenCount = useMenuStore((s) => s.openCount);
+  const isMenuOpen = menuOpenCount > 0;
 
   // Stable refs for wheel handler closure
   const currentIndexRef = useRef(currentIndex);
@@ -31,86 +37,94 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
   const sectionsLenRef = useRef(sections.length);
   sectionsLenRef.current = sections.length;
 
-  // Desktop wheel → immediate card switch, one tick = one card
+  // ── Wheel / touchpad → one card at a time, via store navigation ──
+  // Mouse wheel: single event with large deltaY (±100) → immediate switch.
+  // Touchpad: many events with tiny deltaY (±5~10) → accumulate to threshold → one switch per gesture.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
-    const onWheel = (e: WheelEvent) => {
-      if (scrollingByStore.current) return;
+    let wheelAccum = 0;
+    let wheelClearTimer: ReturnType<typeof setTimeout>;
 
-      e.preventDefault();
-      const dir = e.deltaY > 0 ? 1 : -1;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault(); // always suppress native scroll
+      if (ignoringScroll.current) return;
+
+      wheelAccum += e.deltaY;
+      clearTimeout(wheelClearTimer);
+
+      // 300ms no new event → light touch / finger resting → reset
+      wheelClearTimer = setTimeout(() => { wheelAccum = 0; }, 300);
+
+      const THRESHOLD = 40;
+      if (Math.abs(wheelAccum) < THRESHOLD) return;
+
+      const dir = wheelAccum > 0 ? 1 : -1;
+      wheelAccum = 0;
       const newIdx = currentIndexRef.current + dir;
       if (newIdx >= 0 && newIdx < sectionsLenRef.current) {
-        scrollingByStore.current = true;
         goToSection(newIdx);
       }
     };
 
     el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      clearTimeout(wheelClearTimer);
+    };
   }, [goToSection]);
 
-  // Store → scroll: navigate to card when currentIndex changes externally
+  // ── Store → Scroll: scroll the target card into view ──
+  // Desktop: scrollIntoView (browser natively coordinates with scroll-snap, no jitter).
+  // Mobile:  offsetTop + scrollTo (hidden container has no native scroll, must be programmatic).
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    // Use actual card height (may differ from container height on mobile)
-    const cardH = (el.firstElementChild?.getBoundingClientRect().height ?? el.clientHeight) || el.clientHeight;
-    const targetTop = currentIndex * cardH;
-    if (Math.abs(el.scrollTop - targetTop) < 1) return;
+    const container = scrollRef.current;
+    if (!container) return;
 
-    // Disable snap so intermediate snap points don't hijack the scroll
-    el.style.scrollSnapType = 'none';
-    scrollingByStore.current = true;
-    el.scrollTo({ top: targetTop, behavior: 'smooth' });
-
-    // rAF polling: wait until scrollTop stabilises (3 consecutive identical frames)
-    // then verify we reached the target — retry if not
-    let sameCount = 0;
-    let lastTop = -1;
-    let rafId: number;
-    const checkDone = () => {
-      const cur = scrollRef.current;
-      if (!cur) return;
-      if (cur.scrollTop === lastTop) {
-        sameCount++;
-        if (sameCount >= 3) {
-          const dist = Math.abs(cur.scrollTop - targetTop);
-          if (dist > 2) {
-            // Scroll stopped short — retry
-            sameCount = 0;
-            lastTop = -1;
-            cur.scrollTo({ top: targetTop, behavior: 'smooth' });
-            rafId = requestAnimationFrame(checkDone);
-            return;
-          }
-          // Reached target — restore snap
-          cur.style.scrollSnapType = snapType;
-          scrollingByStore.current = false;
-          return;
-        }
-      } else {
-        sameCount = 0;
-        lastTop = cur.scrollTop;
+    const sectionKey = String(sections[currentIndex] ?? '');
+    let targetEl: HTMLElement | null = null;
+    for (let i = 0; i < container.children.length; i++) {
+      const child = container.children[i] as HTMLElement;
+      if (child.getAttribute('data-section') === sectionKey) {
+        targetEl = child;
+        break;
       }
-      rafId = requestAnimationFrame(checkDone);
-    };
-    rafId = requestAnimationFrame(checkDone);
+    }
+    if (!targetEl) return;
 
-    return () => {
-      cancelAnimationFrame(rafId);
-      if (scrollRef.current) {
-        scrollRef.current.style.scrollSnapType = snapType;
-      }
-    };
-  }, [currentIndex, snapType]);
+    // Already in view?
+    const rect = targetEl.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    if (Math.abs(rect.top - containerRect.top) < 2) {
+      ignoringScroll.current = false;
+      return;
+    }
 
+    ignoringScroll.current = true;
+    const finish = () => { ignoringScroll.current = false; };
+
+    if (isMobile) {
+      // Mobile: hidden container → programmatic scroll only
+      container.scrollTo({ top: targetEl.offsetTop, behavior: 'smooth' });
+      // No scrollend on hidden containers → timeout fallback
+      setTimeout(finish, 600);
+    } else {
+      // Desktop: let browser coordinate smooth scroll + snap natively
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      container.addEventListener('scrollend', finish, { once: true });
+      const fallback = setTimeout(finish, 800);
+      return () => {
+        container.removeEventListener('scrollend', finish);
+        clearTimeout(fallback);
+      };
+    }
+  }, [currentIndex, sections, isMobile]);
+
+  // ── Touch handling (mobile) ──
   const isTouchingRef = useRef(false);
   const momentumSettlingRef = useRef(false);
 
-  // Mobile touch: suppress store sync during touch, sync once after momentum settles
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -128,26 +142,30 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
       el.removeEventListener('touchstart', onTouchStart);
       el.removeEventListener('touchend', onTouchEnd);
     };
-  }, [goToSection]);
+  }, []);
 
-  // Scroll → store: debounced sync (100ms delay, skipped during touch & momentum)
+  // ── Scroll → Store: detect manual scroll and sync currentIndex ──
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleScroll = useCallback(() => {
-    if (scrollingByStore.current || isTouchingRef.current || momentumSettlingRef.current) return;
+    if (ignoringScroll.current || isTouchingRef.current || momentumSettlingRef.current) return;
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     debounceTimerRef.current = setTimeout(() => {
       const el = scrollRef.current;
-      if (!el) return;
-      const cardH = (el.firstElementChild?.getBoundingClientRect().height ?? el.clientHeight) || el.clientHeight;
-      const idx = Math.round(el.scrollTop / cardH);
-      if (idx !== currentIndex && idx >= 0 && idx < sections.length) {
-        goToSection(idx);
+      if (!el || !el.children.length) return;
+      const st = el.scrollTop;
+      let bestIdx = 0;
+      let bestDist = Infinity;
+      for (let i = 0; i < el.children.length; i++) {
+        const child = el.children[i] as HTMLElement;
+        const childTop = child.offsetTop;
+        const dist = Math.abs(st - childTop);
+        if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+      }
+      if (bestIdx !== currentIndex && bestIdx >= 0 && bestIdx < sections.length) {
+        goToSection(bestIdx);
       }
     }, 100);
   }, [currentIndex, sections.length, goToSection]);
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <Box
@@ -158,16 +176,20 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
         height: '100%',
         overflowY: isMobile ? 'hidden' : 'scroll',
         scrollSnapType: snapType,
+        p: { xs: 4, md: 6 },
         '&::-webkit-scrollbar': { display: 'none' },
         scrollbarWidth: 'none',
       }}
     >
-      {sections.map((section, _idx) => (
+      {sections.map((section) => (
         <Box
           key={String(section)}
+          data-section={String(section)}
+          className="card-wrapper"
           sx={{
             height: { xs: '100dvh', md: '100vh' },
             scrollSnapAlign: isMobile ? undefined : 'start',
+            scrollSnapStop: 'always',
             display: 'flex',
             alignItems: 'safe center',
             justifyContent: 'center',
@@ -182,13 +204,14 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
               maxHeight: { xs: 'calc(100dvh - 64px)', md: 'calc(100vh - 96px)' },
               overflowY: 'auto',
               py: 1,
-              px: 0.5,
               '&::-webkit-scrollbar': { display: 'none' },
               scrollbarWidth: 'none',
             }}
           >
+            <Box sx={{ overflow: 'visible', mx: { xs: 1, md: 5 }, my: 4 }}>
             <Paper
               elevation={0}
+              className="card-animate"
               sx={{
                 width: '100%',
                 p: { xs: 2.5, md: 4 },
@@ -198,7 +221,8 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
                 bgcolor: 'rgba(22,33,62,0.6)',
                 backdropFilter: 'blur(12px)',
                 overflow: 'visible',
-                animation: `cardFloat ${floatRef.current.duration}s cubic-bezier(0.45,0,0.55,1) ${floatRef.current.delay}s infinite`,
+                animation: `cardFloat ${floatParams.duration}s cubic-bezier(0.45,0,0.55,1) ${floatParams.delay}s infinite`,
+                animationPlayState: isMenuOpen ? 'paused' : undefined,
                 '&:hover': { animationPlayState: 'paused' },
               }}
             >
@@ -206,6 +230,7 @@ function SectionRoller({ renderSection }: SectionRollerProps): React.ReactElemen
                 {renderSection(section)}
               </Box>
             </Paper>
+            </Box>
           </Box>
         </Box>
       ))}

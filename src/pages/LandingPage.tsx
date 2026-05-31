@@ -36,10 +36,10 @@ const bubbleRise = keyframes`
   100% { transform: translateY(-100vh) scale(1.4); opacity: 0; }
 `;
 
-// 按钮沉浮
+// 按钮光晕呼吸
 const float = keyframes`
-  0%, 100% { transform: translateY(0); box-shadow: 0 2px 8px rgba(91,192,235,0.25); }
-  50% { transform: translateY(-10px); box-shadow: 0 8px 24px rgba(91,192,235,0.45); }
+  0%, 100% { box-shadow: 0 0 20px rgba(91,192,235,0.3), 0 0 0 2px rgba(208,228,220,0.10); }
+  50% { box-shadow: 0 0 36px rgba(91,192,235,0.45), 0 0 0 2px rgba(208,228,220,0.16); }
 `;
 
 const EXIT_MS = 350;
@@ -98,6 +98,32 @@ function LandingPage(): React.ReactElement {
           animation: `${waveShift} 6s ease-in-out infinite`,
         }}
       />
+      {/* Furina 剪影 — 右侧淡入 */}
+      <Box
+        component="img"
+        src="/furina-bg.svg"
+        alt=""
+        aria-hidden="true"
+        sx={{
+          position: 'fixed',
+          top: '-14vh',
+          right: '-50vw',
+          width: '110vw',
+          height: '132vh',
+          objectFit: 'cover',
+          objectPosition: '5% center',
+          zIndex: 0,
+          pointerEvents: 'none',
+          opacity: 0.045,
+          animation: 'furinaBreathe 6s cubic-bezier(0.45,0,0.55,1) infinite',
+          '@keyframes furinaBreathe': {
+            '0%, 100%': { opacity: 0.035 },
+            '50%': { opacity: 0.06 },
+          },
+          '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+        }}
+      />
+
       {/* 第二层海面：稍偏移制造纵深感 */}
       <Box
         sx={{
@@ -189,7 +215,7 @@ function LandingPage(): React.ReactElement {
           sx={{ color: 'text.secondary', mb: 6, lineHeight: 1.8,
             animation: `${fadeIn} 0.8s 0.3s cubic-bezier(0.16,1,0.3,1) both` }}
         >
-          基于完整伤害公式的圣遗物词条优化工具
+          基于完整期望伤害公式的圣遗物词条优化工具
           <br />
           逐区填写 · 问答引导 · 可视化计算
         </Typography>
@@ -209,7 +235,7 @@ function LandingPage(): React.ReactElement {
 
         <Typography variant="caption" sx={{ color: 'text.disabled', mt: 4, display: 'block',
           animation: `${fadeIn} 0.8s 0.6s cubic-bezier(0.16,1,0.3,1) both` }}>
-          作者：袔苾 · v4.1
+          作者：袔苾 · v4.2
         </Typography>
       </Container>
 
@@ -252,7 +278,7 @@ function LandingPage(): React.ReactElement {
               fullWidth
               variant="text"
               startIcon={<DescriptionIcon fontSize="small" />}
-              href="/理想原生v4.1-项目介绍手册.docx"
+              href="/理想原生v4.2-项目介绍手册.docx"
               download
               sx={{ justifyContent: 'flex-start', color: 'text.secondary', mb: 0.5, fontSize: '0.8rem' }}
             >
@@ -263,7 +289,7 @@ function LandingPage(): React.ReactElement {
               fullWidth
               variant="text"
               startIcon={<DescriptionIcon fontSize="small" />}
-              href="/理想原生v4.1-使用说明.docx"
+              href="/理想原生v4.2-使用说明.docx"
               download
               sx={{ justifyContent: 'flex-start', color: 'text.secondary', fontSize: '0.8rem' }}
             >

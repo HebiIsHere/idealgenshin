@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>理想原生 v5.0 — 设计样板 · Furina 色板 + 海洋</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  --bg-deepest:     #000030;
+  --bg-deep:        #091959;
+  --bg-mid:         #0E2368;
+
+  --sky:            #94CFF0;
+  --sky-subtle:     rgba(148,207,240,0.12);
+  --sky-soft:       rgba(148,207,240,0.25);
+  --sky-glow:       rgba(148,207,240,0.35);
+
+  --royal:          #2850A0;
+  --royal-subtle:   rgba(40,80,160,0.15);
+  --royal-soft:     rgba(40,80,160,0.30);
+  --royal-glow:     rgba(40,80,160,0.40);
+
+  --white-cyan:     #D0E8EF;
+  --white-dim:      rgba(208,232,239,0.55);
+  --white-hint:     rgba(208,232,239,0.30);
+
+  --gold:           #D0C4A6;
+  --gold-dim:       rgba(208,196,166,0.18);
+  --gold-faint:     rgba(208,196,166,0.08);
+
+  --radius-sm:      8px;
+  --radius-md:      12px;
+  --radius-lg:      16px;
+  --radius-xl:      20px;
+  --radius-full:    999px;
+
+  --ease-snappy:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-breathe:   cubic-bezier(0.45, 0, 0.55, 1);
+  --dur-micro:      120ms;
+  --dur-fast:       200ms;
+  --dur-normal:     350ms;
+  --dur-page:       500ms;
+}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background:
+    linear-gradient(180deg,
+      #000028 0%,
+      #000030 15%,
+      #051050 45%,
+      #091959 75%,
+      #0E2368 100%);
+  color: var(--white-cyan);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── ① 深海纵深背景 + 海底暗影 ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* 深海纵深渐变（全蓝色调） */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(14,35,104,0.50) 0%,
+      rgba(9,25,89,0.30)  40%,
+      rgba(0,0,48,0.60)   80%,
+      #000020             100%);
+}
+
+/* ── ① 光束（caustics）— 2 条斜向光柱 ── */
+.caustic {
+  position: fixed; z-index: 0; pointer-events: none;
+  width: 3px; height: 80vh;
+  background: linear-gradient(180deg,
+    rgba(148,207,240,0.08) 0%,
+    rgba(148,207,240,0.15) 30%,
+    rgba(148,207,240,0.04) 70%,
+    transparent 100%);
+}
+.caustic--a {
+  top: -10%; left: 18%;
+  transform: rotate(12deg);
+  animation: causticDrift 12s var(--ease-breathe) infinite alternate;
+}
+.caustic--b {
+  top: -10%; left: 72%;
+  transform: rotate(-10deg);
+  animation: causticDrift 14s var(--ease-breathe) 3s infinite alternate;
+}
+@keyframes causticDrift {
+  0%   { opacity: 0.3; transform: rotate(12deg) translateX(0); }
+  100% { opacity: 0.7; transform: rotate(14deg) translateX(40px); }
+}
+.caustic--b { animation-name: causticDriftB; }
+@keyframes causticDriftB {
+  0%   { opacity: 0.3; transform: rotate(-10deg) translateX(0); }
+  100% { opacity: 0.6; transform: rotate(-8deg) translateX(-30px); }
+}
+
+/* ── ② 浪纹分隔线（SVG inline）── */
+.wave-divider {
+  width: 100%; height: 32px; margin: 24px 0;
+  display: flex; align-items: center;
+  overflow: visible;
+}
+.wave-divider svg {
+  width: 100%; height: 16px;
+}
+.wave-divider path {
+  stroke: var(--gold);
+  stroke-width: 1;
+  fill: none;
+  stroke-dasharray: 800;
+  stroke-dashoffset: 800;
+  animation: waveDraw 1.2s var(--ease-snappy) forwards;
+  animation-play-state: paused;
+}
+.wave-divider.visible path { animation-play-state: running; }
+@keyframes waveDraw { to { stroke-dashoffset: 0; } }
+
+/* ── ③ 气泡 ── */
+.bubbles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.bubble {
+  position: absolute; border-radius: 50%;
+  border: 1.5px solid rgba(148,207,240,0.18);
+  background: transparent;
+  animation: bubbleFloat linear infinite;
+}
+.bubble--a { width: 18px; height: 18px; bottom: -5%; left: 12%; animation-duration: 12s; animation-delay: 0s; }
+.bubble--b { width: 10px; height: 10px; bottom: -5%; left: 45%; animation-duration: 14s; animation-delay: 2s; }
+.bubble--c { width: 14px; height: 14px; bottom: -5%; left: 78%; animation-duration: 11s; animation-delay: 5s; }
+@keyframes bubbleFloat {
+  0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  10%  { opacity: 0.4; }
+  50%  { transform: translateY(-50vh) translateX(20px) scale(1.3); opacity: 0.3; }
+  90%  { opacity: 0.1; }
+  100% { transform: translateY(-100vh) translateX(-10px) scale(1.6); opacity: 0; }
+}
+
+/* ④ 卡片 hover 时额外气泡 */
+.card:hover .card-bubble {
+  opacity: 0.5;
+  transform: translateY(-60px) scale(1.4);
+}
+.card-bubble {
+  position: absolute; bottom: 0; left: 30%;
+  width: 8px; height: 8px; border-radius: 50%;
+  border: 1px solid rgba(148,207,240,0.3);
+  background: transparent;
+  opacity: 0; pointer-events: none; z-index: 2;
+  transition: opacity 0.4s var(--ease-snappy), transform 0.6s var(--ease-snappy);
+}
+.card-bubble--2 { left: 70%; transition-delay: 60ms; }
+
+/* ── ④ 卡片底边浪纹（悬浮时浮现）── */
+.card-wave {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 24px; z-index: 0; pointer-events: none;
+  overflow: visible; opacity: 0;
+  transition: opacity 0.35s var(--ease-snappy);
+}
+.card:hover .card-wave { opacity: 1; }
+.card-wave svg { width: 100%; height: 100%; }
+.card-wave path {
+  fill: none; stroke: rgba(148,207,240,0.10);
+  stroke-width: 1;
+  transform-origin: center;
+  animation: cardWaveBreathe 3s var(--ease-breathe) infinite;
+}
+@keyframes cardWaveBreathe {
+  0%, 100% { d: path('M0,20 Q60,10 120,20 T240,20 T360,20 T480,20 T600,20 T720,20 L720,24 L0,24 Z'); }
+  50%      { d: path('M0,18 Q60,26 120,18 T240,18 T360,18 T480,18 T600,18 T720,18 L720,24 L0,24 Z'); }
+}
+
+/* ── ⑤ 按钮涟漪 ── */
+.btn-primary { overflow: hidden; }
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  border: 1.5px solid rgba(148,207,240,0.5);
+  background: radial-gradient(circle, rgba(148,207,240,0.15), transparent);
+  animation: rippleOut 500ms var(--ease-snappy) forwards;
+}
+@keyframes rippleOut {
+  0%   { width: 0; height: 0; opacity: 1; }
+  100% { width: 240px; height: 240px; opacity: 0; margin-left: -120px; margin-top: -120px; }
+}
+
+/* ── ⑥ 页脚波浪 SVG ── */
+.footer-wave {
+  width: 100%; height: 80px; overflow: hidden;
+  margin-top: 40px; position: relative; z-index: 1;
+}
+.footer-wave svg {
+  width: 100%; height: 100%;
+  animation: footerWaveBreathe 6s var(--ease-breathe) infinite alternate;
+}
+@keyframes footerWaveBreathe {
+  0%   { transform: translateY(0) scaleX(1); }
+  100% { transform: translateY(-3px) scaleX(1.02); }
+}
+
+/* ============================================================
+   AMBIENT
+   ============================================================ */
+.ambient { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.ambient-glow {
+  position: absolute; border-radius: 50%; filter: blur(140px);
+}
+.ambient-glow--sky {
+  top: -25%; left: 25%; width: 640px; height: 640px;
+  background: var(--sky);
+  opacity: 0.05;
+  animation: ambientPulse 8s var(--ease-breathe) infinite alternate;
+}
+.ambient-glow--royal {
+  bottom: -15%; right: 15%; width: 520px; height: 520px;
+  background: var(--royal);
+  opacity: 0.06;
+  animation: ambientPulse 10s var(--ease-breathe) 2s infinite alternate-reverse;
+}
+@keyframes ambientPulse {
+  0%   { opacity: 0.04; transform: scale(1); }
+  100% { opacity: 0.08; transform: scale(1.12); }
+}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.container {
+  position: relative; z-index: 1;
+  max-width: 960px; margin: 0 auto; padding: 60px 24px 20px;
+}
+
+h1 {
+  font-family: 'Noto Serif SC', 'PingFang SC', serif;
+  font-weight: 200; font-size: 2.8rem; letter-spacing: 0.08em;
+  text-align: center; color: var(--white-cyan);
+  margin-bottom: 8px;
+}
+h1 em { font-style: normal; color: var(--sky); font-weight: 300; }
+
+.version-tag {
+  display: inline-block; margin: 0 auto 12px;
+  padding: 4px 16px; border-radius: var(--radius-full);
+  border: 1px solid var(--gold-dim);
+  font-size: 0.75rem; color: var(--gold);
+  letter-spacing: 0.06em;
+}
+.subtitle {
+  text-align: center; color: var(--white-dim);
+  font-size: 0.95rem; margin-bottom: 48px;
+}
+
+/* Section headers */
+.section { margin-bottom: 56px; }
+.section-title {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 28px;
+}
+.section-title h2 {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 400; font-size: 1.2rem; color: var(--white-cyan);
+  letter-spacing: 0.04em;
+}
+.section-title .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 6px var(--gold);
+  animation: dotPulse 2s var(--ease-breathe) infinite;
+}
+.section-title .line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(208,196,166,0.25), transparent);
+}
+@keyframes dotPulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+/* ── Swatches ── */
+.palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.swatch {
+  height: 80px; border-radius: var(--radius-md);
+  display: flex; align-items: flex-end; padding: 10px;
+  font-size: 0.62rem; font-family: monospace; letter-spacing: 0.04em;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.swatch--bg0    { background: #000030; color: var(--white-cyan); }
+.swatch--bg1    { background: #091959; color: var(--white-cyan); }
+.swatch--bg2    { background: #0E2368; color: var(--white-cyan); }
+.swatch--sky    { background: var(--sky); color: #000030; }
+.swatch--royal  { background: var(--royal); color: var(--white-cyan); }
+.swatch--white  { background: var(--white-cyan); color: #000030; }
+.swatch--dim    { background: #6E7A8C; color: #000030; }
+.swatch--gold   { background: var(--gold); color: #000030; }
+.swatch-label { font-weight: 600; display: block; }
+
+.contrast-pair {
+  display: flex; gap: 8px; margin-top: 12px;
+  align-items: center; justify-content: center;
+  font-size: 0.75rem; color: var(--white-dim);
+}
+.contrast-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.contrast-dot--sky   { background: var(--sky); box-shadow: 0 0 8px var(--sky-glow); }
+.contrast-dot--royal { background: var(--royal); box-shadow: 0 0 8px var(--royal-glow); }
+
+/* ── Buttons ── */
+.btn-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
+
+.btn-primary {
+  position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 36px;
+  font-family: inherit; font-size: 1rem; font-weight: 600; letter-spacing: 0.03em;
+  color: #000030;
+  background: linear-gradient(135deg, var(--sky), var(--royal));
+  border: none; border-radius: var(--radius-full);
+  cursor: pointer;
+  box-shadow: 0 0 24px var(--sky-glow), 0 0 0 2px rgba(208,196,166,0.12);
+  transition: transform var(--dur-fast) var(--ease-spring),
+              box-shadow var(--dur-fast) var(--ease-snappy);
+  will-change: transform;
+}
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 44px rgba(148,207,240,0.45), 0 0 0 3px rgba(208,196,166,0.25);
+}
+.btn-primary:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 0 16px var(--sky-glow), 0 0 0 1px var(--gold-dim);
+}
+.btn-primary .icon {
+  font-size: 1.2em;
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+.btn-primary:hover .icon { transform: rotate(-6deg) scale(1.1); }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 24px;
+  font-family: inherit; font-size: 0.9rem; font-weight: 500; letter-spacing: 0.02em;
+  color: var(--white-cyan);
+  background: transparent;
+  border: 1px solid var(--royal-soft); border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-snappy),
+              background var(--dur-fast) var(--ease-snappy),
+              transform var(--dur-fast) var(--ease-snappy);
+}
+.btn-secondary:hover {
+  border-color: var(--sky);
+  background: rgba(148,207,240,0.06);
+  transform: translateY(-1px);
+}
+.btn-secondary:active { transform: scale(0.97); }
+
+.btn-text {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 8px 16px;
+  font-family: inherit; font-size: 0.85rem; font-weight: 500;
+  color: var(--white-dim);
+  background: none; border: none; border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-snappy);
+}
+.btn-text:hover { color: var(--sky); }
+
+/* ── Card ── */
+.card {
+  position: relative;
+  padding: 32px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-deep);
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: transform var(--dur-fast) var(--ease-spring),
+              border-color var(--dur-fast) var(--ease-snappy),
+              box-shadow var(--dur-fast) var(--ease-snappy);
+  will-change: transform;
+  overflow: visible;
+}
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 20px; right: 20px; height: 1px;
+  background: linear-gradient(90deg,
+    transparent, rgba(208,196,166,0.25) 20%,
+    rgba(208,196,166,0.40) 50%,
+    rgba(208,196,166,0.25) 80%, transparent);
+  opacity: 0.5; z-index: 1;
+  transition: opacity var(--dur-fast) var(--ease-snappy);
+}
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(148,207,240,0.15);
+  box-shadow: 0 0 48px rgba(148,207,240,0.12), 0 0 16px rgba(40,80,160,0.20), 0 4px 20px rgba(0,0,48,0.5);
+}
+.card:hover::before { opacity: 0.85; }
+.card h3 {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 500; font-size: 1.1rem; color: var(--white-cyan);
+  margin-bottom: 12px; position: relative; z-index: 1;
+}
+.card p {
+  color: var(--white-dim); font-size: 0.9rem; line-height: 1.7;
+  position: relative; z-index: 1;
+}
+
+.card-animate {
+  opacity: 0; transform: translateY(24px);
+  animation: cardEnter var(--dur-page) var(--ease-snappy) forwards;
+}
+.card-animate:nth-child(1) { animation-delay: 0ms; }
+.card-animate:nth-child(2) { animation-delay: 80ms; }
+.card-animate:nth-child(3) { animation-delay: 160ms; }
+@keyframes cardEnter { to { opacity: 1; transform: translateY(0); } }
+
+.card-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px; margin-bottom: 20px;
+}
+
+/* ── Input ── */
+.input-group { margin-bottom: 20px; }
+.input-label {
+  display: block; font-size: 0.78rem; font-weight: 500;
+  color: var(--white-dim); margin-bottom: 6px; letter-spacing: 0.03em;
+}
+.input {
+  width: 100%; max-width: 360px;
+  padding: 12px 16px;
+  font-family: inherit; font-size: 0.95rem; color: var(--white-cyan);
+  background: rgba(9,25,89,0.35);
+  border: 1px solid rgba(40,80,160,0.20);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease-snappy),
+              background var(--dur-fast) var(--ease-snappy),
+              box-shadow var(--dur-fast) var(--ease-snappy);
+}
+.input::placeholder { color: var(--white-hint); }
+.input:hover {
+  border-color: rgba(148,207,240,0.3);
+  background: rgba(9,25,89,0.55);
+}
+.input:focus {
+  border-color: var(--royal);
+  background: rgba(9,25,89,0.65);
+  box-shadow: 0 0 0 3px rgba(148,207,240,0.08), 0 0 0 1px rgba(40,80,160,0.30);
+}
+
+.select {
+  width: 100%; max-width: 360px;
+  padding: 12px 40px 12px 16px;
+  font-family: inherit; font-size: 0.95rem; color: var(--white-cyan);
+  background: rgba(9,25,89,0.35);
+  border: 1px solid rgba(40,80,160,0.20);
+  border-radius: var(--radius-md);
+  outline: none; cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23D0C4A6' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 16px center;
+  transition: border-color var(--dur-fast) var(--ease-snappy),
+              background var(--dur-fast) var(--ease-snappy),
+              box-shadow var(--dur-fast) var(--ease-snappy);
+}
+.select:hover { border-color: rgba(148,207,240,0.3); }
+.select:focus {
+  border-color: var(--royal);
+  box-shadow: 0 0 0 3px rgba(148,207,240,0.08), 0 0 0 1px rgba(40,80,160,0.30);
+}
+
+/* ── Chips ── */
+.chip-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 16px;
+  font-family: inherit; font-size: 0.8rem; font-weight: 500;
+  color: var(--white-dim);
+  background: rgba(40,80,160,0.10);
+  border: 1px solid rgba(40,80,160,0.18);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-snappy),
+              color var(--dur-fast) var(--ease-snappy),
+              border-color var(--dur-fast) var(--ease-snappy);
+}
+.chip:hover {
+  background: rgba(148,207,240,0.08);
+  border-color: rgba(148,207,240,0.30);
+  color: var(--white-cyan);
+}
+.chip.active {
+  background: rgba(148,207,240,0.12);
+  color: var(--sky);
+  border-color: rgba(148,207,240,0.40);
+}
+.chip .count {
+  font-size: 0.7rem; opacity: 0.6;
+  background: rgba(148,207,240,0.08);
+  padding: 1px 6px; border-radius: var(--radius-full);
+}
+
+/* ── Stepper ── */
+.stepper {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 8px;
+  border-radius: var(--radius-xl);
+  background: rgba(9,25,89,0.55);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.05);
+  max-width: 160px;
+}
+.step {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 12px; border-radius: var(--radius-full);
+  cursor: pointer; font-size: 0.73rem;
+  color: var(--white-dim);
+  transition: background var(--dur-fast) var(--ease-snappy),
+              color var(--dur-fast) var(--ease-snappy);
+}
+.step:hover { background: rgba(148,207,240,0.04); }
+.step.current { background: rgba(148,207,240,0.10); color: var(--sky); }
+.step.done    { color: var(--gold); }
+.step .num {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.58rem; font-weight: 600;
+  background: rgba(255,255,255,0.04); flex-shrink: 0;
+  transition: background var(--dur-fast) var(--ease-snappy);
+}
+.step.current .num { background: var(--royal); color: var(--white-cyan); }
+.step.done .num    { background: rgba(208,196,166,0.12); color: var(--gold); }
+
+/* ── Loading ── */
+.loading-demo { display: flex; align-items: center; gap: 32px; margin-bottom: 20px; }
+.spinner-ring {
+  width: 48px; height: 48px; border-radius: 50%; position: relative;
+  border: 2px solid rgba(148,207,240,0.10);
+  border-top-color: var(--sky);
+  animation: spin 1.6s linear infinite;
+}
+.spinner-ring::after {
+  content: '';
+  position: absolute; inset: 5px; border-radius: 50%;
+  border: 2px solid rgba(40,80,160,0.10);
+  border-bottom-color: var(--royal);
+  animation: spin 1.0s linear infinite reverse;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  color: var(--white-dim); font-size: 0.9rem;
+  display: flex; align-items: center; gap: 4px;
+}
+.loading-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--gold);
+  animation: dotBounce 0.8s var(--ease-breathe) infinite;
+}
+.loading-dot:nth-child(2) { animation-delay: 0.15s; }
+.loading-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dotBounce { 0%,100%{opacity:.2;transform:translateY(0)} 50%{opacity:1;transform:translateY(-6px)} }
+
+/* ── Progress ── */
+.progress {
+  width: 100%; max-width: 400px; height: 3px;
+  background: rgba(40,80,160,0.12); border-radius: var(--radius-full);
+  overflow: hidden; position: relative;
+}
+.progress-fill {
+  height: 100%; border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--royal), var(--sky));
+  width: 65%;
+  box-shadow: 0 0 6px var(--sky-glow);
+  animation: progressShine 2s ease-in-out infinite;
+}
+@keyframes progressShine { 0%,100%{opacity:.8} 50%{opacity:1} }
+
+/* ── Badge ── */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: var(--radius-full);
+  font-size: 0.7rem; font-weight: 500; letter-spacing: 0.04em;
+  background: rgba(148,207,240,0.08);
+  color: var(--sky);
+  border: 1px solid rgba(148,207,240,0.12);
+}
+.badge--gold {
+  background: rgba(208,196,166,0.06);
+  color: var(--gold);
+  border-color: rgba(208,196,166,0.12);
+}
+
+.rule-box {
+  margin-top: 28px; padding: 20px 24px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-deep);
+  border: 1px solid var(--gold-faint);
+}
+.rule-box h4 {
+  font-size: 0.82rem; color: var(--gold); letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+.rule-box ul {
+  list-style: none; display: flex; flex-wrap: wrap; gap: 16px;
+}
+.rule-box li {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.78rem; color: var(--white-dim);
+}
+.rule-box li strong { color: var(--white-cyan); font-weight: 500; }
+
+/* ============================================================
+   EXPANDABLE UI — 点击后展开的界面
+   ============================================================ */
+
+/* ── Accordion / Collapse ── */
+.expand-panel {
+  border-radius: var(--radius-lg);
+  background: var(--bg-deep);
+  border: 1px solid rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+.expand-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px; cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-snappy);
+  user-select: none;
+}
+.expand-header:hover { background: rgba(148,207,240,0.04); }
+.expand-header-text {
+  flex: 1; font-size: 0.82rem; font-weight: 500; color: var(--white-cyan);
+}
+.expand-badge {
+  font-size: 0.65rem; color: var(--sky);
+  background: rgba(148,207,240,0.06);
+  padding: 2px 8px; border-radius: var(--radius-full);
+}
+.expand-arrow {
+  font-size: 0.65rem; color: var(--white-dim);
+  transition: transform var(--dur-fast) var(--ease-snappy);
+}
+.expand-panel.open > .expand-header { background: rgba(148,207,240,0.05); }
+.expand-panel.open > .expand-header .expand-arrow { transform: rotate(180deg); color: var(--sky); }
+
+.expand-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.35s var(--ease-snappy);
+}
+.expand-panel.open > .expand-body { max-height: 600px; }
+
+.expand-item {
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.expand-item-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px 10px 28px; cursor: pointer;
+  font-size: 0.78rem; color: var(--white-dim);
+  transition: color var(--dur-fast) var(--ease-snappy),
+              background var(--dur-fast) var(--ease-snappy);
+}
+.expand-item-header:hover { color: var(--white-cyan); background: rgba(148,207,240,0.03); }
+.expand-arrow--sm { font-size: 0.55rem; }
+.expand-item.open > .expand-item-header { color: var(--sky); }
+.expand-item.open > .expand-item-header .expand-arrow { transform: rotate(180deg); }
+.expand-item-body {
+  max-height: 0; overflow: hidden;
+  padding: 0 28px; font-size: 0.75rem; color: var(--white-dim); line-height: 1.7;
+  transition: max-height 0.3s var(--ease-snappy), padding 0.3s var(--ease-snappy);
+}
+.expand-item.open > .expand-item-body { max-height: 200px; padding: 0 28px 12px; }
+
+/* ── Stat Grid ── */
+.stat-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  padding: 12px 16px;
+}
+.stat-cell {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 8px; border-radius: var(--radius-sm);
+  font-size: 0.73rem; color: var(--white-dim);
+  background: rgba(255,255,255,0.02);
+}
+.stat-val { color: var(--white-cyan); font-weight: 500; }
+
+/* ── Modal / Popover ── */
+.modal-demo {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: var(--bg-deep);
+  border: 1px solid rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+.modal-backdrop {
+  display: none;
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+}
+.modal-sheet {
+  display: none;
+  position: fixed; z-index: 101;
+  left: 50%; top: 50%; transform: translate(-50%,-50%) scale(0.96);
+  width: 90vw; max-width: 440px; max-height: 80vh; overflow-y: auto;
+  background: rgba(9,25,89,0.96); backdrop-filter: blur(20px);
+  border: 1px solid rgba(148,207,240,0.12); border-radius: var(--radius-lg);
+  padding: 24px;
+  opacity: 0; transition: opacity 0.25s var(--ease-snappy), transform 0.25s var(--ease-snappy);
+}
+.modal-demo.show .modal-backdrop { display: block; }
+.modal-demo.show .modal-sheet {
+  display: block; opacity: 1; transform: translate(-50%,-50%) scale(1);
+}
+.modal-title {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+}
+.modal-title span {
+  flex: 1; font-family: 'Noto Serif SC', serif;
+  font-size: 0.95rem; color: var(--sky);
+}
+.modal-close {
+  background: none; border: 1px solid rgba(255,255,255,0.08);
+  color: var(--white-dim); width: 28px; height: 28px; border-radius: 50%;
+  cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; justify-content: center;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.modal-close:hover { color: var(--sky); border-color: var(--sky-soft); background: rgba(148,207,240,0.06); }
+.modal-body { font-size: 0.85rem; }
+.modal-body .input-label { color: var(--white-dim); }
+
+/* ── Dropdown ── */
+.dropdown { position: relative; }
+.dropdown-trigger {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  background: rgba(9,25,89,0.35);
+  border: 1px solid rgba(40,80,160,0.20);
+  border-radius: var(--radius-md); cursor: pointer;
+  font-size: 0.85rem; color: var(--white-cyan);
+  transition: border-color var(--dur-fast) var(--ease-snappy),
+              background var(--dur-fast) var(--ease-snappy);
+}
+.dropdown-trigger:hover { border-color: rgba(148,207,240,0.3); }
+.dropdown-menu {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 50;
+  max-height: 0; overflow: hidden;
+  background: rgba(9,25,89,0.96);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(148,207,240,0.10);
+  border-radius: var(--radius-md);
+  transition: max-height 0.25s var(--ease-snappy);
+}
+.dropdown.open .dropdown-menu { max-height: 260px; }
+.dropdown.open .dropdown-trigger { border-color: var(--sky); }
+.dropdown.open .dropdown-trigger .expand-arrow { transform: rotate(180deg); color: var(--sky); }
+.dropdown-item {
+  padding: 9px 14px; font-size: 0.82rem; color: var(--white-dim); cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-snappy),
+              color var(--dur-fast) var(--ease-snappy);
+}
+.dropdown-item:hover { background: rgba(148,207,240,0.06); color: var(--white-cyan); }
+.dropdown-item.active { color: var(--sky); background: rgba(148,207,240,0.08); }
+
+/* ── A11y ── */
+@media (max-width: 640px) {
+  h1 { font-size: 2rem; }
+  .container { padding: 40px 16px; }
+  .btn-row { flex-direction: column; align-items: flex-start; }
+  .card-row { grid-template-columns: 1fr; }
+  .stepper { flex-direction: row; max-width: 100%; overflow-x: auto; gap: 2px; padding: 6px; }
+  .step { white-space: nowrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ① 光束 -->
+<div class="caustic caustic--a"></div>
+<div class="caustic caustic--b"></div>
+
+<!-- ③ 背景气泡 -->
+<div class="bubbles">
+  <div class="bubble bubble--a"></div>
+  <div class="bubble bubble--b"></div>
+  <div class="bubble bubble--c"></div>
+</div>
+
+<div class="ambient">
+  <div class="ambient-glow ambient-glow--sky"></div>
+  <div class="ambient-glow ambient-glow--royal"></div>
+</div>
+
+<div class="container">
+
+  <!-- Header -->
+  <h1>IDEAL<em>GENSHIN</em></h1>
+  <div style="text-align:center"><span class="version-tag">v5.0 · Furina 色板 + 海洋</span></div>
+  <p class="subtitle">
+    天蓝 <span style="color:var(--sky)">#94CFF0</span> ⇄ 宝蓝 <span style="color:var(--royal)">#2850A0</span> 对立双色
+    &nbsp;·&nbsp;
+    淡金 <span style="color:var(--gold)">#D0C4A6</span> 仅点缀
+    &nbsp;·&nbsp;
+    全蓝渐变背景 · 深海气泡 · 浪纹 · 光束
+  </p>
+
+  <!-- PALETTE -->
+  <section class="section">
+    <div class="section-title"><div class="dot"></div><h2>色彩体系</h2><div class="line"></div></div>
+    <div class="palette">
+      <div class="swatch swatch--bg0"><span class="swatch-label">#000030</span>极深蓝黑·底</div>
+      <div class="swatch swatch--bg1"><span class="swatch-label">#091959</span>深海蓝·卡片</div>
+      <div class="swatch swatch--bg2"><span class="swatch-label">#0E2368</span>中层蓝·hover</div>
+      <div class="swatch swatch--sky"><span class="swatch-label">#94CFF0</span>天蓝·主色</div>
+      <div class="swatch swatch--royal"><span class="swatch-label">#2850A0</span>宝蓝·对立</div>
+      <div class="swatch swatch--white"><span class="swatch-label">#D0E8EF</span>青瓷白·文字</div>
+      <div class="swatch swatch--dim"><span class="swatch-label">55%</span>灰白·次要</div>
+      <div class="swatch swatch--gold"><span class="swatch-label">#D0C4A6</span>淡金·点缀</div>
+    </div>
+    <div class="contrast-pair">
+      <div class="contrast-dot contrast-dot--sky"></div> 天蓝（主色）
+      &nbsp;⇄&nbsp;
+      <div class="contrast-dot contrast-dot--royal"></div> 宝蓝（对立）
+      &nbsp;&nbsp;—&nbsp;&nbsp;双色成对 &nbsp;|&nbsp; 光束缓慢漂移 &nbsp;|&nbsp; 气泡上升
+    </div>
+  </section>
+
+  <!-- ② 浪纹分隔 -->
+  <div class="wave-divider visible">
+    <svg viewBox="0 0 800 16" preserveAspectRatio="none">
+      <path d="M0,8 Q50,2 100,8 T200,8 T300,8 T400,8 T500,8 T600,8 T700,8 T800,8"/>
+    </svg>
+  </div>
+
+  <!-- BUTTONS -->
+  <section class="section">
+    <div class="section-title"><div class="dot"></div><h2>按钮层级</h2><div class="line"></div></div>
+    <p style="color:var(--white-dim);font-size:0.82rem;margin-bottom:16px">
+      主按钮：天蓝→宝蓝渐变 · 胶囊形 · 点击涟漪（水滴滴落效果）
+    </p>
+    <div class="btn-row">
+      <button class="btn-primary" id="btn1"><span class="icon">✦</span> 开始配置</button>
+      <button class="btn-secondary">保存配置</button>
+      <button class="btn-text">取消</button>
+    </div>
+  </section>
+
+  <div class="wave-divider visible">
+    <svg viewBox="0 0 800 16" preserveAspectRatio="none">
+      <path d="M0,8 Q50,14 100,8 T200,8 T300,8 T400,8 T500,8 T600,8 T700,8 T800,8"/>
+    </svg>
+  </div>
+
+  <!-- CARDS -->
+  <section class="section">
+    <div class="section-title"><div class="dot"></div><h2>卡片 — 悬浮如浮于水面</h2><div class="line"></div></div>
+    <p style="color:var(--white-dim);font-size:0.82rem;margin-bottom:16px">
+      hover 上浮 4px · 外圈天蓝光 + 内圈宝蓝光 · 底部浪纹浮现 · 顶部淡金细线
+    </p>
+    <div class="card-row">
+      <div class="card card-animate">
+        <h3>角色配置</h3>
+        <p>选择角色、武器、圣遗物，配置命座与天赋加成。顶部金色极细线随悬停增强。</p>
+        <div class="card-bubble"></div>
+        <div class="card-bubble card-bubble--2"></div>
+        <div class="card-wave">
+          <svg viewBox="0 0 800 24" preserveAspectRatio="none">
+            <path d="M0,20 Q60,12 120,20 T240,20 T360,20 T480,20 T600,20 T720,20 L720,24 L0,24" fill="none" stroke="rgba(148,207,240,0.12)" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card card-animate">
+        <h3>伤害计算</h3>
+        <p>基于五路径统一公式，实时计算完整伤害，支持逐乘区展开分析。</p>
+        <div class="card-bubble"></div>
+        <div class="card-bubble card-bubble--2"></div>
+        <div class="card-wave">
+          <svg viewBox="0 0 800 24" preserveAspectRatio="none">
+            <path d="M0,20 Q60,12 120,20 T240,20 T360,20 T480,20 T600,20 T720,20 L720,24 L0,24" fill="none" stroke="rgba(148,207,240,0.12)" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card card-animate">
+        <h3>词条优化</h3>
+        <p>枚举+爬山算法，自动寻找最优词条分配方案，支持灵活锚定。</p>
+        <div class="card-bubble"></div>
+        <div class="card-bubble card-bubble--2"></div>
+        <div class="card-wave">
+          <svg viewBox="0 0 800 24" preserveAspectRatio="none">
+            <path d="M0,20 Q60,12 120,20 T240,20 T360,20 T480,20 T600,20 T720,20 L720,24 L0,24" fill="none" stroke="rgba(148,207,240,0.12)" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wave-divider visible">
+    <svg viewBox="0 0 800 16" preserveAspectRatio="none">
+      <path d="M0,8 Q50,2 100,8 T200,8 T300,8 T400,8 T500,8 T600,8 T700,8 T800,8"/>
+    </svg>
+  </div>
+
+  <!-- FORM -->
+  <section class="section">
+    <div class="section-title"><div class="dot"></div><h2>表单控件</h2><div class="line"></div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px">
+      <div>
+        <div class="input-group">
+          <label class="input-label">技能倍率</label>
+          <input class="input" type="text" placeholder="例如 250.5%">
+        </div>
+        <div class="input-group">
+          <label class="input-label">反应类型</label>
+          <select class="select">
+            <option>蒸发</option><option>融化</option><option>超载</option><option>绽放</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <p style="color:var(--white-dim);font-size:0.78rem;margin-bottom:12px">Chip 标签</p>
+        <div class="chip-row">
+          <span class="chip active">暴击率 <span class="count">5</span></span>
+          <span class="chip">暴击伤害 <span class="count">3</span></span>
+          <span class="chip">攻击力% <span class="count">2</span></span>
+          <span class="chip">元素精通</span>
+          <span class="chip">充能效率</span>
+        </div>
+        <p style="color:var(--white-dim);font-size:0.78rem;margin-bottom:12px">徽标</p>
+        <span class="badge">✦ 推荐</span>
+        <span class="badge badge--gold" style="margin-left:8px">◆ 锚定</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="wave-divider visible">
+    <svg viewBox="0 0 800 16" preserveAspectRatio="none">
+      <path d="M0,8 Q50,14 100,8 T200,8 T300,8 T400,8 T500,8 T600,8 T700,8 T800,8"/>
+    </svg>
+  </div>
+
+  <!-- STEPPER -->
+  <section class="section">
+    <div class="section-title"><div class="dot"></div><h2>步骤导航</h2><div class="line"></div></div>
+    <div class="stepper">
+      <div class="step done"><span class="num">✓</span>Enka 导入</div>
+      <div class="step done"><span class="num">✓</span>角色选择</div>
+      <div class="step done"><span class="num">✓</span>武器配置</div>
+      <div class="step current"><span class="num">④</span>圣遗物</div>
+      <div class="step"><span class="num">⑤</span>天赋与命座</div>
+      <div class="step"><span class="num">⑥</span>倍率与反应</div>
+      <div class="step"><span class="num">⑦</span>队伍 Buff</div>
+    </div>
+  </section>
+
+  <!-- LOADING -->
+  <section class="section">
+    <div class="section-title"><div class="dot"></div><h2>加载与进度</h2><div class="line"></div></div>
+    <p style="color:var(--white-dim);font-size:0.82rem;margin-bottom:16px">
+      天蓝外环（顺时针）⇄ 宝蓝内环（逆时针）— 对立旋转
+    </p>
+    <div class="loading-demo">
+      <div class="spinner-ring"></div>
+      <div class="loading-text">
+        正在计算
+        <span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+      </div>
+    </div>
+    <div class="progress"><div class="progress-fill"></div></div>
+  </section>
+
+  <!-- EXPANDABLE UI -->
+  <section class="section">
+    <div class="section-title"><div class="dot"></div><h2>展开界面 — 点击后弹出的内容</h2><div class="line"></div></div>
+    <p style="color:var(--white-dim);font-size:0.82rem;margin-bottom:20px">
+      选中态天蓝 · 背景微提亮 · 面板入场从下方浮起
+    </p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+
+      <!-- ① ACCORDION -->
+      <div class="expand-panel">
+        <div class="expand-header" onclick="this.parentElement.classList.toggle('open')">
+          <span class="expand-header-text">命座详情 · 芙宁娜 C2</span>
+          <span class="expand-arrow">▾</span>
+        </div>
+        <div class="expand-body">
+          <div class="expand-item">
+            <div class="expand-item-header" onclick="this.parentElement.classList.toggle('open')">
+              <span>C1 · 爱是牢狱</span>
+              <span class="expand-arrow expand-arrow--sm">▾</span>
+            </div>
+            <div class="expand-item-body">
+              施放孤心沙龙后，获得150点「气氛值」。队伍中附近角色生命值降低或恢复时，每1%变动获得1点。
+            </div>
+          </div>
+          <div class="expand-item">
+            <div class="expand-item-header" onclick="this.parentElement.classList.toggle('open')">
+              <span>C2 · 爱是悲悯</span>
+              <span class="expand-arrow expand-arrow--sm">▾</span>
+            </div>
+            <div class="expand-item-body">
+              气氛值超过上限时，每1点使队伍角色生命值上限提升0.5%，至多140%。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ② POPOVER / MODAL -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <p style="color:var(--white-dim);font-size:0.75rem">弹窗 / 底部浮层</p>
+        <div class="modal-demo" id="modalDemo">
+          <div class="modal-backdrop" onclick="this.parentElement.classList.remove('show')"></div>
+          <div class="modal-sheet">
+            <div class="modal-title">
+              <span>◇ 武器被动配置</span>
+              <button class="modal-close" onclick="document.getElementById('modalDemo').classList.remove('show')">✕</button>
+            </div>
+            <div class="modal-body">
+              <label class="input-label">额外攻击力%</label>
+              <input class="input" type="text" placeholder="0" style="max-width:100%">
+              <label class="input-label" style="margin-top:12px">额外暴击伤害%</label>
+              <input class="input" type="text" placeholder="0" style="max-width:100%">
+            </div>
+          </div>
+        </div>
+        <button class="btn-secondary" onclick="document.getElementById('modalDemo').classList.add('show')">
+          打开弹窗（桌面居中 · 移动端底部浮层）
+        </button>
+      </div>
+
+      <!-- ③ COLLAPSE PANEL -->
+      <div class="expand-panel">
+        <div class="expand-header" onclick="this.parentElement.classList.toggle('open')">
+          <span class="expand-header-text">角色面板</span>
+          <span class="expand-badge">ATK 2089 &nbsp; CR 72.3% &nbsp; CD 158.6%</span>
+          <span class="expand-arrow">▾</span>
+        </div>
+        <div class="expand-body">
+          <div class="stat-grid">
+            <div class="stat-cell"><span>生命值</span><span class="stat-val">18,552</span></div>
+            <div class="stat-cell"><span>防御力</span><span class="stat-val">876</span></div>
+            <div class="stat-cell"><span>元素精通</span><span class="stat-val">186</span></div>
+            <div class="stat-cell"><span>充能效率</span><span class="stat-val">132.5%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ④ MENU DROPDOWN -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <p style="color:var(--white-dim);font-size:0.75rem">下拉菜单（模拟）</p>
+        <div class="dropdown" style="position:relative">
+          <div class="dropdown-trigger" onclick="this.parentElement.classList.toggle('open')">
+            <span>蒸发</span>
+            <span class="expand-arrow expand-arrow--sm">▾</span>
+          </div>
+          <div class="dropdown-menu">
+            <div class="dropdown-item active">蒸发</div>
+            <div class="dropdown-item">融化</div>
+            <div class="dropdown-item">超载</div>
+            <div class="dropdown-item">绽放</div>
+            <div class="dropdown-item">激化</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="wave-divider visible">
+    <svg viewBox="0 0 800 16" preserveAspectRatio="none">
+      <path d="M0,8 Q50,2 100,8 T200,8 T300,8 T400,8 T500,8 T600,8 T700,8 T800,8"/>
+    </svg>
+  </div>
+
+  <!-- RULES -->
+  <section class="section">
+    <div class="rule-box">
+      <h4>◇ 配色 + 海洋规则</h4>
+      <ul>
+        <li><strong>天蓝</strong> 主按钮 / 外光环 / 光束</li>
+        <li><strong>宝蓝</strong> 次按钮 / 内光环 / 卡片底</li>
+        <li><strong>淡金</strong> <em style="color:var(--gold)">仅装饰</em> — 浪纹分隔线 / 气泡光点</li>
+        <li><strong>光束</strong> 2 条斜向缓慢漂移，8s/12s 周期</li>
+        <li><strong>气泡</strong> 背景 3 个上升 / 卡片 hover 时浮现 2 个</li>
+        <li><strong>浪纹</strong> SVG 正弦曲线分隔 + 卡片底暗纹</li>
+        <li><strong>涟漪</strong> 按钮点击天蓝水滴扩散</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+<!-- ⑥ 页脚波浪 -->
+<div class="footer-wave">
+  <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path d="M0,30 Q180,10 360,30 T720,30 T1080,30 T1440,30 L1440,80 L0,80 Z"
+          fill="rgba(148,207,240,0.03)"/>
+    <path d="M0,40 Q180,20 360,40 T720,40 T1080,40 T1440,40 L1440,80 L0,80 Z"
+          fill="rgba(40,80,160,0.04)"/>
+  </svg>
+</div>
+
+<!-- ⑤ 涟漪 JS -->
+<script>
+document.querySelectorAll('.btn-primary').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    var ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    var rect = this.getBoundingClientRect();
+    ripple.style.left = (e.clientX - rect.left) + 'px';
+    ripple.style.top  = (e.clientY - rect.top)  + 'px';
+    this.appendChild(ripple);
+    setTimeout(function(){ ripple.remove(); }, 500);
+  });
+});
+</script>
+
+</body>
+</html>

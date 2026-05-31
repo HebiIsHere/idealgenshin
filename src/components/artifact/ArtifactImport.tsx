@@ -109,9 +109,10 @@ function ArtifactImport(): React.ReactElement {
         />
         <Button
           variant="contained"
+          size="small"
           onClick={handleImport}
           disabled={isImporting || !uid.trim()}
-          sx={{ minWidth: 80 }}
+          sx={{ minWidth: 72, alignSelf: 'stretch' }}
         >
           {isImporting ? <CircularProgress size={20} /> : '导入'}
         </Button>

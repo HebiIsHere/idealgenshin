@@ -41,7 +41,7 @@ function Header(): React.ReactElement {
             作者：袔苾
           </Typography>
           <Typography variant="caption" sx={{ color: 'text.disabled', mr: 1.5, fontFamily: 'monospace' }}>
-            v4.1
+            v4.2
           </Typography>
 
           <IconButton
