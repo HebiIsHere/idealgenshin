@@ -3,10 +3,8 @@ import { Routes, Route } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import LandingPage from './pages/LandingPage';
-import MenuPauseObserver from './components/wizard/MenuPauseObserver';
 import { useWizardStore } from './store/slices/wizardSlice';
 import { decodeBuildFromHash } from './utils/share';
-import { applySharePayload } from './utils/applyShare';
 
 const WizardPage = lazy(() => import('./pages/WizardPage'));
 
@@ -16,20 +14,21 @@ function App(): React.ReactElement {
   const wizardActive = useWizardStore((s) => s.active);
   const enterWizard = useWizardStore((s) => s.enterWizard);
 
-  // Auto-enter wizard if shared config hash is present — fully replicate the build
+  // Auto-enter wizard if shared config hash is present — dynamic import to keep main bundle lean
   useEffect(() => {
     if (!wizardActive && window.location.hash) {
       const payload = decodeBuildFromHash(window.location.hash);
       if (payload) {
-        applySharePayload(payload);
-        enterWizard();
+        import('./utils/applyShare').then(({ applySharePayload }) => {
+          applySharePayload(payload);
+          enterWizard();
+        });
       }
     }
   }, [wizardActive, enterWizard]);
 
   return (
     <Box>
-      <MenuPauseObserver />
       {wizardActive ? (
         <Box
           sx={{

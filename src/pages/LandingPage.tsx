@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -11,7 +11,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import Paper from '@mui/material/Paper';
 import { keyframes } from '@mui/system';
 import { useWizardStore } from '../store/slices/wizardSlice';
-import SaveManager from '../components/layout/SaveManager';
+
+const SaveManager = lazy(() => import('../components/layout/SaveManager'));
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(24px); }
@@ -60,6 +61,13 @@ function LandingPage(): React.ReactElement {
   const [exiting, setExiting] = useState(false);
   const [saveManagerOpen, setSaveManagerOpen] = useState(false);
   const [downloadPanelOpen, setDownloadPanelOpen] = useState(false);
+
+  // Prefetch WizardPage chunk during idle time so entry is instant
+  useEffect(() => {
+    const idle = requestIdleCallback || ((cb: () => void) => setTimeout(cb, 2000));
+    const id = idle(() => { import('./WizardPage'); });
+    return () => { cancelIdleCallback ? cancelIdleCallback(id as number) : clearTimeout(id as ReturnType<typeof setTimeout>); };
+  }, []);
 
   const handleEnter = () => {
     setExiting(true);
@@ -239,7 +247,9 @@ function LandingPage(): React.ReactElement {
         </Typography>
       </Container>
 
-      <SaveManager open={saveManagerOpen} onClose={() => setSaveManagerOpen(false)} />
+      <Suspense fallback={null}>
+        <SaveManager open={saveManagerOpen} onClose={() => setSaveManagerOpen(false)} />
+      </Suspense>
 
       {/* Download panel */}
       <Box sx={{ position: 'fixed', bottom: 16, left: 16, zIndex: 20 }}>

@@ -24,6 +24,7 @@ import StickerThrower from '../components/common/StickerThrower';
 import SaveManager from '../components/layout/SaveManager';
 import SectionStepper from '../components/wizard/SectionStepper';
 import SectionRoller from '../components/wizard/SectionRoller';
+import MenuPauseObserver from '../components/wizard/MenuPauseObserver';
 
 import ImportSection from '../components/wizard/sections/ImportSection';
 import CharacterSection from '../components/wizard/sections/CharacterSection';
@@ -354,6 +355,7 @@ function WizardPage(): React.ReactElement {
 
   return (
     <>
+      <MenuPauseObserver />
       {/* 海面背景 — 必须在最外层，否则被 bgcolor 遮盖 */}
       <Box sx={{
         position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
