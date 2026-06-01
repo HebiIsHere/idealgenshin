@@ -69,7 +69,6 @@ export class DamageFormula {
       reactedBase * crit * elevation * defense * resistance * independent;
 
     // ── Debug ──
-    const cataDebug = (path === DamagePath.CATALYZE) ? (ctx as any).__cataDebug : undefined;
     const transDebug = (path === DamagePath.TRANSFORMATIVE) ? (ctx as any).__transDebug : undefined;
     const ampDebug = (path === DamagePath.AMPLIFYING) ? (ctx as any).__ampDebug : undefined;
     // moonDebug unused

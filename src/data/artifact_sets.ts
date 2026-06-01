@@ -1,5 +1,3 @@
-import type { ArtifactSetData } from '../types';
-
 /**
  * Artifact set data (P2 skeleton).
  * Will be populated with full set data and effects in P2 phase.
