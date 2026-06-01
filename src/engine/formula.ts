@@ -43,7 +43,9 @@ export class DamageFormula {
     const rawBase = DamageFormula.computeRawBase(ctx, path);
     const authority = new AuthorityZone().calculate(ctx);
     const feather = new FeatherZone().calculate(ctx);
-    const innerDamage = rawBase * authority + feather;
+    // 激化附伤在大权区之后加算（Meropide 公式：base × authority + catalyzeBonus）
+    const catalyzeBonus = (path === DamagePath.CATALYZE) ? new CatalyzeZone().calculate(ctx) : 0;
+    const innerDamage = rawBase * authority + catalyzeBonus + feather;
 
     // ── Layer 2: 反应化一（反应系数 × 月兆区）──
     const reactionCoeff = DamageFormula.getReactionCoefficient(ctx, path);
@@ -67,7 +69,7 @@ export class DamageFormula {
       reactedBase * crit * elevation * defense * resistance * independent;
 
     // ── Debug ──
-    const cataBonus = (path === DamagePath.CATALYZE) ? (ctx as any).__cataDebug : undefined;
+    const cataDebug = (path === DamagePath.CATALYZE) ? (ctx as any).__cataDebug : undefined;
     const transDebug = (path === DamagePath.TRANSFORMATIVE) ? (ctx as any).__transDebug : undefined;
     const ampDebug = (path === DamagePath.AMPLIFYING) ? (ctx as any).__ampDebug : undefined;
     // moonDebug unused
@@ -82,7 +84,7 @@ export class DamageFormula {
       defenseMultiplier: defense,
       reactionMultiplier: reactionCoeff * moonSign * mastery * bonus,
       damagePath: path,
-      aggravationBonus: cataBonus ? new CatalyzeZone().calculate(ctx) : 0,
+      aggravationBonus: catalyzeBonus,
       elevationMultiplier: elevation,
       independentMultiplier: independent,
       baseDebug: (ctx as any).__baseDebug,
@@ -129,11 +131,8 @@ export class DamageFormula {
       return rate * lvl;
     }
     // 直伤 / 增幅 / 激化 / 月反应：属性缩放
-    const base = new BaseDamageZone().calculate(ctx);
-    if (path === DamagePath.CATALYZE) {
-      return base + new CatalyzeZone().calculate(ctx);
-    }
-    return base;
+    // Catalyze bonus is added after Authority multiplication (see Layer 1 below)
+    return new BaseDamageZone().calculate(ctx);
   }
 
   /** Layer 2: 反应系数。 */

@@ -8,13 +8,11 @@
  */
 import { describe, it, expect } from 'vitest';
 import { BaseDamageZone } from '../engine/zones/base';
-import { ScalingZone } from '../engine/zones/scaling';
 import { BonusZone } from '../engine/zones/bonus';
 import { CritZone } from '../engine/zones/crit';
 import { ResistanceZone } from '../engine/zones/resistance';
 import { DefenseZone } from '../engine/zones/defense';
 import { AmplifyingZone } from '../engine/zones/amplifying';
-import { TransformativeZone } from '../engine/zones/transformative';
 import { CatalyzeZone } from '../engine/zones/catalyze';
 import { MoonsignZone } from '../engine/zones/moonsign';
 import { ElevationZone } from '../engine/zones/elevation';
@@ -114,17 +112,7 @@ describe('BaseDamageZone', () => {
 });
 
 // ============================================================
-// 2. ScalingZone (passthrough = 1.0)
-// ============================================================
-describe('ScalingZone', () => {
-  it('always returns 1.0', () => {
-    const zone = new ScalingZone();
-    expect(zone.calculate(makeCtx())).toBe(1.0);
-  });
-});
-
-// ============================================================
-// 3. BonusZone
+// 2. BonusZone
 // ============================================================
 describe('BonusZone', () => {
   it('returns 1 + dmgBonus', () => {
@@ -364,53 +352,7 @@ describe('AmplifyingZone', () => {
 });
 
 // ============================================================
-// 8. TransformativeZone — 5.2 rates
-// ============================================================
-describe('TransformativeZone', () => {
-  const zone = new TransformativeZone();
-
-  it('NONE reaction returns 0', () => {
-    const ctx = makeCtx({ reactionType: ReactionType.NONE });
-    expect(zone.calculate(ctx)).toBe(0);
-  });
-
-  it('Overloaded at lv90: rate 2.75 × levelMultiplier 1446.85 × (1 + EM bonus)', () => {
-    const stats: ComputedStats = {
-      totalHp: 30000, totalAtk: 2000, totalDef: 800,
-      critRate: 0.5, critDmg: 1.0, dmgBonus: 0, em: 100, er: 1.0,
-    };
-    const ctx = makeCtx({ stats, reactionType: ReactionType.OVERLOADED, characterLevel: 90 });
-    // rate = 2.75, levelMult = 1446.85, emBonus = 16*100/2100
-    const emBonus = getTransformativeEMBonus(100);
-    const expected = 2.75 * 1446.85 * (1 + emBonus);
-    expect(zone.calculate(ctx)).toBeCloseTo(expected, 1);
-  });
-
-  it('Hyperbloom at lv90: rate 3.0 × levelMultiplier 1446.85 × (1 + EM bonus)', () => {
-    const stats: ComputedStats = {
-      totalHp: 30000, totalAtk: 2000, totalDef: 800,
-      critRate: 0.5, critDmg: 1.0, dmgBonus: 0, em: 200, er: 1.0,
-    };
-    const ctx = makeCtx({ stats, reactionType: ReactionType.HYPERBLOOM, characterLevel: 90 });
-    const emBonus = getTransformativeEMBonus(200);
-    const expected = 3.0 * 1446.85 * (1 + emBonus);
-    expect(zone.calculate(ctx)).toBeCloseTo(expected, 1);
-  });
-
-  it('Overloaded at lv80 uses lv80 level multiplier', () => {
-    const stats: ComputedStats = {
-      totalHp: 30000, totalAtk: 2000, totalDef: 800,
-      critRate: 0.5, critDmg: 1.0, dmgBonus: 0, em: 0, er: 1.0,
-    };
-    const ctx = makeCtx({ stats, reactionType: ReactionType.OVERLOADED, characterLevel: 80 });
-    // rate = 2.75, levelMult = 776.67, emBonus = 0
-    const expected = 2.75 * 776.67;
-    expect(zone.calculate(ctx)).toBeCloseTo(expected, 1);
-  });
-});
-
-// ============================================================
-// 9. CatalyzeZone
+// 8. CatalyzeZone
 // ============================================================
 describe('CatalyzeZone', () => {
   const zone = new CatalyzeZone();
@@ -914,16 +856,20 @@ describe('Constants validation', () => {
   });
 
   it('LEVEL_MULTIPLIERS values are correct', () => {
-    expect(LEVEL_MULTIPLIERS[90]).toBeCloseTo(1446.85, 2);
-    expect(LEVEL_MULTIPLIERS[80]).toBeCloseTo(776.67, 2);
+    expect(LEVEL_MULTIPLIERS[70]).toBeCloseTo(765.64, 2);
+    expect(LEVEL_MULTIPLIERS[80]).toBeCloseTo(1077.44, 2);
     expect(LEVEL_MULTIPLIERS[85]).toBeCloseTo(1027.50, 2);
+    expect(LEVEL_MULTIPLIERS[90]).toBeCloseTo(1446.85, 2);
+    expect(LEVEL_MULTIPLIERS[95]).toBeCloseTo(1561.46, 2);
+    expect(LEVEL_MULTIPLIERS[100]).toBeCloseTo(1674.81, 2);
   });
 
   it('getLevelMultiplier returns correct values', () => {
+    expect(getLevelMultiplier(70)).toBeCloseTo(765.64, 2);
+    expect(getLevelMultiplier(80)).toBeCloseTo(1077.44, 2);
     expect(getLevelMultiplier(90)).toBeCloseTo(1446.85, 2);
-    expect(getLevelMultiplier(80)).toBeCloseTo(776.67, 2);
-    // Level 100 → nearest is 90
-    expect(getLevelMultiplier(100)).toBeCloseTo(1446.85, 2);
+    expect(getLevelMultiplier(95)).toBeCloseTo(1561.46, 2);
+    expect(getLevelMultiplier(100)).toBeCloseTo(1674.81, 2);
   });
 
   it('AGGRAVATION_BASE_RATES values are correct', () => {

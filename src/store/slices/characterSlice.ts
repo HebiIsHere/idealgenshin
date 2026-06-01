@@ -1,7 +1,28 @@
 import { create } from 'zustand';
-import type { CharacterData, ReactionType, StatConversion, TeamBuff, WeaponConfig, ConstellationConfig, TalentConfig, ZoneBonusInput } from '../../types';
+import type { CharacterData, ReactionType, StatConversion, TeamBuff, WeaponConfig, ConstellationConfig, TalentConfig, ZoneBonusInput, StatScaling } from '../../types';
 import { getCharacterById } from '../../data/characters';
 import { getWeaponsByType } from '../../data/weapons/index';
+
+/** 队伍 Buff 配置（与 TeamBuffPanel 的 TeamBuffConfig 一致）。 */
+export interface TeamBuffConfigSlice {
+  supportIds: string[];
+  artifactIds: string[];
+  resonanceId: string;
+  moonsignEnabled: boolean;
+  moonsignBonus: number;
+  customBuffs: Partial<ZoneBonusInput>;
+}
+
+function defaultTeamBuffConfig(): TeamBuffConfigSlice {
+  return {
+    supportIds: [],
+    artifactIds: [],
+    resonanceId: '',
+    moonsignEnabled: false,
+    moonsignBonus: 0.36,
+    customBuffs: {},
+  };
+}
 
 /**
  * 角色切片 — 管理角色选择、等级、技能配置、武器配置、命座配置和场景选择。
@@ -36,6 +57,14 @@ interface CharacterState {
   statConversions: StatConversion[];
   /** 圣遗物套装产生的动态转模（如绝缘之旗印 ER→dmgBonus）。 */
   setConversions: StatConversion[];
+  /** 自定义多属性缩放（Tab2 倍率配置）。 */
+  customScaling: StatScaling;
+  /** 队伍 Buff 面板配置。 */
+  teamBuffConfig: TeamBuffConfigSlice;
+  /** 菈乌玛命座。 */
+  laumaCons: string;
+  /** 菈乌玛精通。 */
+  laumaEM: number;
   /** Tab2/3 的结果是否已过期（Tab1 数据变更时标记）。 */
   isResultExpired: boolean;
 }
@@ -81,6 +110,12 @@ interface CharacterActions {
   removeStatConversion: (index: number) => void;
   /** 替换所有属性转模规则。 */
   setStatConversions: (list: StatConversion[]) => void;
+  /** 设置自定义多属性缩放。 */
+  setCustomScaling: (scaling: StatScaling) => void;
+  /** 设置队伍 Buff 配置。 */
+  setTeamBuffConfig: (config: TeamBuffConfigSlice) => void;
+  /** 设置菈乌玛配置。 */
+  setLaumaConfig: (cons: string, em: number) => void;
   /** 标记 Tab2/3 结果为已过期。 */
   markResultExpired: () => void;
   /** 重置所有角色状态。 */
@@ -107,6 +142,10 @@ const initialState: CharacterState = {
   setBonus: {},
   statConversions: [],
   setConversions: [],
+  customScaling: { atkRatio: 3, hpRatio: 0, defRatio: 0, emRatio: 0 },
+  teamBuffConfig: defaultTeamBuffConfig(),
+  laumaCons: 'c0',
+  laumaEM: 0,
   isResultExpired: false,
 };
 
@@ -136,6 +175,10 @@ export const useCharacterStore = create<CharacterState & CharacterActions>((set)
       setBonus: {},
       statConversions: [],
       setConversions: [],
+      customScaling: { atkRatio: 3, hpRatio: 0, defRatio: 0, emRatio: 0 },
+      teamBuffConfig: defaultTeamBuffConfig(),
+      laumaCons: 'c0',
+      laumaEM: 0,
       isResultExpired: true,
     });
   },
@@ -225,6 +268,15 @@ export const useCharacterStore = create<CharacterState & CharacterActions>((set)
       statConversions: list,
       isResultExpired: true,
     }),
+
+  setCustomScaling: (scaling) =>
+    set({ customScaling: scaling, isResultExpired: true }),
+
+  setTeamBuffConfig: (config) =>
+    set({ teamBuffConfig: config, isResultExpired: true }),
+
+  setLaumaConfig: (cons, em) =>
+    set({ laumaCons: cons, laumaEM: em, isResultExpired: true }),
 
   markResultExpired: () => set({ isResultExpired: true }),
 

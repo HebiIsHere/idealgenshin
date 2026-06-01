@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 import type { ArtifactInstance, ShowcaseCharacter } from '../../types';
 import { ArtifactSlotType } from '../../types';
-import { MAIN_STAT_MAX_VALUES, MAIN_STAT_BY_SLOT } from '../../data/constants';
-import { generateId } from '../../utils/helper';
 
 /**
  * Artifact slice — manages 5 artifact instances, Enka import state,
@@ -41,20 +39,6 @@ interface ArtifactActions {
   clearAll: () => void;
   /** Reset state. */
   reset: () => void;
-}
-
-/** Create a default artifact for a given slot with no sub-stats. */
-export function createDefaultArtifact(slot: ArtifactSlotType): ArtifactInstance {
-  const validMainStats = MAIN_STAT_BY_SLOT[slot];
-  const mainStatType = validMainStats[0];
-  return {
-    id: generateId(),
-    slot,
-    mainStatType,
-    mainStatValue: MAIN_STAT_MAX_VALUES[mainStatType] ?? 0,
-    subStats: [],
-    setName: '',
-  };
 }
 
 const emptyArtifacts: Record<ArtifactSlotType, ArtifactInstance | null> = {

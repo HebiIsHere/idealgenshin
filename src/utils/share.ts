@@ -1,5 +1,5 @@
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
-import type { CharacterBuild, CharacterSave } from '../types';
+import type { CharacterSave } from '../types';
 
 /** 分享时保存的最小关键字段（去掉了完整的 CharacterData，只留 ID 用于还原）。 */
 export interface SharePayload {
@@ -29,45 +29,14 @@ export interface SharePayload {
   statConversions: { from: string; to: string; ratio: number; maxCap?: number }[];
   laumaCons: string;
   laumaEM: number;
-}
-
-/**
- * 将 CharacterBuild 编码为 URL hash 片段，供分享使用。
- * 返回 "v=1&d=..." 格式的字符串，可直接附加到 URL 末尾。
- */
-export function encodeBuild(build: CharacterBuild, customScaling: { atkRatio: number; hpRatio: number; defRatio: number; emRatio: number }, laumaCons: string, laumaEM: number): string {
-  const payload: SharePayload = {
-    v: 1,
-    characterId: build.character.id,
-    characterLevel: build.characterLevel,
-    weaponId: build.weaponConfig.weaponData.id,
-    weaponLevel: build.weaponConfig.weaponLevel,
-    weaponRefinement: build.weaponConfig.refinement,
-    weaponPassive: filterZero(build.weaponConfig.passiveBonus as Record<string, number>),
-    constellationLevel: build.constellationConfig?.level ?? 0,
-    constellationBonus: filterZero(build.constellationConfig?.bonus as Record<string, number> ?? {}),
-    talentBonus: filterZero(build.talentConfig?.bonus as Record<string, number> ?? {}),
-    skillMultiplier: build.skillMultiplier,
-    reactionType: build.reactionType as string,
-    amplifyingMultiplier: build.amplifyingMultiplier ?? 0,
-    customScaling: { atkRatio: customScaling.atkRatio, hpRatio: customScaling.hpRatio, defRatio: customScaling.defRatio, emRatio: customScaling.emRatio },
-    artifacts: (build.artifacts ?? []).map((a) => ({
-      slot: a.slot,
-      mainStatType: a.mainStatType,
-      mainStatValue: a.mainStatValue,
-      setName: a.setName || '',
-      subStats: (a.subStats ?? []).map((s) => ({ type: s.type, value: s.value })),
-    })),
-    teamBuffs: (build.teamBuffs ?? []).map((b) => ({ name: b.name, statType: b.statType, value: b.value })),
-    setBonus: filterZero(build.setBonus as Record<string, number> ?? {}),
-    statConversions: (build.statConversions ?? []).map((c) => ({ from: c.from, to: c.to, ratio: c.ratio, maxCap: c.maxCap })),
-    laumaCons,
-    laumaEM,
+  teamBuffConfig?: {
+    supportIds: string[];
+    artifactIds: string[];
+    resonanceId: string;
+    moonsignEnabled: boolean;
+    moonsignBonus: number;
+    customBuffs: Record<string, number>;
   };
-
-  const json = JSON.stringify(payload);
-  const compressed = compressToEncodedURIComponent(json);
-  return `s=${compressed}`;
 }
 
 /**
@@ -106,7 +75,7 @@ export function encodeFromSave(save: CharacterSave): string | null {
       skillMultiplier: save.skillMultiplier ?? 1.0,
       reactionType: save.reactionType ?? 'NONE',
       amplifyingMultiplier: save.amplifyingMultiplier ?? 0,
-      customScaling: { atkRatio: 3, hpRatio: 0, defRatio: 0, emRatio: 0 },
+      customScaling: save.customScaling ?? { atkRatio: 3, hpRatio: 0, defRatio: 0, emRatio: 0 },
       artifacts: (save.artifacts ?? []).map((a) => ({
         slot: a.slot,
         mainStatType: a.mainStatType,
@@ -117,8 +86,16 @@ export function encodeFromSave(save: CharacterSave): string | null {
       teamBuffs: (save.teamBuffs ?? []).map((b) => ({ name: b.name, statType: b.statType, value: b.value })),
       setBonus: filterZero(save.setBonus as Record<string, number> ?? {}),
       statConversions: (save.statConversions ?? []).map((c) => ({ from: c.from, to: c.to, ratio: c.ratio, maxCap: c.maxCap })),
-      laumaCons: 'c0',
-      laumaEM: 0,
+      laumaCons: save.laumaCons ?? 'c0',
+      laumaEM: save.laumaEM ?? 0,
+      teamBuffConfig: save.teamBuffConfig ? {
+        supportIds: save.teamBuffConfig.supportIds ?? [],
+        artifactIds: save.teamBuffConfig.artifactIds ?? [],
+        resonanceId: save.teamBuffConfig.resonanceId ?? '',
+        moonsignEnabled: save.teamBuffConfig.moonsignEnabled ?? false,
+        moonsignBonus: save.teamBuffConfig.moonsignBonus ?? 0.36,
+        customBuffs: save.teamBuffConfig.customBuffs as Record<string, number> ?? {},
+      } : undefined,
     };
     const json = JSON.stringify(payload);
     const compressed = compressToEncodedURIComponent(json);

@@ -18,7 +18,7 @@ import { DamageFormula } from '../engine/formula';
 import { mergeExtraBonuses } from '../utils/mergeExtraBonuses';
 
 import CharacterStatPanel from '../components/character/CharacterStatPanel';
-import { TeamBuffConfig, defaultTeamBuffConfig, computeTeamBuffBonuses } from '../components/optimizer/TeamBuffPanel';
+import { TeamBuffConfig, computeTeamBuffBonuses } from '../components/optimizer/TeamBuffPanel';
 import LoadingOverlay from '../components/common/LoadingOverlay';
 import StickerThrower from '../components/common/StickerThrower';
 import SaveManager from '../components/layout/SaveManager';
@@ -64,25 +64,22 @@ function WizardPage(): React.ReactElement {
     teamBuffs, weaponConfig, constellationConfig, talentConfig, setBonus,
     statConversions, setConversions, setWeaponConfig,
     setSetBonus, selectCharacter,
+    customScaling, setCustomScaling,
+    teamBuffConfig: storeTeamBuffConfig, setTeamBuffConfig,
+    laumaCons, setLaumaConfig,
+    laumaEM,
   } = useCharacterStore();
 
   const { artifacts, showcaseCharacters, selectedShowcaseIdx } = useArtifactStore();
   const { isCalculating, progress, runOptimizationWithComparison, runIdealTemplate } = useOptimizerStore();
 
-  const [teamBuffConfig, setTeamBuffConfig] = useState<TeamBuffConfig>(defaultTeamBuffConfig());
-  const teamBuffBonuses = useMemo(() => computeTeamBuffBonuses(teamBuffConfig), [teamBuffConfig]);
+  // teamBuffBonuses 由 store 中的 teamBuffConfig 计算
+  const teamBuffBonuses = useMemo(() => computeTeamBuffBonuses(storeTeamBuffConfig as TeamBuffConfig), [storeTeamBuffConfig]);
   const [damageResult, setDamageResult] = useState<DamageResult | null>(null);
   const [idealRollCount, setIdealRollCount] = useState(25);
   const [idealRollText, setIdealRollText] = useState('25');
   const [searchMainStats] = useState(false);
   const [resultLabels, setResultLabels] = useState<Record<string, string>>({});
-
-  // Lauma prayer config
-  const [laumaCons, setLaumaCons] = useState<string>('c0');
-  const [laumaEM, setLaumaEM] = useState<number>(0);
-
-  // 倍率配置（至多两种混合，默认攻击力 300%）
-  const [customScaling, setCustomScaling] = useState<StatScaling>({ atkRatio: 3, hpRatio: 0, defRatio: 0, emRatio: 0 });
 
   // 活跃的倍率条目
   const scalingEntries = useMemo(() => {
@@ -345,11 +342,11 @@ function WizardPage(): React.ReactElement {
       case 'weapon': return <WeaponSection onSelectWeapon={handleSelectWeapon} />;
       case 'artifacts': return <ArtifactSection importedSetNames={importedSetNames} importedSetCounts={importedSetCounts} />;
       case 'talents': return <TalentSection />;
-      case 'teambuffs': return <TeambuffSection teamBuffConfig={teamBuffConfig} setTeamBuffConfig={setTeamBuffConfig} laumaCons={laumaCons} setLaumaCons={setLaumaCons} laumaEM={laumaEM} setLaumaEM={setLaumaEM} reactionType={reactionType} />;
+      case 'teambuffs': return <TeambuffSection teamBuffConfig={storeTeamBuffConfig as TeamBuffConfig} setTeamBuffConfig={setTeamBuffConfig as any} laumaCons={laumaCons} setLaumaCons={(c: string) => setLaumaConfig(c, laumaEM)} setLaumaEM={(e: number) => setLaumaConfig(laumaCons, e)} laumaEM={laumaEM} reactionType={reactionType} />;
       case 'scenario': return <ScenarioSection customScaling={customScaling} setCustomScaling={setCustomScaling} scalingEntries={scalingEntries} reactionOptions={reactionOptions} reactIdx={reactIdx} handleReactionChange={handleReactionChange} reactionType={reactionType} />;
       default: return <Typography color="text.secondary">未知板块</Typography>;
     }
-  }, [resultLabels, damageResult, computedStats, isCalculating, idealRollCount, idealRollText, idealAvailableTypes, idealAnchors, idealInputs, handleIdealPinToggle, handleIdealInputChange, handleRunIdeal, currentAllocations, anchoredTypes, toggleAnchor, handleRunRedistribute, characterLevel, setCharacterLevel, handleSelectCharacter, handleSelectWeapon, importedSetNames, importedSetCounts, teamBuffConfig, setTeamBuffConfig, laumaCons, laumaEM, reactionType, customScaling, scalingEntries, reactionOptions, reactIdx, handleReactionChange]);
+  }, [resultLabels, damageResult, computedStats, isCalculating, idealRollCount, idealRollText, idealAvailableTypes, idealAnchors, idealInputs, handleIdealPinToggle, handleIdealInputChange, handleRunIdeal, currentAllocations, anchoredTypes, toggleAnchor, handleRunRedistribute, characterLevel, setCharacterLevel, handleSelectCharacter, handleSelectWeapon, importedSetNames, importedSetCounts, storeTeamBuffConfig, setTeamBuffConfig, laumaCons, setLaumaConfig, laumaEM, reactionType, customScaling, setCustomScaling, scalingEntries, reactionOptions, reactIdx, handleReactionChange]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 

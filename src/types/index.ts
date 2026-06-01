@@ -87,16 +87,6 @@ export enum DamagePath {
   MOONSIGN_DIRECT = 'MOONSIGN_DIRECT',
 }
 
-/**
- * Damage scaling type (determines which stat the damage scales off).
- * @deprecated Use StatScaling instead. This enum will be removed in a future version.
- */
-export enum ScalingType {
-  ATK = 'ATK',
-  HP = 'HP',
-  DEF = 'DEF',
-}
-
 /** Weapon type classification. */
 export enum WeaponType {
   SWORD = 'SWORD',
@@ -655,6 +645,21 @@ export interface CharacterSave {
   teamBuffs?: TeamBuff[];
   /** 圣遗物套装静态加成。可选，向后兼容。 */
   setBonus?: ZoneBonusInput;
+  /** 自定义多属性缩放（Tab2 倍率配置）。可选，向后兼容。 */
+  customScaling?: StatScaling;
+  /** 队伍 Buff 面板配置。可选，向后兼容。 */
+  teamBuffConfig?: {
+    supportIds: string[];
+    artifactIds: string[];
+    resonanceId: string;
+    moonsignEnabled: boolean;
+    moonsignBonus: number;
+    customBuffs: Partial<ZoneBonusInput>;
+  };
+  /** 菈乌玛命座（c0~c6）。可选，向后兼容。 */
+  laumaCons?: string;
+  /** 菈乌玛精通（手动填入）。可选，向后兼容。 */
+  laumaEM?: number;
 }
 
 /** Export file format. */

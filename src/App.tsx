@@ -21,6 +21,8 @@ function App(): React.ReactElement {
       if (payload) {
         import('./utils/applyShare').then(({ applySharePayload }) => {
           applySharePayload(payload);
+          // 清除 hash 防止退出后再次自动进入
+          window.history.replaceState(null, '', window.location.pathname);
           enterWizard();
         });
       }

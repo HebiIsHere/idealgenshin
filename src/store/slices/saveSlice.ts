@@ -113,6 +113,21 @@ export const useSaveStore = create<SaveState & SaveActions>((set, get) => ({
       characterStore.setSetBonus(save.setBonus);
     }
 
+    // 恢复自定义倍率缩放
+    if (save.customScaling) {
+      characterStore.setCustomScaling(save.customScaling);
+    }
+
+    // 恢复队伍 Buff 配置
+    if (save.teamBuffConfig) {
+      characterStore.setTeamBuffConfig(save.teamBuffConfig);
+    }
+
+    // 恢复菈乌玛配置
+    if (save.laumaCons !== undefined) {
+      characterStore.setLaumaConfig(save.laumaCons, save.laumaEM ?? 0);
+    }
+
     // 恢复 artifactSlice 状态
     const artifactStore = useArtifactStore.getState();
     artifactStore.setAllArtifacts(save.artifacts);
@@ -159,6 +174,11 @@ export const useSaveStore = create<SaveState & SaveActions>((set, get) => ({
       statConversions: characterStore.statConversions?.length > 0 ? characterStore.statConversions : undefined,
       teamBuffs: characterStore.teamBuffs?.length > 0 ? characterStore.teamBuffs : undefined,
       setBonus: Object.keys(characterStore.setBonus).length > 0 ? characterStore.setBonus : undefined,
+      customScaling: characterStore.customScaling,
+      teamBuffConfig: characterStore.teamBuffConfig?.supportIds?.length > 0 || characterStore.teamBuffConfig?.artifactIds?.length > 0 || characterStore.teamBuffConfig?.resonanceId
+        ? characterStore.teamBuffConfig : undefined,
+      laumaCons: characterStore.laumaCons !== 'c0' ? characterStore.laumaCons : undefined,
+      laumaEM: characterStore.laumaEM > 0 ? characterStore.laumaEM : undefined,
     };
 
     if (currentSaveId) {
@@ -242,6 +262,11 @@ export const useSaveStore = create<SaveState & SaveActions>((set, get) => ({
         statConversions: characterStore.statConversions?.length > 0 ? characterStore.statConversions : undefined,
         teamBuffs: characterStore.teamBuffs?.length > 0 ? characterStore.teamBuffs : undefined,
         setBonus: Object.keys(characterStore.setBonus).length > 0 ? characterStore.setBonus : undefined,
+        customScaling: characterStore.customScaling,
+        teamBuffConfig: characterStore.teamBuffConfig?.supportIds?.length > 0 || characterStore.teamBuffConfig?.artifactIds?.length > 0 || characterStore.teamBuffConfig?.resonanceId
+          ? characterStore.teamBuffConfig : undefined,
+        laumaCons: characterStore.laumaCons !== 'c0' ? characterStore.laumaCons : undefined,
+        laumaEM: characterStore.laumaEM > 0 ? characterStore.laumaEM : undefined,
         characterId: selectedCharacter.id,
         characterLevel: characterStore.characterLevel,
         weaponConfig,

@@ -5,69 +5,13 @@ import type { ArtifactSetData } from '../types';
  * Will be populated with full set data and effects in P2 phase.
  */
 
-export const ARTIFACT_SETS: ArtifactSetData[] = [
-  {
-    id: 'crimson_witch',
-    name: 'Crimson Witch of Flames',
-    nameZh: '炽烈的炎之魔女',
-    twoPcEffect: '火元素伤害加成提高15%',
-    twoPcBonus: { dmgBonus: 0.15 },
-    fourPcEffect: '超载、燃烧反应造成的伤害提升40%，蒸发、融化反应的加成系数提高15%。施放元素战技后的10秒内，2件套的效果提高50%，该效果最多叠加3次',
-    fourPcBonus: { transformReactionBonus: 0.40, ampReactionBonus: 0.15 },
-  },
-  {
-    id: 'emblem_of_severed_fate',
-    name: 'Emblem of Severed Fate',
-    nameZh: '绝缘之旗印',
-    twoPcEffect: '元素充能效率提高20%',
-    twoPcBonus: { energyRecharge: 0.20 },
-    fourPcEffect: '基于元素充能效率的25%，提高元素爆发造成的伤害，最多通过这种方式提高75%',
-  },
-  {
-    id: 'noblesse_oblige',
-    name: 'Noblesse Oblige',
-    nameZh: '昔日宗室之仪',
-    twoPcEffect: '元素爆发造成的伤害提高20%',
-    twoPcBonus: { dmgBonus: 0.20 },
-    fourPcEffect: '施放元素爆发后，队伍中所有角色攻击力提高20%，持续12秒，不可叠加',
-    fourPcBonus: { atkPercent: 0.20 },
-  },
-  {
-    id: 'marechaussee_hunter',
-    name: 'Marechaussee Hunter',
-    nameZh: '逐影猎人',
-    twoPcEffect: '普通攻击与重击造成的伤害提高15%',
-    twoPcBonus: { dmgBonus: 0.15 },
-    fourPcEffect: '当前生命值提升或降低时，暴击率提升12%，该效果持续5秒，最多叠加3次',
-    fourPcBonus: { critRate: 0.36 },
-  },
-  {
-    id: 'blizzard_strayer',
-    name: 'Blizzard Strayer',
-    nameZh: '冰风迷途的勇士',
-    twoPcEffect: '冰元素伤害加成提高15%',
-    twoPcBonus: { dmgBonus: 0.15 },
-    fourPcEffect: '攻击处于冰元素影响下的敌人时，暴击率提高20%；若敌人处于冻结状态下，则暴击率额外提高20%',
-    fourPcBonus: { critRate: 0.40 },
-  },
-];
-
-/** Get an artifact set by ID. */
-export function getArtifactSetById(id: string): ArtifactSetData | undefined {
-  return ARTIFACT_SETS.find((s) => s.id === id);
-}
-
-/** Get all artifact sets. */
-export function getAllArtifactSets(): ArtifactSetData[] {
-  return ARTIFACT_SETS;
-}
-
 /**
  * Mapping from Enka setNameTextMapHash (number as string) to Chinese set name.
  * Hash values sourced from GenshinData ReliquarySetExcelConfigData.json.
  * If a hash is not found, the fallback display is "未知套装(#{hash})".
  */
-export const ARTIFACT_SET_HASH_MAP: Record<string, string> = {
+/** Map from Enka setNameTextMapHash to Chinese set name. */
+const ARTIFACT_SET_HASH_MAP: Record<string, string> = {
   // ===== 5星套装（按SetID排序，数据源自 ReliquarySetExcelConfigData） =====
 
   // 15007: Gladiator's Finale

@@ -24,7 +24,7 @@ export function getCharacterById(id: string): CharacterData | undefined {
   return getCache().get(id);
 }
 
-export function getAllCharacters(): CharacterData[] {
+function getAllCharacters(): CharacterData[] {
   return [...allCharactersArr].sort((a, b) => {
     if (a.element !== b.element) return a.element.localeCompare(b.element);
     return a.nameZh.localeCompare(b.nameZh, 'zh-CN');

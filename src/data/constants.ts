@@ -183,10 +183,12 @@ export const LEVEL_MULTIPLIERS: Record<number, number> = {
   40: 152.61,
   50: 234.97,
   60: 351.71,
-  70: 497.44,
-  80: 776.67,
+  70: 765.64,
+  80: 1077.44,
   85: 1027.50,
   90: 1446.85,
+  95: 1561.46,
+  100: 1674.81,
 };
 
 /**
@@ -206,20 +208,6 @@ export function getLevelMultiplier(level: number): number {
   );
   return LEVEL_MULTIPLIERS[nearest];
 }
-
-/**
- * @deprecated Use TRANSFORM_RATES_V52 and getLevelMultiplier() instead.
- * Base transformative reaction damage at level 90 (old values, pre-5.2).
- */
-export const TRANSFORMATIVE_BASE_DMG_LEVEL_90: Record<string, number> = {
-  OVERLOADED: 2172,
-  SUPERCONDUCT: 1086,
-  ELECTRO_CHARGED: 1303,
-  SWIRL: 869,
-  HYPERBLOOM: 2824,
-  BLOOM: 2172,
-  BURGEON: 2824,
-};
 
 // ===== Catalyze (Aggravation/Spread) Constants =====
 

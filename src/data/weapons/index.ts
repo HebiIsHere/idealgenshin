@@ -26,15 +26,11 @@ function getCache(): Map<string, WeaponData> {
   return weaponCache;
 }
 
-export function loadAllWeapons(): Map<string, WeaponData> {
-  return getCache();
-}
-
 export function getWeaponById(id: string): WeaponData | undefined {
   return getCache().get(id);
 }
 
-export function getAllWeapons(): WeaponData[] {
+function getAllWeapons(): WeaponData[] {
   return [...allWeaponsArr].sort((a, b) => {
     if (a.weaponType !== b.weaponType) return a.weaponType.localeCompare(b.weaponType);
     return b.rarity - a.rarity;
@@ -57,11 +53,3 @@ export const DEFAULT_WEAPON: WeaponData = {
   passiveName: '',
   passiveDesc: '',
 };
-
-export function searchWeapons(query: string): WeaponData[] {
-  if (!query.trim()) return getAllWeapons();
-  const q = query.toLowerCase();
-  return getAllWeapons().filter(
-    (w) => w.nameZh.includes(query) || w.name.toLowerCase().includes(q) || w.id.toLowerCase().includes(q),
-  );
-}

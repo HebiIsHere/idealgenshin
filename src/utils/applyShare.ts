@@ -46,6 +46,19 @@ export function applySharePayload(payload: SharePayload): void {
       })));
     }
 
+    // 恢复自定义倍率缩放
+    if (payload.customScaling) {
+      cs.setCustomScaling(payload.customScaling as any);
+    }
+
+    // 恢复队伍 Buff 配置
+    if (payload.teamBuffConfig) {
+      cs.setTeamBuffConfig(payload.teamBuffConfig as any);
+    }
+
+    // 恢复菈乌玛配置
+    cs.setLaumaConfig(payload.laumaCons ?? 'c0', payload.laumaEM ?? 0);
+
     const restored = restoreArtifacts(payload);
     if (restored.length > 0) {
       useArtifactStore.getState().setAllArtifacts(restored);
