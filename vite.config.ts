@@ -15,6 +15,21 @@ export default defineConfig({
         target: 'https://enka.network',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/enka-api/, ''),
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.warn('[vite proxy] enka-api error:', err.message);
+          });
+        },
+      },
+      '/minigg-api': {
+        target: 'https://profile.microgg.cn',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/minigg-api/, ''),
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.warn('[vite proxy] minigg-api error:', err.message);
+          });
+        },
       },
     },
   },

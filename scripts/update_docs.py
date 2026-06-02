@@ -9,7 +9,7 @@
 import sys, os, re
 from docx import Document
 
-PUBLIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'public')
+PUBLIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public')
 
 DOC_FILES = [
     '理想原生{old}-使用说明.docx',

@@ -9,10 +9,24 @@ import { WEAPON_ID_MAP } from '../data/weapon_id_map';
  * Fetches character showcase data and parses it into CharacterBuild objects.
  *
  * API Docs: https://enka.network/
- * Endpoint: GET https://enka.network/api/uid/{uid}
+ *
+ * UID routing:
+ * - Bilibili server (5xxxxxxxx) → MiniGG mirror (profile.microgg.cn)
+ * - Official servers          → Enka (enka.network)
+ *
+ * Both endpoints return the same JSON schema.
  */
 
 const ENKA_API_BASE = '/enka-api/api/uid';
+const MINIGG_API_BASE = '/minigg-api/api/uid';
+
+/** Bilibili server (世界树) UIDs start with "5". */
+const BILIBILI_UID_PREFIX = '5';
+
+/** Pick the API base according to UID server. */
+function selectApiBase(uid: string): string {
+  return uid.startsWith(BILIBILI_UID_PREFIX) ? MINIGG_API_BASE : ENKA_API_BASE;
+}
 
 /** Error types for Enka API interactions. */
 export class EnkaError extends Error {
@@ -34,7 +48,9 @@ export class EnkaError extends Error {
  * @throws EnkaError on API failures
  */
 async function fetchEnkaApi(uid: string): Promise<any> {
-  const url = `${ENKA_API_BASE}/${uid}`;
+  const apiBase = selectApiBase(uid);
+  const url = `${apiBase}/${uid}`;
+  const isMiniGG = apiBase === MINIGG_API_BASE;
 
   let response: Response;
   try {
@@ -50,13 +66,21 @@ async function fetchEnkaApi(uid: string): Promise<any> {
     );
   }
 
+  // MiniGG returns 424 when its upstream (Enka/game servers) is unreachable
+  if (response.status === 424) {
+    throw new EnkaError(
+      'MiniGG 数据服务暂时不可用（上游服务器维护中），请稍后再试',
+      'API_UNAVAILABLE',
+    );
+  }
+
   if (response.status === 400) {
     // Enka returns 400 when the player hasn't been looked up on their site yet.
-    // The user needs to visit https://enka.network/u/{uid} first to register the profile.
-    throw new EnkaError(
-      `UID「${uid}」暂未收录，请先到 enka.network/u/${uid} 查看一次角色展柜，再回来导入`,
-      'NOT_FOUND',
-    );
+    // For MiniGG this also applies — user must visit enka.network first.
+    const tip = isMiniGG
+      ? `UID「${uid}」暂未收录，请先到 enka.network/u/${uid} 查看一次角色展柜，再回来导入`
+      : `UID「${uid}」暂未收录，请先到 enka.network/u/${uid} 查看一次角色展柜，再回来导入`;
+    throw new EnkaError(tip, 'NOT_FOUND');
   }
 
   if (response.status === 404) {

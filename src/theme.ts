@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 
 /**
- * 原神主题 v4.2.1 — 芙宁娜
+ * 原神主题 v4.2.2 — 芙宁娜
  * - 水蓝主色 + 金色点缀 + 深海军蓝背景
  * - Noto Serif SC 衬线体标题 + Noto Sans SC 正文
  */
