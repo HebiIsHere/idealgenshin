@@ -88,6 +88,7 @@ export default function TalentSection() {
           <BonusRow label="攻击力" value={showNum(tb, 'atkFlat')} onChange={setFlat(setTb, tb, 'atkFlat')} hint="固定值" />
           <BonusRow label="防御力" value={showNum(tb, 'defFlat')} onChange={setFlat(setTb, tb, 'defFlat')} hint="固定值" />
           <BonusRow label="生命值" value={showNum(tb, 'hpFlat')} onChange={setFlat(setTb, tb, 'hpFlat')} hint="固定值" />
+          <BonusRow label="基础攻击力" value={showNum(tb, 'baseAtkFlat')} onChange={setFlat(setTb, tb, 'baseAtkFlat')} hint="白值" />
           <BonusRow label="羽毛附伤" value={showNum(tb, 'featherFlat')} onChange={setFlat(setTb, tb, 'featherFlat')} hint="固定值" />
         </Box>
         <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 1 }}>
@@ -126,6 +127,7 @@ export default function TalentSection() {
           <BonusRow label="攻击力" value={showNum(cb, 'atkFlat')} onChange={setFlat(setCb, cb, 'atkFlat')} hint="固定值" />
           <BonusRow label="防御力" value={showNum(cb, 'defFlat')} onChange={setFlat(setCb, cb, 'defFlat')} hint="固定值" />
           <BonusRow label="生命值" value={showNum(cb, 'hpFlat')} onChange={setFlat(setCb, cb, 'hpFlat')} hint="固定值" />
+          <BonusRow label="基础攻击力" value={showNum(cb, 'baseAtkFlat')} onChange={setFlat(setCb, cb, 'baseAtkFlat')} hint="白值" />
         </Box>
         <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 1 }}>
           ⚠ 百分比类数值无需输入 % 号，直接填数字即可（如 61.7 表示 61.7%）

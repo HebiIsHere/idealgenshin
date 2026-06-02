@@ -158,6 +158,7 @@ function WeaponPassiveInput(): React.ReactElement {
         <BonusRow label="攻击力" value={showNum('atkFlat')} onChange={setFlat('atkFlat')} hint="固定值" />
         <BonusRow label="防御力" value={showNum('defFlat')} onChange={setFlat('defFlat')} hint="固定值" />
         <BonusRow label="生命值" value={showNum('hpFlat')} onChange={setFlat('hpFlat')} hint="固定值" />
+        <BonusRow label="基础攻击力" value={showNum('baseAtkFlat')} onChange={setFlat('baseAtkFlat')} hint="白值" />
         <BonusRow label="增伤区" value={showPct('dmgBonus')} onChange={setPct('dmgBonus')} hint="%" />
         <BonusRow label="精通区" value={showNum('elementalMastery')} onChange={setFlat('elementalMastery')} hint="EM" />
         <BonusRow label="暴击率" value={showPct('critRate')} onChange={setPct('critRate')} hint="%" />

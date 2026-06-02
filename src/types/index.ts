@@ -528,6 +528,12 @@ export interface ZoneBonusInput {
   prayerScaling?: { atkRatio?: number; hpRatio?: number; defRatio?: number; emRatio?: number };
   /** 月兆区加成（百分比，如 0.10 = +10%）。 */
   moonSignBonus?: number;
+  /** 基础生命值加成（白值，直接加到 baseHp。玛薇卡 2 命式效果）。 */
+  baseHpFlat?: number;
+  /** 基础攻击力加成（白值，直接加到 baseAtk。玛薇卡 2 命 +200）。 */
+  baseAtkFlat?: number;
+  /** 基础防御力加成（白值，直接加到 baseDef）。 */
+  baseDefFlat?: number;
 }
 
 /** Weapon configuration selected by the user. */

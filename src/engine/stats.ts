@@ -146,9 +146,23 @@ export class StatCalculator {
     }
 
     // 基础值（步骤3已赋值 weaponBaseAtk，用于正确计算 ATK%/HP%/DEF% 叠加）
-    const baseHp = base.hp;
-    const baseAtk = base.atk + weaponBaseAtk;
-    const baseDef = base.def;
+    let baseHp = base.hp;
+    let baseAtk = base.atk + weaponBaseAtk;
+    let baseDef = base.def;
+
+    // 6.5 ★ 基础属性加成（白值）：收集所有来源的基础攻击力/生命值/防御力加成
+    //    必须在 applyZoneBonus 之前执行，确保后续 ATK%/HP%/DEF% 乘算基于正确的基础值。
+    //    玛薇卡 2 命：+200 基础攻击力（来源 = constellationConfig.bonus.baseAtkFlat）
+    const allBonuses: ZoneBonusInput[] = [
+      weaponConfig.passiveBonus ?? {},
+      constellationConfig?.bonus ?? {},
+      talentConfig?.bonus ?? {},
+      teamBuffBonuses ?? {},
+      setBonus ?? {},
+    ];
+    baseHp += allBonuses.reduce((sum, b) => sum + (b.baseHpFlat ?? 0), 0);
+    baseAtk += allBonuses.reduce((sum, b) => sum + (b.baseAtkFlat ?? 0), 0);
+    baseDef += allBonuses.reduce((sum, b) => sum + (b.baseDefFlat ?? 0), 0);
 
     // 7. 叠加武器被动加成
     const weaponPassiveStats = StatCalculator.applyZoneBonus(

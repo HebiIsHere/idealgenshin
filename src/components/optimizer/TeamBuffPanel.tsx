@@ -139,6 +139,7 @@ function TeamBuffPanel({ config, onChange }: TeamBuffPanelProps): React.ReactEle
   const customFields: { key: keyof ZoneBonusInput; label: string; step: number }[] = [
     { key: 'atkPercent', label: '攻击力%', step: 0.01 },
     { key: 'atkFlat', label: '攻击力（数值）', step: 1 },
+    { key: 'baseAtkFlat', label: '基础攻击力（白值）', step: 1 },
     { key: 'dmgBonus', label: '增伤%', step: 0.01 },
     { key: 'critRate', label: '暴击率%', step: 0.01 },
     { key: 'critDmg', label: '暴击伤害%', step: 0.01 },
@@ -278,7 +279,7 @@ function TeamBuffPanel({ config, onChange }: TeamBuffPanelProps): React.ReactEle
                     type="number"
                     fullWidth
                     label={f.label}
-                    value={config.customBuffs[f.key] !== undefined ? ((config.customBuffs[f.key] as number) * (f.key === 'elementalMastery' || f.key === 'atkFlat' ? 1 : 100)) : ''}
+                    value={config.customBuffs[f.key] !== undefined ? ((config.customBuffs[f.key] as number) * (f.key === 'elementalMastery' || f.key === 'atkFlat' || f.key === 'baseAtkFlat' ? 1 : 100)) : ''}
                     onChange={(e) => {
                       const raw = e.target.value;
                       if (raw === '' || raw === '-') {
@@ -287,7 +288,7 @@ function TeamBuffPanel({ config, onChange }: TeamBuffPanelProps): React.ReactEle
                       }
                       const num = Number(raw);
                       if (isNaN(num)) return;
-                      const scale = (f.key === 'elementalMastery' || f.key === 'atkFlat') ? 1 : 100;
+                      const scale = (f.key === 'elementalMastery' || f.key === 'atkFlat' || f.key === 'baseAtkFlat') ? 1 : 100;
                       update({ customBuffs: { ...config.customBuffs, [f.key]: num / scale } });
                     }}
                     inputProps={{ step: f.step }}
