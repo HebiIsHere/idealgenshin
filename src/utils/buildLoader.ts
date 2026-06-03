@@ -12,6 +12,7 @@ export function restoreArtifacts(payload: SharePayload): ArtifactInstance[] {
     mainStatType: a.mainStatType as SubstatType,
     mainStatValue: a.mainStatValue,
     setName: a.setName || '',
+    initialSubstatCount: a.initialSubstatCount,
     subStats: (a.subStats ?? []).map((s) => ({
       type: s.type as SubstatType,
       value: s.value,

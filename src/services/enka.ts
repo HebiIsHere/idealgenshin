@@ -3,6 +3,7 @@ import { ArtifactSlotType } from '../types';
 import { resolveSetName, resolveCharacterName, fuzzyMatchSetName } from '../data/artifact_sets';
 import { detectSetBonuses } from './set-bonus';
 import { WEAPON_ID_MAP } from '../data/weapon_id_map';
+import { inferInitialCount } from '../data/substat_tiers';
 
 /**
  * EnkaService — client for the Enka Network API.
@@ -254,6 +255,11 @@ export function parseArtifacts(equipList: any[]): ArtifactInstance[] {
         value: convertStatValue(mapSubstatType(sub.appendPropId), sub.statValue),
       }));
 
+      // Infer initial substat count (3 or 4) from the 4 substat values
+      const initCount = inferInitialCount(
+        parsedSubStats.map((s) => ({ type: s.type, value: s.value })),
+      );
+
       // Resolve setNameTextMapHash to Chinese name; fall back to fuzzy match from icon
       const rawSetName = flat.setNameTextMapHash ?? '';
       const iconName = flat.icon ?? '';
@@ -274,6 +280,7 @@ export function parseArtifacts(equipList: any[]): ArtifactInstance[] {
         mainStatValue: convertStatValue(mainStatType, mainStatValue),
         subStats: parsedSubStats,
         setName,
+        initialSubstatCount: initCount,
       } as ArtifactInstance;
     });
 }

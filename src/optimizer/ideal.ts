@@ -21,6 +21,8 @@ import {
   ELEMENT_DMG_BONUS_STAT,
   MAX_TOTAL_ROLLS,
 } from '../data/constants';
+import { IDEAL_MAX_ROLLS_PER_TYPE } from '../data/substat_tiers';
+import { isSubstatEffective } from './substatFilter';
 import { mergeExtraBonuses } from '../utils/mergeExtraBonuses';
 
 /** Top-N combos from quick evaluation to run full hill climbing on. */
@@ -49,7 +51,12 @@ export class IdealTemplateOptimizer {
       return { theoreticalDamage: dmg, idealAllocations: anchoredAllocations ?? [], breakdown: evaluateDamageWithBreakdown(finalBuild, finalStats), idealStats: finalStats, mainStatCombo: getCurrentMainStats(finalBuild), _debug: { artifacts: refBuild.artifacts?.length ?? 0, weapon: refBuild.weaponConfig?.weaponData?.nameZh || 'unknown', totalAtk: finalStats.totalAtk, skillMultiplier: refBuild.skillMultiplier, reactionType: refBuild.reactionType, firstDamage: dmg } };
     }
 
-    const relevantTypes = character.relevantSubstats.filter((t) => !anchoredTypeSet.has(t));
+    const relevantTypes = character.relevantSubstats.filter((t) => {
+      if (anchoredTypeSet.has(t)) return false;
+      // 统一由 substatFilter 判断该词条对伤害是否有效
+      const effectiveBuild = (build ?? createDefaultBuild(character, skillMultiplier, reactionType, amplifyingMultiplier, baseDmgMultiplier)) as any;
+      return isSubstatEffective(t, effectiveBuild);
+    });
     const effectiveRolls = Math.min(remainingRolls, MAX_TOTAL_ROLLS);
     const baseBuild = build ?? createDefaultBuild(character, skillMultiplier, reactionType, amplifyingMultiplier, baseDmgMultiplier);
     const refBuild = ensureArtifacts(baseBuild, character);
@@ -70,6 +77,7 @@ export class IdealTemplateOptimizer {
         const { damage } = SearchSpaceExplorer.quickEvaluate(
           effectiveRolls, relevantTypes,
           (alloc) => evaluateDamage(b, StatCalculator.compute(applyAllocation(b, alloc))),
+          IDEAL_MAX_ROLLS_PER_TYPE,
         );
         scored.push({ combo, damage });
         if (onProgress) onProgress((i / allCombos.length) * 0.3);
@@ -94,6 +102,8 @@ export class IdealTemplateOptimizer {
           },
           initialGuess,
           (p) => onProgress?.(0.3 + (i + p) / topN.length * 0.7),
+          0.1,
+          IDEAL_MAX_ROLLS_PER_TYPE,
         );
 
         if (bestDamage > globalBestDamage) {
@@ -113,6 +123,8 @@ export class IdealTemplateOptimizer {
         },
         initialGuess,
         onProgress,
+        0.1,
+        IDEAL_MAX_ROLLS_PER_TYPE,
       );
       globalBestDamage = bestDamage;
       globalBestAllocation = bestAllocation;

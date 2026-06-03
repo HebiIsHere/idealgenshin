@@ -14,6 +14,7 @@ import { SearchSpaceExplorer } from './search';
 import { SUBSTAT_MID_VALUES, DEFAULT_ENEMY_LEVEL, DEFAULT_ENEMY_RESISTANCE, ELEMENT_DMG_BONUS_STAT } from '../data/constants';
 import { mergeExtraBonuses } from '../utils/mergeExtraBonuses';
 import { enumerateMainStatCombos, applyMainStats, getCurrentMainStats, type MainStatCombo } from './mainStatSearch';
+import { filterEffectiveTypes } from './substatFilter';
 
 /**
  * RedistributeOptimizer — finds the optimal sub-stat allocation
@@ -58,6 +59,12 @@ export class RedistributeOptimizer {
     if ((sc.defRatio ?? 0) > 0) { relSet.add('DEF_PERCENT' as any); relSet.add('DEF_FLAT' as any); }
     if ((sc.atkRatio ?? 0) > 0) { relSet.add('ATK_PERCENT' as any); relSet.add('ATK_FLAT' as any); }
     if ((sc.emRatio ?? 0) > 0) { relSet.add('ELEMENTAL_MASTERY' as any); }
+
+    // 过滤对伤害无效的词条类型（ER/EM 条件判断统一由 substatFilter 处理）
+    const effectiveTypes = filterEffectiveTypes(relSet, build);
+    relSet.clear();
+    for (const t of effectiveTypes) { relSet.add(t as any); }
+
     // 排除锚定的词条类型
     for (const t of anchoredSet) { relSet.delete(t as any); }
     const relevantTypes = Array.from(relSet) as any[];
@@ -165,33 +172,80 @@ export class RedistributeOptimizer {
 
 /**
  * Create a virtual build with the given sub-stat allocation.
- * Replaces all artifact sub-stats with the allocation using mid-values.
+ * Distributes rolls across artifacts respecting per-artifact type constraints:
+ * each artifact keeps exactly its 4 original types (no deletion, no addition),
+ * each type gets 1-6 rolls per artifact.
+ *
+ * Ineffective types keep their original roll counts unchanged.
+ * Effective types get rolls from the pooled allocation, distributed evenly
+ * across artifacts that contain them.
  */
 function buildWithAllocation(
   originalBuild: CharacterBuild,
   allocation: SubstatAllocation[],
 ): CharacterBuild {
-  // Convert allocation to sub-stat entries using mid-values
-  const subStats = allocation
-    .filter((a) => a.rolls > 0)
-    .map((a) => ({
-      type: a.type,
-      value: a.rolls * ((SUBSTAT_MID_VALUES as any)[a.type] ?? 0),
-    }));
+  const allocMap = new Map<string, number>(allocation.map((a) => [a.type as string, a.rolls]));
 
-  // Replace all artifact sub-stats while keeping main stats
-  const newArtifacts = originalBuild.artifacts.map((artifact, idx) => {
-    if (idx === 0) {
-      // First artifact gets all the sub-stats
-      return {
-        ...artifact,
-        subStats,
-      };
+  // Build per-artifact type info
+  const artifactTypes: { idx: number; effective: string[]; locked: { type: string; rolls: number }[] }[] = [];
+
+  for (let i = 0; i < originalBuild.artifacts.length; i++) {
+    const art = originalBuild.artifacts[i];
+    if (!art || art.subStats.length === 0) {
+      artifactTypes.push({ idx: i, effective: [], locked: [] });
+      continue;
     }
-    // Other artifacts get empty sub-stats (already accounted for)
+    const types = art.subStats.map((s) => s.type);
+    const effective: string[] = [];
+    const locked: { type: string; rolls: number }[] = [];
+    for (const t of types) {
+      if (allocMap.has(t)) {
+        effective.push(t);
+      } else {
+        // Locked type: keep original rolls
+        const origValue = art.subStats.find((s) => s.type === t)?.value ?? 0;
+        const midVal = (SUBSTAT_MID_VALUES as any)[t] ?? 1;
+        locked.push({ type: t, rolls: midVal > 0 ? origValue / midVal : 1 });
+      }
+    }
+    artifactTypes.push({ idx: i, effective, locked });
+  }
+
+  // Distribute pooled allocation across artifacts
+  const newArtifacts = originalBuild.artifacts.map((artifact, idx) => {
+    const info = artifactTypes[idx];
+    if (!info || (info.effective.length === 0 && info.locked.length === 0)) {
+      return { ...artifact, subStats: [] };
+    }
+
+    const newSubStats: { type: any; value: number }[] = [];
+
+    // Locked types: keep original rolls
+    for (const lt of info.locked) {
+      const mid = (SUBSTAT_MID_VALUES as any)[lt.type] ?? 1;
+      newSubStats.push({ type: lt.type, value: lt.rolls * mid });
+    }
+
+    // Effective types: distribute allocation evenly among artifacts that have this type
+    for (const t of info.effective) {
+      const pooledRolls = allocMap.get(t) ?? 0;
+      // Count how many artifacts have this effective type
+      const artifactCount = artifactTypes.filter(
+        (a) => a.effective.includes(t),
+      ).length;
+      const share = artifactCount > 0 ? pooledRolls / artifactCount : 0;
+      // Clamp to artifact limits: min 1, max 6
+      const clamped = Math.max(1, Math.min(6, share));
+      const mid = (SUBSTAT_MID_VALUES as any)[t] ?? 1;
+      newSubStats.push({ type: t, value: clamped * mid });
+    }
+
+    // Ensure exactly 4 types: pad with locked types if needed, or drop excess
+    // (should never happen if input is valid)
+
     return {
       ...artifact,
-      subStats: [],
+      subStats: newSubStats,
     };
   });
 

@@ -8,6 +8,7 @@ import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import IconButton from '@mui/material/IconButton';
+import Chip from '@mui/material/Chip';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import type { ArtifactInstance } from '../../types';
@@ -129,9 +130,24 @@ function ArtifactSlotEditor({
 
   return (
     <Paper sx={{ p: 1.5 }}>
-      <Typography variant="caption" sx={{ mb: 1, display: 'block', color: 'primary.main', fontWeight: 600 }}>
-        {SLOT_NAMES[slot]}
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600 }}>
+          {SLOT_NAMES[slot]}
+        </Typography>
+        <Chip
+          label={artifact?.initialSubstatCount === 3 ? '初始3词条' : '初始4词条'}
+          size="small"
+          variant="outlined"
+          onClick={() => {
+            if (!artifact) return;
+            onChange({
+              ...artifact,
+              initialSubstatCount: artifact.initialSubstatCount === 3 ? 4 : 3,
+            });
+          }}
+          sx={{ fontSize: '0.6rem', height: 22, cursor: 'pointer' }}
+        />
+      </Box>
 
       {/* Main stat selector */}
       <FormControl size="small" sx={{ mb: 1.5, minWidth: 160 }}>

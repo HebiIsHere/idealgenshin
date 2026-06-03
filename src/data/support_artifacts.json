@@ -4,7 +4,7 @@
     "nameEn": "Noblesse Oblige",
     "rarity": 5,
     "buffs": {
-      "atkPercent": 0.20
+      "atkPercent": 0.2
     }
   },
   "tenacity_of_the_millelith": {
@@ -12,7 +12,7 @@
     "nameEn": "Tenacity of the Millelith",
     "rarity": 5,
     "buffs": {
-      "atkPercent": 0.20
+      "atkPercent": 0.2
     }
   },
   "viridescent_venerer": {
@@ -20,7 +20,7 @@
     "nameEn": "Viridescent Venerer",
     "rarity": 5,
     "buffs": {
-      "resistReduction": 0.40
+      "resistReduction": 0.4
     }
   },
   "scroll_of_cinder_city": {
@@ -28,7 +28,7 @@
     "nameEn": "Scroll of the Hero of Cinder City",
     "rarity": 5,
     "buffs": {
-      "dmgBonus": 0.40
+      "dmgBonus": 0.4
     }
   },
   "deepwood_memories": {
@@ -36,7 +36,7 @@
     "nameEn": "Deepwood Memories",
     "rarity": 5,
     "buffs": {
-      "resistReduction": 0.30
+      "resistReduction": 0.3
     }
   },
   "instructor": {
@@ -61,7 +61,15 @@
     "rarity": 5,
     "buffs": {
       "elementalMastery": 120,
-      "moonReactionBonus": 0.10
+      "moonReactionBonus": 0.1
+    }
+  },
+  "celestial_gift": {
+    "name": "天之美赐",
+    "nameEn": "Celestial Gift",
+    "rarity": 5,
+    "buffs": {
+      "dmgBonus": 0.4
     }
   }
 }

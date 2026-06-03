@@ -685,5 +685,32 @@
     "nameZh": "游医",
     "twoPcEffect": "角色受到的治疗效果提高20%。",
     "fourPcEffect": "施放元素爆发时，恢复20%生命值。"
+  },
+  {
+    "id": "celestial_gift",
+    "name": "Celestial Gift",
+    "nameZh": "天之美赐",
+    "twoPcEffect": "元素充能效率提高20%。",
+    "fourPcEffect": "若装备者完成了「魔女的课业」，施放元素战技后获得「光之引导」：队伍中附近所有角色获得40%对应元素增伤。",
+    "twoPcBonus": {
+      "energyRecharge": 0.2
+    },
+    "fourPcBonus": {
+      "dmgBonus": 0.4
+    }
+  },
+  {
+    "id": "disenchantment_in_deep_shadow",
+    "name": "Disenchantment in Deep Shadow",
+    "nameZh": "影中沉凝的幻灭",
+    "twoPcEffect": "攻击力提高18%。",
+    "fourPcEffect": "超导反应伤害提升80%；攻击受超导影响的敌人时，暴击率提高16%。",
+    "twoPcBonus": {
+      "atkPercent": 0.18
+    },
+    "fourPcBonus": {
+      "transformReactionBonus": 0.8,
+      "critRate": 0.16
+    }
   }
 ]

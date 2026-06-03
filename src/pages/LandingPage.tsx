@@ -8,6 +8,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import DescriptionIcon from '@mui/icons-material/Description';
 import CloseIcon from '@mui/icons-material/Close';
+import CampaignIcon from '@mui/icons-material/Campaign';
 import Paper from '@mui/material/Paper';
 import { keyframes } from '@mui/system';
 import { useWizardStore } from '../store/slices/wizardSlice';
@@ -45,6 +46,23 @@ const float = keyframes`
 
 const EXIT_MS = 350;
 
+const CHANGELOG = [
+  {
+    version: 'v4.3.0',
+    date: '2026.06.03',
+    items: [
+      '新增 3 角色（洛恩 / 尼可 / 布伦妮）+ 2 武器（尘光七谕 / 灾悔）+ 2 圣遗物（天之美赐 / 影中沉凝的幻灭）',
+      '基础攻击力加成支持 — 命座面板新增「基础攻击力」输入，玛薇卡 2 命 +200 白值',
+      '同词条重分配 / 理想模板加入圣遗物槽位物理约束，方案可复现',
+      '有效词条智能过滤 — 充能仅在有转模时参与优化，直伤下精通自动排除',
+      '理想模板词条上限提升至 53，单类最多 35 条，充能始终可锚定',
+      'B 服 MiniGenshin 导入全链路贯通',
+      '天之美赐加入辅助圣遗物预设（队伍增伤 +40%）',
+      '首页新增更新公告面板',
+    ],
+  },
+];
+
 const BUBBLES = [
   { left: '10%', size: 22, delay: 0, duration: 7 },
   { left: '22%', size: 14, delay: 1.5, duration: 8 },
@@ -61,6 +79,7 @@ function LandingPage(): React.ReactElement {
   const [exiting, setExiting] = useState(false);
   const [saveManagerOpen, setSaveManagerOpen] = useState(false);
   const [downloadPanelOpen, setDownloadPanelOpen] = useState(false);
+  const [changelogOpen, setChangelogOpen] = useState(false);
 
   // Prefetch WizardPage chunk during idle time so entry is instant
   useEffect(() => {
@@ -241,9 +260,49 @@ function LandingPage(): React.ReactElement {
           </Button>
         </Box>
 
+        {/* 更新公告按钮 — 左下角 */}
+        <Box sx={{ position: 'fixed', bottom: 16, left: 60, zIndex: 20 }}>
+          <IconButton
+            onClick={() => setChangelogOpen(!changelogOpen)}
+            title="更新公告"
+            sx={{ color: 'rgba(255,255,255,0.35)', '&:hover': { color: 'primary.main', bgcolor: 'rgba(91,192,235,0.08)' } }}
+          >
+            <CampaignIcon fontSize="small" />
+          </IconButton>
+          {changelogOpen && (
+            <Paper
+              elevation={4}
+              sx={{
+                position: 'absolute',
+                bottom: 48,
+                left: 0,
+                p: 2,
+                minWidth: 300,
+                bgcolor: 'rgba(15,22,41,0.95)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 2,
+                animation: `${fadeIn} 0.25s cubic-bezier(0.16,1,0.3,1)`,
+              }}
+            >
+              <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600, mb: 1, display: 'block' }}>
+                📢 更新公告 · {CHANGELOG[0].version}
+              </Typography>
+              {CHANGELOG[0].items.map((item, i) => (
+                <Typography key={i} variant="caption" sx={{ display: 'block', color: 'text.secondary', lineHeight: 1.8, fontSize: '0.7rem', '&::before': { content: '\"◆ \"', color: 'rgba(91,192,235,0.5)', fontSize: '0.5rem', verticalAlign: 'middle' } }}>
+                  {item}
+                </Typography>
+              ))}
+              <Typography variant="caption" sx={{ display: 'block', color: 'rgba(255,255,255,0.2)', fontSize: '0.6rem', mt: 0.75 }}>
+                {CHANGELOG[0].date}
+              </Typography>
+            </Paper>
+          )}
+        </Box>
+
         <Typography variant="caption" sx={{ color: 'text.disabled', mt: 4, display: 'block',
           animation: `${fadeIn} 0.8s 0.6s cubic-bezier(0.16,1,0.3,1) both` }}>
-          作者：袔苾 · v4.2.2
+          作者：袔苾 · v4.3.0
         </Typography>
       </Container>
 
@@ -288,7 +347,7 @@ function LandingPage(): React.ReactElement {
               fullWidth
               variant="text"
               startIcon={<DescriptionIcon fontSize="small" />}
-              href="/理想原生v4.2.2-项目介绍手册.docx"
+              href="/理想原生v4.3.0-项目介绍手册.docx"
               download
               sx={{ justifyContent: 'flex-start', color: 'text.secondary', mb: 0.5, fontSize: '0.8rem' }}
             >
@@ -299,7 +358,7 @@ function LandingPage(): React.ReactElement {
               fullWidth
               variant="text"
               startIcon={<DescriptionIcon fontSize="small" />}
-              href="/理想原生v4.2.2-使用说明.docx"
+              href="/理想原生v4.3.0-使用说明.docx"
               download
               sx={{ justifyContent: 'flex-start', color: 'text.secondary', fontSize: '0.8rem' }}
             >

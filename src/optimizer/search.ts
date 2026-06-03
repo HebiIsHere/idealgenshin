@@ -232,6 +232,7 @@ export class SearchSpaceExplorer {
     initialGuess?: SubstatAllocation[],
     onProgress?: (progress: number) => void,
     stepSize: number = 0.1,
+    maxPerType: number = Infinity,
   ): { bestAllocation: SubstatAllocation[]; bestDamage: number } {
     if (types.length === 0 || total <= 0) {
       const alloc: SubstatAllocation[] = [];
@@ -269,6 +270,8 @@ export class SearchSpaceExplorer {
 
           // Try moving stepSize rolls from fromIdx to toIdx
           const moveAmount = Math.min(stepSize, bestAllocation[fromIdx].rolls);
+          // Enforce per-type cap
+          if (bestAllocation[toIdx].rolls + moveAmount > maxPerType) continue;
           bestAllocation[fromIdx].rolls -= moveAmount;
           bestAllocation[toIdx].rolls += moveAmount;
 
@@ -428,13 +431,26 @@ export class SearchSpaceExplorer {
     total: number,
     types: SubstatType[],
     evaluateDamage: (allocation: SubstatAllocation[]) => number,
+    maxPerType: number = Infinity,
   ): { allocation: SubstatAllocation[]; damage: number } {
     if (types.length === 0 || total <= 0) {
       const dmg = evaluateDamage([]);
       return { allocation: [], damage: isFinite(dmg) ? dmg : 0 };
     }
-    const base = total / types.length;
-    const allocation = types.map((type) => ({ type, rolls: base }));
+    // Evenly distribute, but enforce per-type cap
+    let remaining = total;
+    const allocation = types.map((type) => {
+      const share = Math.min(remaining / (types.length - allocation.length + 1), maxPerType);
+      remaining -= share;
+      return { type, rolls: share };
+    });
+    // Redistribute any leftover within cap
+    for (let i = 0; i < allocation.length && remaining > 0.001; i++) {
+      const canTake = maxPerType - allocation[i].rolls;
+      const add = Math.min(canTake, remaining);
+      allocation[i].rolls += add;
+      remaining -= add;
+    }
     const damage = evaluateDamage(allocation);
     return { allocation, damage: isFinite(damage) ? damage : 0 };
   }

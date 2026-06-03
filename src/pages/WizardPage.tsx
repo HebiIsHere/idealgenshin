@@ -16,6 +16,7 @@ import { useSaveStore } from '../store/slices/saveSlice';
 import { StatCalculator } from '../engine/stats';
 import { DamageFormula } from '../engine/formula';
 import { mergeExtraBonuses } from '../utils/mergeExtraBonuses';
+import { isSubstatEffective } from '../optimizer/substatFilter';
 
 import CharacterStatPanel from '../components/character/CharacterStatPanel';
 import { TeamBuffConfig, computeTeamBuffBonuses } from '../components/optimizer/TeamBuffPanel';
@@ -132,8 +133,19 @@ function WizardPage(): React.ReactElement {
     if ((customScaling.defRatio ?? 0) > 0) { rel.add(SubstatType.DEF_PERCENT); rel.add(SubstatType.DEF_FLAT); }
     if ((customScaling.atkRatio ?? 0) > 0) { rel.add(SubstatType.ATK_PERCENT); rel.add(SubstatType.ATK_FLAT); }
     if ((customScaling.emRatio ?? 0) > 0) { rel.add(SubstatType.ELEMENTAL_MASTERY); }
+    // 过滤：仅保留对伤害有效的词条（统一由 substatFilter 判定）
+    // 构建一个精简的 build 快照供判定函数使用
+    const effectivenessBuild = {
+      character: selectedCharacter ?? { id: '', defaultStatScaling: { emRatio: 0 } },
+      reactionType: (reactionType ?? 'NONE') as any,
+      statScaling: customScaling ?? selectedCharacter?.defaultStatScaling ?? { emRatio: 0 },
+      statConversions: [...(statConversions ?? []), ...(setConversions ?? [])],
+    } as any;
+    for (const t of [...rel]) {
+      if (!isSubstatEffective(t, effectivenessBuild)) rel.delete(t);
+    }
     return allocs.filter(a => rel.has(a.type));
-  }, [artifacts, selectedCharacter, weaponConfig, customScaling]);
+  }, [artifacts, selectedCharacter, weaponConfig, customScaling, statConversions, setConversions, reactionType]);
 
   // 锚定状态
   const [anchoredTypes, setAnchoredTypes] = useState<Set<SubstatType>>(new Set());
@@ -146,9 +158,14 @@ function WizardPage(): React.ReactElement {
   }, []);
 
   // 理想模板锚定（手动输入模式）
+  // 充能始终可锚定：不锚定时不参与分配，锚定时按用户指定数锁定
   const idealAvailableTypes = useMemo(() => {
     if (!selectedCharacter) return [] as SubstatType[];
-    return selectedCharacter.relevantSubstats;
+    const types = [...selectedCharacter.relevantSubstats];
+    if (!types.includes(SubstatType.ENERGY_RECHARGE)) {
+      types.push(SubstatType.ENERGY_RECHARGE);
+    }
+    return types;
   }, [selectedCharacter]);
   const [idealAnchors, setIdealAnchors] = useState<Map<SubstatType, number>>(new Map());
   const [idealInputs, setIdealInputs] = useState<Map<SubstatType, string>>(new Map());

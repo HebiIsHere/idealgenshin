@@ -49,8 +49,8 @@ export const ROLLABLE_SUBSTAT_TYPES: SubstatType[] = [
 /** Maximum rolls a single sub-stat can receive on a 5-star artifact. */
 export const MAX_ROLLS_PER_SUBSTAT = 6;
 
-/** Maximum total sub-stat rolls across 5 artifacts (5 pieces × 4 sub-stats + upgrades). */
-export const MAX_TOTAL_ROLLS = 45;
+/** Maximum total sub-stat rolls across 5 artifacts (45 slots × 1.176 max tier ≈ 53). */
+export const MAX_TOTAL_ROLLS = 53;
 
 // ===== Main Stat Max Values (5-star, Level 20) =====
 

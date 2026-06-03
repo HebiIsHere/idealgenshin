@@ -109,16 +109,14 @@ function ArtifactSetSelect({ importedSetNames = [], importedSetCounts = {} }: Pr
   // 套装选择变化时，自动生成动态转模（如绝缘之旗印 ER→dmgBonus）
   useEffect(() => {
     const convs: StatConversion[] = [];
-    const collect = (s: ArtifactSetData | null) => {
-      if (!s) return;
-      if (s.fourPcDynamic) convs.push(s.fourPcDynamic);
-      if (s.twoPcDynamic) convs.push(s.twoPcDynamic);
-    };
     if (mode === '4pc') {
-      collect(setA);
+      // 4件套：同时触发 2件套和 4件套的动态转模
+      if (setA?.twoPcDynamic) convs.push(setA.twoPcDynamic);
+      if (setA?.fourPcDynamic) convs.push(setA.fourPcDynamic);
     } else if (mode === '2+2') {
-      collect(setA);
-      collect(setB);
+      // 2+2：仅触发 2件套的动态转模
+      if (setA?.twoPcDynamic) convs.push(setA.twoPcDynamic);
+      if (setB?.twoPcDynamic) convs.push(setB.twoPcDynamic);
     }
     setSetConversions(convs);
   }, [mode, setA, setB, setSetConversions]);

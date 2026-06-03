@@ -186,6 +186,8 @@ export interface ArtifactInstance {
   mainStatValue: number;
   subStats: SubStatEntry[];
   setName: string;
+  /** 初始副词条数（3 或 4）。Enka 导入时自动推断，手动录入时用户选择。默认 4。 */
+  initialSubstatCount?: 3 | 4;
 }
 
 /** Allocation of N rolls to a sub-stat type. */

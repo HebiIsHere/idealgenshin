@@ -22,6 +22,7 @@ export interface SharePayload {
     mainStatType: string;
     mainStatValue: number;
     setName: string;
+    initialSubstatCount?: 3 | 4;
     subStats: { type: string; value: number }[];
   }[];
   teamBuffs: { name: string; statType: string; value: number }[];
@@ -81,6 +82,7 @@ export function encodeFromSave(save: CharacterSave): string | null {
         mainStatType: a.mainStatType,
         mainStatValue: a.mainStatValue,
         setName: a.setName || '',
+        initialSubstatCount: a.initialSubstatCount,
         subStats: (a.subStats ?? []).map((s) => ({ type: s.type, value: s.value })),
       })),
       teamBuffs: (save.teamBuffs ?? []).map((b) => ({ name: b.name, statType: b.statType, value: b.value })),

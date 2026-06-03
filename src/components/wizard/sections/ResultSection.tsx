@@ -82,12 +82,12 @@ export default function ResultSection(props: ResultSectionProps) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <Typography variant="body2" color="text.secondary">词条数</Typography>
           <TextField size="small" type="number" value={idealRollText} sx={{ width: 100 }}
-            slotProps={{ htmlInput: { step: 0.1, min: 0.1, max: 50 } }}
+            slotProps={{ htmlInput: { step: 0.1, min: 0.1, max: 53 } }}
             onChange={(e) => {
               const raw = e.target.value;
               setIdealRollText(raw);
               const v = parseFloat(raw);
-              if (!isNaN(v) && v >= 0.1 && v <= 50) setIdealRollCount(v);
+              if (!isNaN(v) && v >= 0.1 && v <= 53) setIdealRollCount(v);
             }}
             onBlur={() => {
               const v = parseFloat(idealRollText);
