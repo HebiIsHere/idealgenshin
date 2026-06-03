@@ -203,20 +203,38 @@ export default function ResultSection(props: ResultSectionProps) {
                   <Typography variant="caption" sx={{ px: 0.5, py: 0.25, color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>优化前</Typography>
                   <Typography variant="caption" sx={{ px: 0.5, py: 0.25, color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>优化后</Typography>
                   <Typography variant="caption" sx={{ px: 0.5, py: 0.25, color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>Δ</Typography>
-                  {redistributeResult.optimizedAllocations.map((opt) => {
-                    const cur = redistributeResult.currentAllocations.find(a => a.type === opt.type);
-                    const curRolls = cur?.rolls ?? 0;
-                    const delta = opt.rolls - curRolls;
-                    const changed = Math.abs(delta) > 0.001;
-                    return (
-                      <React.Fragment key={opt.type}>
-                        <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: changed ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)' }}>{STAT_DISPLAY_NAMES[opt.type] ?? opt.type}</Typography>
+                  {(() => {
+                    // 合并有效词条（优化器搜索的）和锁定词条（不可改变的）
+                    const allTypes = new Set([
+                      ...redistributeResult.optimizedAllocations.map(a => a.type),
+                      ...redistributeResult.currentAllocations.map(a => a.type),
+                    ]);
+                    const rows = Array.from(allTypes).map(type => {
+                      const cur = redistributeResult.currentAllocations.find(a => a.type === type);
+                      const opt = redistributeResult.optimizedAllocations.find(a => a.type === type);
+                      const curRolls = cur?.rolls ?? 0;
+                      const optRolls = opt?.rolls ?? curRolls; // 锁定词条保持当前值
+                      const isLocked = !opt;
+                      const delta = optRolls - curRolls;
+                      const changed = Math.abs(delta) > 0.001;
+                      return { type, curRolls, optRolls, delta, changed, isLocked };
+                    });
+                    // 有效词条排前面，锁定词条排后面
+                    rows.sort((a, b) => {
+                      if (a.isLocked !== b.isLocked) return a.isLocked ? 1 : -1;
+                      return (STAT_DISPLAY_NAMES[a.type] ?? a.type).localeCompare(STAT_DISPLAY_NAMES[b.type] ?? b.type);
+                    });
+                    return rows.map(({ type, curRolls, optRolls, delta, changed, isLocked }) => (
+                      <React.Fragment key={type}>
+                        <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: isLocked ? 'rgba(255,255,255,0.25)' : changed ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)' }}>
+                          {isLocked ? '🔒 ' : ''}{STAT_DISPLAY_NAMES[type] ?? type}
+                        </Typography>
                         <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: 'rgba(255,255,255,0.45)', textAlign: 'right', fontFamily: 'monospace' }}>{curRolls.toFixed(1)}</Typography>
-                        <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: changed ? 'success.light' : 'rgba(255,255,255,0.6)', textAlign: 'right', fontFamily: 'monospace', fontWeight: changed ? 600 : 400 }}>{opt.rolls.toFixed(1)}</Typography>
-                        <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: delta > 0 ? 'success.light' : delta < 0 ? 'error.light' : 'rgba(255,255,255,0.3)', textAlign: 'right', fontFamily: 'monospace', fontWeight: changed ? 600 : 400 }}>{delta > 0 ? '+' : ''}{delta.toFixed(1)}</Typography>
+                        <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: isLocked ? 'rgba(255,255,255,0.25)' : changed ? 'success.light' : 'rgba(255,255,255,0.6)', textAlign: 'right', fontFamily: 'monospace', fontWeight: changed ? 600 : 400 }}>{optRolls.toFixed(1)}</Typography>
+                        <Typography variant="caption" sx={{ px: 0.5, py: 0.2, color: isLocked ? 'rgba(255,255,255,0.2)' : delta > 0 ? 'success.light' : delta < 0 ? 'error.light' : 'rgba(255,255,255,0.3)', textAlign: 'right', fontFamily: 'monospace', fontWeight: changed ? 600 : 400 }}>{isLocked ? '—' : (delta > 0 ? '+' : '') + delta.toFixed(1)}</Typography>
                       </React.Fragment>
-                    );
-                  })}
+                    ));
+                  })()}
                 </Box>
               </Box>
             )}
